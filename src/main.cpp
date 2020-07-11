@@ -18,6 +18,7 @@
 */
 
 #include <dirent.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <switch.h>
@@ -38,7 +39,11 @@ struct app_entry
     std::string name;
     std::string author;
     std::string version;
-    std::string path;
+    std::string full_path;
+    std::string file_name;
+    std::size_t size;
+    std::size_t icon_size;
+    uint8_t* icon;
 };
 
 std::vector<app_entry> apps;
@@ -73,7 +78,6 @@ typedef struct menuEntry_s_tag menuEntry_s;
 app_entry menuEntryLoadEmbeddedNacp(std::string path)
 {
     app_entry current;
-    current.author  = "Init";
     menuEntry_s* me = new menuEntry_s();
     NroHeader header;
     NroAssetHeader asset_header;
@@ -82,7 +86,6 @@ app_entry menuEntryLoadEmbeddedNacp(std::string path)
     if (!f)
         return current;
 
-    current.author = "header";
     fseek(f, sizeof(NroStart), SEEK_SET);
     if (fread(&header, sizeof(header), 1, f) != 1)
     {
@@ -91,8 +94,6 @@ app_entry menuEntryLoadEmbeddedNacp(std::string path)
     }
 
     fseek(f, header.size, SEEK_SET);
-
-    current.author = "size";
 
     if (fread(&asset_header, sizeof(asset_header), 1, f) != 1
         || asset_header.magic != NROASSETHEADER_MAGIC
@@ -103,7 +104,6 @@ app_entry menuEntryLoadEmbeddedNacp(std::string path)
         fclose(f);
         return current;
     }
-    current.author = "size2";
 
     if (asset_header.nacp.size < sizeof(NacpStruct))
     {
@@ -111,16 +111,12 @@ app_entry menuEntryLoadEmbeddedNacp(std::string path)
         return current;
     }
 
-    current.author = "struct";
-
     me->nacp = (NacpStruct*)malloc(sizeof(NacpStruct));
     if (me->nacp == NULL)
     {
         fclose(f);
         return current;
     }
-
-    current.author = "offset";
 
     fseek(f, header.size + asset_header.nacp.offset, SEEK_SET);
     fread(me->nacp, sizeof(NacpStruct), 1, f);
@@ -154,16 +150,68 @@ app_entry menuEntryLoadEmbeddedNacp(std::string path)
     free(me->nacp);
     me->nacp = NULL;
 
-    current.name    = me->name;
-    current.author  = me->author;
-    current.version = me->version;
-    current.path    = path.substr(8);
+    current.name      = me->name;
+    current.author    = me->author;
+    current.version   = me->version;
+    current.file_name = path.substr(path.find_last_of("/\\") + 1);
+    current.full_path = path;
+    current.size      = fs::file_size(path);
     return current;
+}
+
+bool menuEntryLoadEmbeddedIcon(std::string path, app_entry* current)
+{
+    menuEntry_s* me = new menuEntry_s();
+    NroHeader header;
+    NroAssetHeader asset_header;
+
+    FILE* f = fopen(path.c_str(), "rb");
+    if (!f)
+        return false;
+
+    fseek(f, sizeof(NroStart), SEEK_SET);
+    if (fread(&header, sizeof(header), 1, f) != 1)
+    {
+        fclose(f);
+        return false;
+    }
+
+    fseek(f, header.size, SEEK_SET);
+
+    if (fread(&asset_header, sizeof(asset_header), 1, f) != 1
+        || asset_header.magic != NROASSETHEADER_MAGIC
+        || asset_header.version > NROASSETHEADER_VERSION
+        || asset_header.icon.offset == 0
+        || asset_header.icon.size == 0)
+    {
+        fclose(f);
+        return false;
+    }
+
+    me->icon_size = asset_header.icon.size;
+    me->icon      = (uint8_t*)malloc(me->icon_size);
+    if (me->icon == NULL)
+    {
+        fclose(f);
+        return false;
+    }
+    memset(me->icon, 0, me->icon_size);
+
+    fseek(f, header.size + asset_header.icon.offset, SEEK_SET);
+    bool ok = fread(me->icon, me->icon_size, 1, f) == 1;
+    fclose(f);
+
+    current->icon      = me->icon;
+    current->icon_size = me->icon_size;
+    return ok;
 }
 
 bool compare_by_name(const app_entry& a, const app_entry& b)
 {
-    return (a.name.compare(b.name) < 0);
+    if (a.name != b.name)
+        return (a.name.compare(b.name) < 0);
+    else
+        return (a.version.compare(b.version));
 }
 
 void load_apps()
@@ -175,12 +223,21 @@ void load_apps()
         if (filename.substr(filename.length() - 4) == ".nro")
         {
             app_entry current = menuEntryLoadEmbeddedNacp(filename);
+            menuEntryLoadEmbeddedIcon(filename, &current);
             if (current.name.length() != 0)
                 apps.push_back(current);
         }
     }
 
     sort(apps.begin(), apps.end(), compare_by_name);
+}
+
+brls::ListItem* add_list_entry(std::string name, std::string info, brls::List* add_to)
+{
+    brls::ListItem* item = new brls::ListItem(name);
+    item->setValue(info);
+    add_to->addView(item);
+    return item;
 }
 
 int main(int argc, char* argv[])
@@ -196,7 +253,7 @@ int main(int argc, char* argv[])
 
     brls::TabFrame* rootFrame = new brls::TabFrame();
     rootFrame->setTitle("Homebrew Details");
-    rootFrame->setIcon(BOREALIS_ASSET("icon/borealis.jpg"));
+    rootFrame->setIcon(BOREALIS_ASSET("icon.jpg"));
 
     load_apps();
 
@@ -208,47 +265,56 @@ int main(int argc, char* argv[])
 
         brls::ListItem* popupItem = new brls::ListItem(current.name);
         popupItem->setValue("v" + current.version);
+        popupItem->setThumbnail(current.icon, current.icon_size);
         popupItem->getClickEvent()->subscribe([current](brls::View* view) mutable {
             brls::TabFrame* popupTabFrame = new brls::TabFrame();
             brls::List* infoList          = new brls::List();
-            infoList->addView(new brls::Header("NRO Info", false));
 
-            brls::ListItem* n = new brls::ListItem("Name");
-            n->setValue(current.name);
-            infoList->addView(n);
+            infoList->addView(new brls::Header(".NRO File Info", false));
 
-            brls::ListItem* f = new brls::ListItem("Filename");
-            f->setValue(current.path);
-            infoList->addView(f);
+            add_list_entry("Name", current.name, infoList);
 
-            brls::ListItem* a = new brls::ListItem("Author");
-            a->setValue(current.author);
-            infoList->addView(a);
+            brls::ListItem* f = add_list_entry("Filename", current.file_name, infoList);
+            f->getClickEvent()->subscribe([current](brls::View* view) {
+                brls::Dialog* dialog                       = new brls::Dialog("Full Path:\n\nsdmc:" + current.full_path);
+                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                    dialog->close();
+                };
+                dialog->addButton("Dismiss", closeCallback);
+                dialog->setCancelable(true);
+                dialog->open();
+            });
+            f->updateActionHint(brls::Key::A, "Show Full Path");
 
-            brls::ListItem* v = new brls::ListItem("Version");
-            v->setValue(current.version);
-            infoList->addView(v);
+            add_list_entry("Author", current.author, infoList);
+            add_list_entry("Version", current.version, infoList);
+            std::stringstream stream;
+            stream << std::fixed << std::setprecision(2) << current.size / 1000. / 1000.;
+            std::string str = stream.str();
+            add_list_entry("Size", str + " MB", infoList);
+            add_list_entry("Icon Size", std::to_string(current.icon_size), infoList);
 
-            popupTabFrame->addTab("Info", infoList);
-            //popupTabFrame->addTab("Green", new brls::Rectangle(nvgRGB(0, 128, 0)));
-            //popupTabFrame->addTab("Blue", new brls::Rectangle(nvgRGB(0, 0, 128)));
-            brls::PopupFrame::open(current.name, BOREALIS_ASSET("icon/borealis.jpg"), popupTabFrame, "Author: " + current.author, "Version: " + current.version);
+            popupTabFrame->addTab("File Info", infoList);
+
+            brls::PopupFrame::open(current.name, current.icon, current.icon_size, popupTabFrame, "Author: " + current.author, "Version: " + current.version);
         });
         testList->addView(popupItem);
     }
 
     rootFrame->addTab("All Apps", testList);
     rootFrame->addSeparator();
-    rootFrame->addTab("App Store Apps", testList);
-    rootFrame->addTab("Local Apps", testList);
-
-    //
+    rootFrame->addTab("App Store Apps", new brls::Rectangle(nvgRGB(60, 60, 60)));
+    rootFrame->addTab("Local Apps", new brls::Rectangle(nvgRGB(60, 60, 60)));
+    rootFrame->addSeparator();
+    rootFrame->addTab("Settings", new brls::Rectangle(nvgRGB(120, 120, 120)));
 
     brls::Application::pushView(rootFrame);
 
     // Run the app
     while (brls::Application::mainLoop())
         ;
+
+    rootFrame->setParent(NULL);
 
     // Exit
     return EXIT_SUCCESS;
