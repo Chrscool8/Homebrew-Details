@@ -45,7 +45,7 @@ ICON		:=	icon.jpg
 INCLUDES	:=	include
 APP_TITLE	:=	Homebrew Details
 APP_AUTHOR	:=	Chris Bradel
-APP_VERSION	:=	1.0
+APP_VERSION	:=	0.1
 
 ROMFS				:=	resources
 BOREALIS_PATH		:=	.
