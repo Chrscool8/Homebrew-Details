@@ -1,4 +1,4 @@
-# Homebrew-Details
+# Homebrew Details - A Homebrew App Manager
 
 ![](https://i.imgur.com/SS2xRnS.jpg)
 ![](https://i.imgur.com/aggbWNj.jpg)
