@@ -48,11 +48,6 @@ struct app_entry
 
 std::vector<app_entry> apps;
 
-#define ENTRY_NAMELENGTH 0x200
-#define ENTRY_AUTHORLENGTH 0x100
-#define ENTRY_VERLENGTH 0x10
-#define ENTRY_ARGBUFSIZE 0x400
-
 // from hbmenu
 struct menuEntry_s_tag
 {
@@ -61,9 +56,9 @@ struct menuEntry_s_tag
     bool fileassoc_type; //0=file_extension, 1 = filename
     char fileassoc_str[PATH_MAX + 1]; //file_extension/filename
 
-    char name[ENTRY_NAMELENGTH + 1];
-    char author[ENTRY_AUTHORLENGTH + 1];
-    char version[ENTRY_VERLENGTH + 1];
+    char name[512 + 1];
+    char author[256 + 1];
+    char version[16 + 1];
 
     uint8_t* icon;
     size_t icon_size;
@@ -232,10 +227,25 @@ void load_apps()
     sort(apps.begin(), apps.end(), compare_by_name);
 }
 
-brls::ListItem* add_list_entry(std::string name, std::string info, brls::List* add_to)
+brls::ListItem* add_list_entry(std::string name, std::string short_info, std::string long_info, brls::List* add_to)
 {
     brls::ListItem* item = new brls::ListItem(name);
-    item->setValue(info);
+    item->setValue(short_info);
+
+    if (!long_info.empty())
+    {
+        item->getClickEvent()->subscribe([long_info](brls::View* view) {
+            brls::Dialog* dialog                       = new brls::Dialog(long_info);
+            brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                dialog->close();
+            };
+            dialog->addButton("Dismiss", closeCallback);
+            dialog->setCancelable(true);
+            dialog->open();
+        });
+        item->updateActionHint(brls::Key::A, "Show Extended Info");
+    }
+
     add_to->addView(item);
     return item;
 }
@@ -272,29 +282,18 @@ int main(int argc, char* argv[])
 
             infoList->addView(new brls::Header(".NRO File Info", false));
 
-            add_list_entry("Name", current.name, infoList);
-
-            brls::ListItem* f = add_list_entry("Filename", current.file_name, infoList);
-            f->getClickEvent()->subscribe([current](brls::View* view) {
-                brls::Dialog* dialog                       = new brls::Dialog("Full Path:\n\nsdmc:" + current.full_path);
-                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
-                    dialog->close();
-                };
-                dialog->addButton("Dismiss", closeCallback);
-                dialog->setCancelable(true);
-                dialog->open();
-            });
-            f->updateActionHint(brls::Key::A, "Show Full Path");
-
-            add_list_entry("Author", current.author, infoList);
-            add_list_entry("Version", current.version, infoList);
+            add_list_entry("Name", current.name, "", infoList);
+            add_list_entry("Filename", current.file_name, "Full Path:\n\nsdmc:" + current.full_path, infoList);
+            add_list_entry("Author", current.author, "", infoList);
+            add_list_entry("Version", current.version, "", infoList);
             std::stringstream stream;
             stream << std::fixed << std::setprecision(2) << current.size / 1000. / 1000.;
             std::string str = stream.str();
-            add_list_entry("Size", str + " MB", infoList);
-            add_list_entry("Icon Size", std::to_string(current.icon_size), infoList);
+            add_list_entry("Size", str + " MB", "Full Size:\n\n" + std::to_string(current.size) + " bytes", infoList);
+            add_list_entry("Icon Size", std::to_string(current.icon_size), "", infoList);
 
             popupTabFrame->addTab("File Info", infoList);
+            popupTabFrame->addTab("Notes", new brls::Rectangle(nvgRGB(120, 120, 120)));
 
             brls::PopupFrame::open(current.name, current.icon, current.icon_size, popupTabFrame, "Author: " + current.author, "Version: " + current.version);
         });
