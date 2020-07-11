@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 
     brls::TabFrame* rootFrame = new brls::TabFrame();
     rootFrame->setTitle("Homebrew Details");
-    rootFrame->setIcon(BOREALIS_ASSET("icon/HD.jpg"));
+    rootFrame->setIcon(BOREALIS_ASSET("icon/borealis.jpg"));
 
     load_apps();
 
