@@ -62,43 +62,45 @@ bool compare_by_name(const app_entry& a, const app_entry& b)
 void read_store_apps()
 {
     std::string path = "/switch/appstore/.get/packages/";
-    for (const auto& entry : fs::directory_iterator(path))
+    if (fs::exists(path))
     {
-        std::string folder = entry.path();
-        if (fs::is_directory(folder))
+        for (const auto& entry : fs::directory_iterator(path))
         {
-            //printf(("folder: " + folder + "\n").c_str());
-
-            std::string info_file = folder + "/info.json";
-            if (fs::exists(info_file))
+            std::string folder = entry.path();
+            if (fs::is_directory(folder))
             {
-                //printf(("info_file: " + info_file + "\n").c_str());
+                //printf(("folder: " + folder + "\n").c_str());
 
-                std::ifstream i(info_file);
-                nlohmann::json info_json;
-                i >> info_json;
+                std::string info_file = folder + "/info.json";
+                if (fs::exists(info_file))
+                {
+                    //printf(("info_file: " + info_file + "\n").c_str());
 
-                app_entry current;
-                current.from_appstore = true;
-                current.name          = json_load_value_string(info_json, "title");
-                current.author        = json_load_value_string(info_json, "author");
-                current.category      = json_load_value_string(info_json, "category");
-                current.version       = json_load_value_string(info_json, "version");
-                current.url           = json_load_value_string(info_json, "url");
-                current.license       = json_load_value_string(info_json, "license");
-                current.description   = json_load_value_string(info_json, "description");
-                current.summary       = json_load_value_string(info_json, "details");
-                current.changelog     = json_load_value_string(info_json, "changelog");
+                    std::ifstream i(info_file);
+                    nlohmann::json info_json;
+                    i >> info_json;
 
-                if (!current.name.empty())
-                    store_apps.push_back(current);
+                    app_entry current;
+                    current.from_appstore = true;
+                    current.name          = json_load_value_string(info_json, "title");
+                    current.author        = json_load_value_string(info_json, "author");
+                    current.category      = json_load_value_string(info_json, "category");
+                    current.version       = json_load_value_string(info_json, "version");
+                    current.url           = json_load_value_string(info_json, "url");
+                    current.license       = json_load_value_string(info_json, "license");
+                    current.description   = json_load_value_string(info_json, "description");
+                    current.summary       = json_load_value_string(info_json, "details");
+                    current.changelog     = json_load_value_string(info_json, "changelog");
 
-                //printf((current.name + "\n").c_str());
+                    if (!current.name.empty())
+                        store_apps.push_back(current);
+
+                    //printf((current.name + "\n").c_str());
+                }
             }
         }
+        sort(store_apps.begin(), store_apps.end(), compare_by_name);
     }
-
-    sort(store_apps.begin(), store_apps.end(), compare_by_name);
 }
 
 void read_nacp_from_file(std::string path, app_entry* current)
@@ -330,7 +332,14 @@ int main(int argc, char* argv[])
     rootFrame->addSeparator();
     rootFrame->addTab("App Store Apps", storeAppsList);
     rootFrame->addTab("Local Apps", localAppsList);
+    //rootFrame->addSeparator();
+    //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));
+    //rootFrame->addTab("Emulators", new brls::Rectangle(nvgRGB(120, 120, 120)));
+    //rootFrame->addTab("Games", new brls::Rectangle(nvgRGB(120, 120, 120)));
+    //rootFrame->addTab("Tools", new brls::Rectangle(nvgRGB(120, 120, 120)));
+    //rootFrame->addTab("Misc.", new brls::Rectangle(nvgRGB(120, 120, 120)));
     rootFrame->addSeparator();
+
     rootFrame->addTab("Settings", new brls::Rectangle(nvgRGB(120, 120, 120)));
 
     brls::Application::pushView(rootFrame);
