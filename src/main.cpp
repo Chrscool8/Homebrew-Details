@@ -24,6 +24,7 @@ struct app_entry
     std::size_t size;
     std::size_t icon_size;
     uint8_t* icon;
+    bool from_appstore;
 };
 
 std::vector<app_entry> apps;
