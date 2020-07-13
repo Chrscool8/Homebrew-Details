@@ -45,7 +45,7 @@ ICON		:=	resources/icon.jpg
 INCLUDES	:=	include
 APP_TITLE	:=	Homebrew Details
 APP_AUTHOR	:=	Chris Bradel
-APP_VERSION	:=	0.31
+APP_VERSION	:=	0.40
 
 ROMFS				:=	resources
 BOREALIS_PATH		:=	.
@@ -60,7 +60,8 @@ CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ \
-			-DBOREALIS_RESOURCES="\"$(BOREALIS_RESOURCES)\""
+			-DBOREALIS_RESOURCES="\"$(BOREALIS_RESOURCES)\"" \
+			-DAPP_VERSION="\"$(APP_VERSION)\""
 
 CXXFLAGS	:= $(CFLAGS) -fno-exceptions -std=c++1z -O2
 
