@@ -383,29 +383,33 @@ bool check_for_updates()
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
         /* Check for errors */
-        if (res != CURLE_OK)
-        {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                curl_easy_strerror(res));
-        }
-
-        /* always cleanup */
         curl_easy_cleanup(curl);
 
-        //printf(("s: " + s).c_str());
-        nlohmann::json j = nlohmann::json::parse(s);
-        if (j.contains("tag_name"))
+        if (res != CURLE_OK)
         {
-            online_version = j["tag_name"].get<std::string>().substr(1);
-            printf((std::string("") + online_version + " : " + APP_VERSION + "\n").c_str());
-
-            if (std::stod(online_version) > std::stod(APP_VERSION))
-            {
-                return true;
-            }
+            //fprintf(stderr, "curl_easy_perform() failed: %s\n"
+            //curl_easy_strerror(res));
         }
         else
-            printf("problem parsing online version\n");
+        {
+            /* always cleanup */
+
+            //printf(("s: " + s).c_str());
+            nlohmann::json j = nlohmann::json::parse(s);
+            if (j.contains("tag_name"))
+            {
+                online_version = j["tag_name"].get<std::string>().substr(1);
+                //brls::Application::notify(online_version);
+                printf((std::string("") + online_version + " : " + APP_VERSION + "\n").c_str());
+
+                if (std::stod(online_version) > std::stod(APP_VERSION))
+                {
+                    return true;
+                }
+            }
+            else
+                brls::Application::notify("problem parsing online version\n");
+        }
     }
     return false;
 }
