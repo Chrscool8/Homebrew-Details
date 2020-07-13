@@ -45,7 +45,7 @@ ICON		:=	resources/icon.jpg
 INCLUDES	:=	include
 APP_TITLE	:=	Homebrew Details
 APP_AUTHOR	:=	Chris Bradel
-APP_VERSION	:=	0.40
+APP_VERSION	:=	0.42
 
 ROMFS				:=	resources
 BOREALIS_PATH		:=	.
@@ -68,7 +68,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-exceptions -std=c++1z -O2
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx -lm
+LIBS	:= -lcurl -lz -lnx -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

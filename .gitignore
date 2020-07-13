@@ -11,3 +11,4 @@ builddir
 .vs
 library
 *.sh
+include/curl/

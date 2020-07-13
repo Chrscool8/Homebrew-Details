@@ -9,6 +9,7 @@ IntroPage::IntroPage(std::string label)
     this->setActionAvailable(brls::Key::B, false);
 
     go         = false;
+    asked      = false;
     short_wait = 0;
 
     // Label
@@ -18,6 +19,7 @@ IntroPage::IntroPage(std::string label)
         if (!go)
         {
             printf("Clicked scan\n");
+
             this->button->setLabel("Scanning...");
             this->button->invalidate();
             go = true;
@@ -39,14 +41,20 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
     this->label->frame(ctx);
     this->button->frame(ctx);
 
-    if (go)
+    if (go && !asked)
     {
         if (short_wait < 5)
             short_wait += 1;
         else
         {
-            brls::Application::popView();
+            asked = true;
+            // brls::Application::popView();
             brls::Application::pushView(new MainPage());
+            go         = false;
+            asked      = false;
+            short_wait = 0;
+            this->button->setLabel("Scan Again");
+            this->button->invalidate();
         }
     }
 }

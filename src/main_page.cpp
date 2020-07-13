@@ -5,7 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <switch.h>
-
+//
+#include <sys/select.h>
+//
+#include <curl/curl.h>
+#include <curl/easy.h>
+//
 #include <algorithm>
 #include <borealis.hpp>
 #include <cstring>
@@ -18,7 +23,13 @@
 
 #include "intro_page.hpp"
 
+#ifndef APP_VERSION
+#error APP_VERSION define missing
+#endif
+
 namespace fs = std::filesystem;
+
+std::string online_version = "";
 
 struct app_entry
 {
@@ -262,6 +273,10 @@ brls::ListItem* add_list_entry(std::string title, std::string short_info, std::s
     return item;
 }
 
+void purge_entry(app_entry* entry)
+{
+}
+
 brls::ListItem* make_app_entry(app_entry* entry)
 {
     brls::ListItem* popupItem = new brls::ListItem(entry->name);
@@ -296,6 +311,38 @@ brls::ListItem* make_app_entry(app_entry* entry)
         add_list_entry("Changelog", entry->changelog, "", appStoreInfoList);
 
         appView->addTab("App Store Info", appStoreInfoList);
+
+        brls::List* manageList = new brls::List();
+        manageList->addView(new brls::Header("File Management Actions", false));
+
+        brls::ListItem* delete_item = new brls::ListItem("Delete App");
+        delete_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
+            brls::Dialog* dialog                     = new brls::Dialog("Are you sure you want to delete the following file? This action cannot be undone.\n\n" + entry->full_path);
+            brls::GenericEvent::Callback yesCallback = [dialog, entry, appView](brls::View* view) {
+                if (remove(entry->full_path.c_str()) != 0)
+                    brls::Application::notify("Issue removing file");
+                else
+                {
+                    brls::Application::notify("File successfully deleted");
+                    purge_entry(entry);
+                }
+
+                dialog->close();
+            };
+            brls::GenericEvent::Callback noCallback = [dialog](brls::View* view) {
+                dialog->close();
+            };
+            dialog->addButton("!!  [Yes]  !!", yesCallback);
+            dialog->addButton("No", noCallback);
+            dialog->setCancelable(true);
+            dialog->open();
+        });
+        //delete_item->updateActionHint(brls::Key::A, "Show Extended Info");
+
+        manageList->addView(delete_item);
+
+        appView->addTab("Manage", manageList);
+
         //appView->addTab("Notes", new brls::Rectangle(nvgRGB(120, 120, 120)));
 
         brls::PopupFrame::open(entry->name, entry->icon, entry->icon_size, appView, "Author: " + entry->author, "Version: " + entry->version);
@@ -304,9 +351,64 @@ brls::ListItem* make_app_entry(app_entry* entry)
     return popupItem;
 }
 
-#ifndef APP_VERSION
-#error APP_VERSION define missing
-#endif
+size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmemb, std::string* s)
+{
+    size_t newLength = size * nmemb;
+    s->append((char*)contents, newLength);
+    return newLength;
+}
+
+bool check_for_updates()
+{
+    printf("curltime\n");
+
+    CURL* curl;
+    CURLcode res;
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
+    curl = curl_easy_init();
+    std::string s;
+    if (curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.github.com/repos/Chrscool8/Homebrew-Details/releases/latest");
+
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //remove this to disable verbose output
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
+
+        /* Perform the request, res will get the return code */
+        res = curl_easy_perform(curl);
+        /* Check for errors */
+        if (res != CURLE_OK)
+        {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+        }
+
+        /* always cleanup */
+        curl_easy_cleanup(curl);
+
+        //printf(("s: " + s).c_str());
+        nlohmann::json j = nlohmann::json::parse(s);
+        if (j.contains("tag_name"))
+        {
+            online_version = j["tag_name"].get<std::string>().substr(1);
+            printf((std::string("") + online_version + " : " + APP_VERSION + "\n").c_str());
+
+            if (std::stod(online_version) > std::stod(APP_VERSION))
+            {
+                return true;
+            }
+        }
+        else
+            printf("problem parsing online version\n");
+    }
+    return false;
+}
 
 MainPage::MainPage()
 {
@@ -335,21 +437,57 @@ MainPage::MainPage()
             localAppsList->addView(make_app_entry(current));
     }
 
-    this->addTab("All Apps", appsList);
+    this->addTab("All Apps               (" + std::to_string(store_apps.size() + switch_apps.size()) + ")", appsList);
     this->addSeparator();
     if (!store_apps.empty())
-        this->addTab("App Store Apps", storeAppsList);
+        this->addTab("App Store Apps     (" + std::to_string(store_apps.size()) + ")", storeAppsList);
     if (!switch_apps.empty())
-        this->addTab("Local Apps", localAppsList);
+        this->addTab("Local Apps            (" + std::to_string(switch_apps.size()) + ")", localAppsList);
+
     //rootFrame->addSeparator();
     //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Emulators", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Games", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Tools", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Misc.", new brls::Rectangle(nvgRGB(120, 120, 120)));
-    this->addSeparator();
 
-    //this->addTab("Settings", new brls::Rectangle(nvgRGB(120, 120, 120)));
+    if (check_for_updates())
+    {
+        this->addSeparator();
+        brls::List* settingsList = new brls::List();
+        settingsList->addView(new brls::Header("Newer Version Found Online", false));
+
+        brls::ListItem* dialogItem = new brls::ListItem("More Info...");
+        dialogItem->getClickEvent()->subscribe([](brls::View* view) {
+            brls::Dialog* dialog = new brls::Dialog(std::string("") + "You have v" + APP_VERSION + " but v" + online_version + " is out.\n\n The auto-updater isn't ready quite yet, but you can find the new version in the GBATemp forum topic or my Github.");
+
+            brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                dialog->close();
+            };
+            brls::GenericEvent::Callback infoCallback = [dialog](brls::View* view) {
+                //dialog->close();
+
+                brls::Dialog* dialog1 = new brls::Dialog(std::string("") + "GBATemp Discussion Topic:\nhttps://gbatemp.net/threads/homebrew-details-a-homebrew-app-manager.569528/\n\nGithub Repo:\nhttps://github.com/Chrscool8/Homebrew-Details");
+
+                brls::GenericEvent::Callback closeCallback1 = [dialog1](brls::View* view) {
+                    dialog1->close();
+                };
+
+                dialog1->addButton("Okay.", closeCallback1);
+                dialog1->setCancelable(true);
+
+                dialog1->open();
+            };
+
+            dialog->addButton("Okay.", closeCallback);
+            dialog->addButton("Link Info.", infoCallback);
+            dialog->setCancelable(true);
+
+            dialog->open();
+        });
+        settingsList->addView(dialogItem);
+        this->addTab("Update Available!", settingsList);
+    }
 }
 
 MainPage::~MainPage()
