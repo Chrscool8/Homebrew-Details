@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <switch.h>
+
+#include "switch/services/psm.h"
+
 //
 #include <sys/select.h>
 //
@@ -358,59 +361,62 @@ size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmem
     return newLength;
 }
 
+bool is_number(const std::string& s)
+{
+    return (strspn(s.c_str(), "-.0123456789") == s.size() && s.length() > 0);
+}
+
 bool check_for_updates()
 {
-    printf("curltime\n");
+    printf("curl time\n");
 
     CURL* curl;
-    CURLcode res;
-
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     curl = curl_easy_init();
-    std::string s;
     if (curl)
     {
+        std::string s;
+
         curl_easy_setopt(curl, CURLOPT_URL, "https://api.github.com/repos/Chrscool8/Homebrew-Details/releases/latest");
 
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); //remove this to disable verbose output
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
 
-        /* Perform the request, res will get the return code */
+        CURLcode res;
         res = curl_easy_perform(curl);
-        /* Check for errors */
         curl_easy_cleanup(curl);
 
-        if (res != CURLE_OK)
+        if (res == CURLE_OK)
         {
-            //fprintf(stderr, "curl_easy_perform() failed: %s\n"
-            //curl_easy_strerror(res));
-        }
-        else
-        {
-            /* always cleanup */
-
-            //printf(("s: " + s).c_str());
             nlohmann::json j = nlohmann::json::parse(s);
             if (j.contains("tag_name"))
             {
-                online_version = j["tag_name"].get<std::string>().substr(1);
-                //brls::Application::notify(online_version);
-                printf((std::string("") + online_version + " : " + APP_VERSION + "\n").c_str());
+                online_version = j["tag_name"].get<std::string>();
 
-                if (std::stod(online_version) > std::stod(APP_VERSION))
+                if (online_version.length() > 0)
                 {
-                    return true;
+                    online_version = online_version.substr(1);
+                }
+
+                if (is_number(online_version))
+                {
+                    printf((std::string("") + online_version + " : " + APP_VERSION + "\n").c_str());
+
+                    if (std::stod(online_version) > std::stod(APP_VERSION))
+                    {
+                        return true;
+                    }
                 }
             }
-            else
-                brls::Application::notify("problem parsing online version\n");
         }
     }
+
+    //brls::Application::notify("problem parsing online version\n");
     return false;
 }
 
@@ -454,6 +460,12 @@ MainPage::MainPage()
     //rootFrame->addTab("Games", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Tools", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Misc.", new brls::Rectangle(nvgRGB(120, 120, 120)));
+
+    psmInitialize();
+    std::uint32_t batteryCharge = 0;
+    psmGetBatteryChargePercentage(&batteryCharge);
+
+    //this->addTab("Read: "+std::to_string(batteryCharge), new brls::Rectangle(nvgRGB(120, 120, 120)));
 
     if (check_for_updates())
     {
