@@ -315,7 +315,7 @@ MainPage::MainPage()
     this->setTitle(title.c_str());
     this->setIcon(BOREALIS_ASSET("icon.jpg"));
     printf("init rootframe");
-    this->setActionAvailable(brls::Key::B, false);
+    //this->setActionAvailable(brls::Key::B, false);
 
     read_store_apps();
     load_all_apps();
