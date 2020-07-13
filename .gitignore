@@ -10,4 +10,4 @@ build.nx/
 builddir
 .vs
 library
-.sh
+*.sh
