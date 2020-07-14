@@ -1,7 +1,5 @@
 #include "intro_page.hpp"
-
 #include <math.h>
-
 #include "main_page.hpp"
 
 IntroPage::IntroPage(std::string label)

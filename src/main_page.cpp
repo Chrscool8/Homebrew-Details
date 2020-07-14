@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "intro_page.hpp"
+#include "settings.h"
 
 #ifndef APP_VERSION
 #error APP_VERSION define missing
@@ -32,7 +33,7 @@
 
 namespace fs = std::filesystem;
 
-std::string online_version = "";
+std::string online_version = "0";
 
 struct app_entry
 {
@@ -53,8 +54,9 @@ struct app_entry
     std::string changelog;
 };
 
-std::vector<app_entry> switch_apps;
+std::vector<app_entry> local_apps;
 std::vector<app_entry> store_apps;
+std::vector<app_entry> store_file_data;
 
 std::string json_load_value_string(nlohmann::json json, std::string key)
 {
@@ -79,6 +81,7 @@ bool compare_by_name(const app_entry& a, const app_entry& b)
 
 void read_store_apps()
 {
+    store_file_data.clear();
     store_apps.clear();
 
     std::string path = "/switch/appstore/.get/packages/";
@@ -113,13 +116,13 @@ void read_store_apps()
                     current.changelog     = json_load_value_string(info_json, "changelog");
 
                     if (!current.name.empty())
-                        store_apps.push_back(current);
+                        store_file_data.push_back(current);
 
                     //printf((current.name + "\n").c_str());
                 }
             }
         }
-        sort(store_apps.begin(), store_apps.end(), compare_by_name);
+        sort(store_file_data.begin(), store_file_data.end(), compare_by_name);
     }
 }
 
@@ -198,50 +201,66 @@ bool read_icon_from_file(std::string path, app_entry* current)
     return true;
 }
 
+void process_app_file(std::string filename)
+{
+    if (filename.substr(filename.length() - 4) == ".nro")
+    {
+        app_entry current;
+        read_nacp_from_file(filename, &current);
+        read_icon_from_file(filename, &current);
+        current.from_appstore = false;
+
+        // Check against store apps
+        int count = 0;
+        for (auto store_entry : store_file_data)
+        {
+            count++;
+            if (store_entry.name != current.name || store_entry.version != current.version)
+            { }
+            else
+            {
+                //current.author        = store_entry.author;
+                current.from_appstore = true;
+                current.category      = store_entry.category;
+                current.url           = store_entry.url;
+                current.license       = store_entry.license;
+                current.description   = store_entry.description;
+                current.summary       = store_entry.summary;
+                current.changelog     = store_entry.changelog;
+
+                store_apps.push_back(store_entry);
+                store_file_data.erase(store_file_data.begin() + count);
+                break;
+            }
+        }
+
+        if (!current.name.empty())
+            local_apps.push_back(current);
+    }
+}
+
 void load_all_apps()
 {
-    switch_apps.clear();
+    local_apps.clear();
 
     std::string path = "/switch/";
-    for (const auto& entry : fs::recursive_directory_iterator(path))
+    if (get_setting(setting_recursive_search) == "true")
     {
-        std::string filename = entry.path();
-        if (filename.substr(filename.length() - 4) == ".nro")
+        for (const auto& entry : fs::recursive_directory_iterator(path))
         {
-            app_entry current;
-            read_nacp_from_file(filename, &current);
-            read_icon_from_file(filename, &current);
-            current.from_appstore = false;
-
-            // Check against store apps
-            int count = 0;
-            for (auto store_entry : store_apps)
-            {
-                count++;
-                if (store_entry.name != current.name || store_entry.version != current.version)
-                { }
-                else
-                {
-                    current.from_appstore = true;
-                    //current.author        = store_entry.author;
-                    current.category    = store_entry.category;
-                    current.url         = store_entry.url;
-                    current.license     = store_entry.license;
-                    current.description = store_entry.description;
-                    current.summary     = store_entry.summary;
-                    current.changelog   = store_entry.changelog;
-
-                    store_apps.erase(store_apps.begin() + count);
-                    break;
-                }
-            }
-
-            if (!current.name.empty())
-                switch_apps.push_back(current);
+            process_app_file(entry.path());
+        }
+    }
+    else
+    {
+        for (const auto& entry : fs::directory_iterator(path))
+        {
+            process_app_file(entry.path());
         }
     }
 
-    sort(switch_apps.begin(), switch_apps.end(), compare_by_name);
+    store_file_data.clear();
+    sort(local_apps.begin(), local_apps.end(), compare_by_name);
 }
 
 brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to)
@@ -436,9 +455,9 @@ MainPage::MainPage()
     brls::List* storeAppsList = new brls::List();
     brls::List* localAppsList = new brls::List();
 
-    for (unsigned int i = 0; i < switch_apps.size(); i++)
+    for (unsigned int i = 0; i < local_apps.size(); i++)
     {
-        app_entry* current = &switch_apps.at(i);
+        app_entry* current = &local_apps.at(i);
         appsList->addView(make_app_entry(current));
 
         if (current->from_appstore)
@@ -447,12 +466,12 @@ MainPage::MainPage()
             localAppsList->addView(make_app_entry(current));
     }
 
-    this->addTab("All Apps               (" + std::to_string(store_apps.size() + switch_apps.size()) + ")", appsList);
+    this->addTab("All Apps               (" + std::to_string(store_apps.size() + local_apps.size()) + ")", appsList);
     this->addSeparator();
     if (!store_apps.empty())
         this->addTab("App Store Apps     (" + std::to_string(store_apps.size()) + ")", storeAppsList);
-    if (!switch_apps.empty())
-        this->addTab("Local Apps            (" + std::to_string(switch_apps.size()) + ")", localAppsList);
+    if (!local_apps.empty())
+        this->addTab("Local Apps            (" + std::to_string(local_apps.size()) + ")", localAppsList);
 
     //rootFrame->addSeparator();
     //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));
@@ -460,10 +479,6 @@ MainPage::MainPage()
     //rootFrame->addTab("Games", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Tools", new brls::Rectangle(nvgRGB(120, 120, 120)));
     //rootFrame->addTab("Misc.", new brls::Rectangle(nvgRGB(120, 120, 120)));
-
-    psmInitialize();
-    std::uint32_t batteryCharge = 0;
-    psmGetBatteryChargePercentage(&batteryCharge);
 
     //this->addTab("Read: "+std::to_string(batteryCharge), new brls::Rectangle(nvgRGB(120, 120, 120)));
 
@@ -475,34 +490,84 @@ MainPage::MainPage()
 
         brls::ListItem* dialogItem = new brls::ListItem("More Info...");
         dialogItem->getClickEvent()->subscribe([](brls::View* view) {
-            brls::Dialog* dialog = new brls::Dialog(std::string("") + "You have v" + APP_VERSION + " but v" + online_version + " is out.\n\n The auto-updater isn't ready quite yet, but you can find the new version in the GBATemp forum topic or my Github.");
+            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + APP_VERSION + " but v" + online_version + " is out.\n\n The auto-updater isn't ready quite yet, but you can find the new version in the GBATemp forum topic or my Github.");
 
-            brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
-                dialog->close();
+            brls::GenericEvent::Callback closeCallback = [version_compare_dialog](brls::View* view) {
+                version_compare_dialog->close();
             };
-            brls::GenericEvent::Callback infoCallback = [dialog](brls::View* view) {
-                //dialog->close();
+            brls::GenericEvent::Callback infoCallback = [version_compare_dialog](brls::View* view) {
+                brls::Dialog* link_info_dialog = new brls::Dialog(std::string("") + "GBATemp Discussion Topic:\nhttps://gbatemp.net/threads/homebrew-details-a-homebrew-app-manager.569528/\n\nGithub Repo:\nhttps://github.com/Chrscool8/Homebrew-Details");
 
-                brls::Dialog* dialog1 = new brls::Dialog(std::string("") + "GBATemp Discussion Topic:\nhttps://gbatemp.net/threads/homebrew-details-a-homebrew-app-manager.569528/\n\nGithub Repo:\nhttps://github.com/Chrscool8/Homebrew-Details");
-
-                brls::GenericEvent::Callback closeCallback1 = [dialog1](brls::View* view) {
-                    dialog1->close();
+                brls::GenericEvent::Callback closeCallback1 = [link_info_dialog](brls::View* view) {
+                    link_info_dialog->close();
                 };
 
-                dialog1->addButton("Okay.", closeCallback1);
-                dialog1->setCancelable(true);
-
-                dialog1->open();
+                link_info_dialog->addButton("Okay.", closeCallback1);
+                link_info_dialog->setCancelable(true);
+                link_info_dialog->open();
             };
 
-            dialog->addButton("Okay.", closeCallback);
-            dialog->addButton("Link Info.", infoCallback);
-            dialog->setCancelable(true);
+            version_compare_dialog->addButton("Okay.", closeCallback);
+            version_compare_dialog->addButton("Link Info.", infoCallback);
+            version_compare_dialog->setCancelable(true);
 
-            dialog->open();
+            version_compare_dialog->open();
         });
         settingsList->addView(dialogItem);
         this->addTab("Update Available!", settingsList);
+    }
+
+    {
+        this->addSeparator();
+
+        brls::List* settings_list = new brls::List();
+
+        brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Recursive Scan", { "Scan /switch/ and its Subfolders", "Only Scan /switch/" });
+        if (get_setting(setting_recursive_search) == "true")
+            layerSelectItem->setSelectedValue(0);
+        else
+            layerSelectItem->setSelectedValue(1);
+
+        layerSelectItem->getValueSelectedEvent()->subscribe([=](size_t selection) {
+            switch (selection)
+            {
+                case 0:
+                    set_setting(setting_recursive_search, "true");
+                    break;
+                case 1:
+                    set_setting(setting_recursive_search, "false");
+                    break;
+            }
+        });
+
+        settings_list->addView(layerSelectItem);
+        this->addTab("Settings", settings_list);
+    }
+
+    bool debug = true;
+    if (debug)
+    {
+        this->addSeparator();
+        brls::List* debug_list = new brls::List();
+        debug_list->addView(new brls::Header("Super Secret Dev Menu Unlocked!", false));
+
+        psmInitialize();
+
+        std::uint32_t batteryCharge = 0;
+        psmGetBatteryChargePercentage(&batteryCharge);
+        add_list_entry("Battery Percent", std::to_string(batteryCharge) + "%", "", debug_list);
+
+        ChargerType chargerType;
+        std::string chargerTypes[3] = { std::string("None"), std::string("Charging"), std::string("USB") };
+        psmGetChargerType(&chargerType);
+
+        add_list_entry("Charging Status", chargerTypes[chargerType], "", debug_list);
+        add_list_entry("Local Version", std::string("v") + APP_VERSION, "", debug_list);
+        add_list_entry("Online Version", std::string("v") + online_version, "", debug_list);
+        add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list);
+        add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list);
+
+        this->addTab("Debug Menu", debug_list);
     }
 }
 

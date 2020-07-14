@@ -16,25 +16,31 @@
 
 #include "intro_page.hpp"
 #include "main_page.hpp"
+#include "settings.h"
 
 #ifndef APP_VERSION
 #error APP_VERSION define missing
 #endif
+
+namespace fs = std::filesystem;
+
+////
 
 int main(int argc, char* argv[])
 {
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
     std::string title = "Homebrew Details v" APP_VERSION;
-
     if (!brls::Application::init(title.c_str()))
     {
         brls::Logger::error("Unable to init Borealis application, Homebrew Details");
         return EXIT_FAILURE;
     }
 
-    brls::Application::pushView(new IntroPage("Begin Scan"));
+    file_load_settings();
+    init_settings();
 
+    brls::Application::pushView(new IntroPage("Begin Scan"));
     // Run the app
     while (brls::Application::mainLoop())
         ;
