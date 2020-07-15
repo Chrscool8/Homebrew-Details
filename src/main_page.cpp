@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "intro_page.hpp"
+#include "reboot_to_payload.h"
 #include "settings.h"
 
 #ifndef APP_VERSION
@@ -520,9 +521,27 @@ MainPage::MainPage()
     {
         this->addSeparator();
 
+        brls::List* tools_list   = new brls::List();
+        brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
+        rtp_item->setValue("atmosphere/reboot_payload.bin");
+        rtp_item->getClickEvent()->subscribe([](brls::View* view) {
+            printf("reboot_to_payload\n");
+            int result = reboot_to_payload();
+            if (result == -1)
+                brls::Application::notify("Problem initializing spl");
+            else if (result == -2)
+                brls::Application::notify("Failed to open atmosphere/ reboot_payload.bin!");
+        });
+        tools_list->addView(rtp_item);
+        this->addTab("Toolbox", tools_list);
+    }
+
+    {
+        //this->addSeparator();
+
         brls::List* settings_list = new brls::List();
 
-        brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Recursive Scan", { "Scan /switch/ and its Subfolders", "Only Scan /switch/" });
+        brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Recursive Scan", { "Scan /switch/ and its subfolders", "Only scan /switch/" });
         if (get_setting(setting_recursive_search) == "true")
             layerSelectItem->setSelectedValue(0);
         else
@@ -566,6 +585,13 @@ MainPage::MainPage()
         add_list_entry("Online Version", std::string("v") + online_version, "", debug_list);
         add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list);
         add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list);
+
+        brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
+        rtp_item->getClickEvent()->subscribe([](brls::View* view) {
+            printf("reboot_to_payload\n");
+            reboot_to_payload();
+        });
+        debug_list->addView(rtp_item);
 
         this->addTab("Debug Menu", debug_list);
     }
