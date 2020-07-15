@@ -247,6 +247,7 @@ void load_all_apps()
     std::string path = "/switch/";
     if (get_setting(setting_recursive_search) == "true")
     {
+        printf("Searching recursively within /switch/\n");
         for (const auto& entry : fs::recursive_directory_iterator(path))
         {
             process_app_file(entry.path());
@@ -254,6 +255,7 @@ void load_all_apps()
     }
     else
     {
+        printf("Searching only within /switch/\n");
         for (const auto& entry : fs::directory_iterator(path))
         {
             process_app_file(entry.path());
@@ -594,6 +596,8 @@ MainPage::MainPage()
         debug_list->addView(rtp_item);
 
         this->addTab("Debug Menu", debug_list);
+
+        remove("sdmc:/config/homebrew_details/lock");
     }
 }
 

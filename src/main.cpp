@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "intro_page.hpp"
+#include "issue_page.hpp"
 #include "main_page.hpp"
 #include "settings.h"
 
@@ -40,10 +41,16 @@ int main(int argc, char* argv[])
     file_load_settings();
     init_settings();
 
-    brls::Application::pushView(new IntroPage("Begin Scan"));
+    if (fs::exists("sdmc:/config/homebrew_details/lock"))
+        brls::Application::pushView(new IssuePage());
+    else
+        brls::Application::pushView(new IntroPage("Begin Scan"));
+
     // Run the app
     while (brls::Application::mainLoop())
         ;
+
+    printf("Main loop end.\n");
 
     // Protect from crash
     //rootFrame->setParent(NULL);

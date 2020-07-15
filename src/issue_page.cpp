@@ -1,12 +1,12 @@
-#include "intro_page.hpp"
+#include "issue_page.hpp"
 
 #include <math.h>
 
-#include <fstream>
-
+#include "intro_page.hpp"
 #include "main_page.hpp"
+#include "settings.h"
 
-IntroPage::IntroPage(std::string label)
+IssuePage::IssuePage()
 {
     this->setActionAvailable(brls::Key::B, false);
 
@@ -14,36 +14,30 @@ IntroPage::IntroPage(std::string label)
     asked      = false;
     short_wait = 0;
 
-    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel(label)->setImage(BOREALIS_ASSET("arrows_small.jpg"));
+    // Label
+    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel("Back to Basics.")->setImage(BOREALIS_ASSET("warning_arrows.jpg"));
     this->button->setParent(this);
     this->button->getClickEvent()->subscribe([this](View* view) {
         if (!go)
         {
             printf("Clicked scan\n");
 
-            std::ofstream outputFile("sdmc:/config/homebrew_details/lock");
-            if (outputFile)
-            {
-                outputFile << "lock";
-                outputFile.close();
-            }
-
-            this->button->setLabel("Scanning...");
-            this->button->invalidate();
+            //this->button->setLabel("Scanning...");
+            //this->button->invalidate();
             go = true;
         }
     });
 
-    this->image = (new brls::Image(BOREALIS_ASSET("icon.jpg")));
+    this->image = (new brls::Image(BOREALIS_ASSET("warning.jpg")));
     this->image->setParent(this);
 
-    this->label = new brls::Label(brls::LabelStyle::DIALOG, "Welcome to Homebrew Details\nBy: Chris Bradel", true);
+    this->label = new brls::Label(brls::LabelStyle::DIALOG, "Safe Mode Engaged!\nLooks like HD didn't finish its last scan.\nSome settings have been reset.", true);
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);
 }
 
-void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
+void IssuePage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
 {
     this->image->frame(ctx);
     this->label->frame(ctx);
@@ -55,24 +49,25 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
             short_wait += 1;
         else
         {
+            set_setting(setting_recursive_search, "false");
+            set_setting(setting_search_root, "false");
+
             asked = true;
-            // brls::Application::popView();
-            brls::Application::pushView(new MainPage());
+            brls::Application::popView();
+            brls::Application::pushView(new IntroPage("Begin Scan"));
             go         = false;
             asked      = false;
             short_wait = 0;
-            this->button->setLabel("Scan Again");
-            this->button->invalidate();
         }
     }
 }
 
-brls::View* IntroPage::getDefaultFocus()
+brls::View* IssuePage::getDefaultFocus()
 {
     return this->button;
 }
 
-void IntroPage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash)
+void IssuePage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash)
 {
     this->image->setWidth(256);
     this->image->setHeight(256);
@@ -90,19 +85,19 @@ void IntroPage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stas
 
     this->label->setBoundaries(
         this->x + this->width / 2 - this->label->getWidth() / 2 + 140 + 43,
-        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2,
+        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2 - 30,
         this->label->getWidth(),
         this->label->getHeight());
 
     this->button->setBoundaries(
-        this->x + this->width / 2 - style->CrashFrame.buttonWidth / 2 + 140 + 43,
+        this->x + this->width / 2 - style->CrashFrame.buttonWidth / 2 + 140 + 52,
         this->y + this->height / 2 + 100 - this->button->getHeight(),
         style->CrashFrame.buttonWidth,
         style->CrashFrame.buttonHeight);
     this->button->invalidate();
 }
 
-IntroPage::~IntroPage()
+IssuePage::~IssuePage()
 {
     delete this->label;
     delete this->button;
