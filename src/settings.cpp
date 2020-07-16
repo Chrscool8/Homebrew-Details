@@ -60,6 +60,7 @@ void file_save_settings()
 void set_setting(int setting, std::string value)
 {
     settings[setting] = base64_encode(value);
+    printf(("Set " + std::to_string(setting) + " to " + value).c_str());
     file_save_settings();
 }
 
@@ -70,13 +71,23 @@ std::string get_setting(int setting)
 
 void init_settings()
 {
-    if (get_setting(setting_recursive_search) == "")
+    if (get_setting(setting_search_subfolders) == "")
     {
-        set_setting(setting_recursive_search, "true");
+        set_setting(setting_search_subfolders, "true");
     }
 
     if (get_setting(setting_search_root) == "")
     {
         set_setting(setting_search_root, "false");
+    }
+
+    if (get_setting(setting_scan_full_card) == "")
+    {
+        set_setting(setting_scan_full_card, "false");
+    }
+
+    if (get_setting(setting_autoscan) == "")
+    {
+        set_setting(setting_autoscan, "false");
     }
 }

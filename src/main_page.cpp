@@ -244,21 +244,40 @@ void load_all_apps()
 {
     local_apps.clear();
 
-    std::string path = "/switch/";
-    if (get_setting(setting_recursive_search) == "true")
+    if (get_setting(setting_scan_full_card) == "true")
     {
-        printf("Searching recursively within /switch/\n");
-        for (const auto& entry : fs::recursive_directory_iterator(path))
+        printf("Searching recursively within /\n");
+        for (const auto& entry : fs::recursive_directory_iterator("/"))
         {
             process_app_file(entry.path());
         }
     }
     else
     {
-        printf("Searching only within /switch/\n");
-        for (const auto& entry : fs::directory_iterator(path))
+        if (get_setting(setting_search_subfolders) == "true")
         {
-            process_app_file(entry.path());
+            printf("Searching recursively within /switch/\n");
+            for (const auto& entry : fs::recursive_directory_iterator("/switch/"))
+            {
+                process_app_file(entry.path());
+            }
+        }
+        else
+        {
+            printf("Searching only within /switch/\n");
+            for (const auto& entry : fs::directory_iterator("/switch/"))
+            {
+                process_app_file(entry.path());
+            }
+        }
+
+        if (get_setting(setting_search_root) == "true")
+        {
+            printf("Searching only within /\n");
+            for (const auto& entry : fs::directory_iterator("/"))
+            {
+                process_app_file(entry.path());
+            }
         }
     }
 
@@ -442,13 +461,17 @@ bool check_for_updates()
     return false;
 }
 
+void emptyfunc()
+{
+}
+
 MainPage::MainPage()
 {
     std::string title = "Homebrew Details v" APP_VERSION;
 
     this->setTitle(title.c_str());
     this->setIcon(BOREALIS_ASSET("icon.jpg"));
-    printf("init rootframe");
+    printf("init rootframe\n");
     //this->setActionAvailable(brls::Key::B, false);
 
     read_store_apps();
@@ -539,29 +562,82 @@ MainPage::MainPage()
     }
 
     {
-        //this->addSeparator();
-
-        brls::List* settings_list = new brls::List();
-
-        brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Recursive Scan", { "Scan /switch/ and its subfolders", "Only scan /switch/" });
-        if (get_setting(setting_recursive_search) == "true")
-            layerSelectItem->setSelectedValue(0);
-        else
-            layerSelectItem->setSelectedValue(1);
-
-        layerSelectItem->getValueSelectedEvent()->subscribe([=](size_t selection) {
-            switch (selection)
+        brls::List* settings_list        = new brls::List();
+        brls::ListItem* item_scan_switch = new brls::ListItem("Scan /switch/");
+        item_scan_switch->setChecked(true);
+        brls::ListItem* item_scan_switch_subs = new brls::ListItem("Scan /switch/'s subfolders");
+        item_scan_switch_subs->setChecked((get_setting(setting_search_subfolders) == "true"));
+        item_scan_switch_subs->updateActionHint(brls::Key::A, "Toggle");
+        item_scan_switch_subs->getClickEvent()->subscribe([item_scan_switch_subs](brls::View* view) {
+            if (get_setting(setting_search_subfolders) == "true")
             {
-                case 0:
-                    set_setting(setting_recursive_search, "true");
-                    break;
-                case 1:
-                    set_setting(setting_recursive_search, "false");
-                    break;
+                set_setting(setting_search_subfolders, "false");
+                item_scan_switch_subs->setChecked(false);
+            }
+            else
+            {
+                set_setting(setting_search_subfolders, "true");
+                item_scan_switch_subs->setChecked(true);
             }
         });
 
+        brls::ListItem* item_scan_root = new brls::ListItem("Scan / (not subfolders)");
+        item_scan_root->setChecked((get_setting(setting_search_root) == "true"));
+        item_scan_root->updateActionHint(brls::Key::A, "Toggle");
+        item_scan_root->getClickEvent()->subscribe([item_scan_root](brls::View* view) {
+            if (get_setting(setting_search_root) == "true")
+            {
+                set_setting(setting_search_root, "false");
+                item_scan_root->setChecked(false);
+            }
+            else
+            {
+                set_setting(setting_search_root, "true");
+                item_scan_root->setChecked(true);
+            }
+        });
+
+        settings_list->addView(new brls::Header("Scan Settings"));
+
+        brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Scan Range", { "Scan Whole SD Card (Slow!)", "Only scan some folders" });
+
+        layerSelectItem->getValueSelectedEvent()->subscribe([item_scan_switch, item_scan_switch_subs, item_scan_root](size_t selection) {
+            switch (selection)
+            {
+                case 1:
+                    set_setting(setting_scan_full_card, "false");
+                    item_scan_switch->expand(true);
+                    item_scan_switch_subs->expand(true);
+                    item_scan_root->expand(true);
+                    break;
+                case 0:
+                    set_setting(setting_scan_full_card, "true");
+                    item_scan_switch->collapse(true);
+                    item_scan_switch_subs->collapse(true);
+                    item_scan_root->collapse(true);
+                    break;
+            }
+        });
         settings_list->addView(layerSelectItem);
+        settings_list->addView(item_scan_switch);
+        settings_list->addView(item_scan_switch_subs);
+        settings_list->addView(item_scan_root);
+
+        if (get_setting(setting_scan_full_card) == "false")
+        {
+            layerSelectItem->setSelectedValue(1);
+            item_scan_switch->expand(true);
+            item_scan_switch_subs->expand(true);
+            item_scan_root->expand(true);
+        }
+        else
+        {
+            layerSelectItem->setSelectedValue(0);
+            item_scan_switch->collapse(true);
+            item_scan_switch_subs->collapse(true);
+            item_scan_root->collapse(true);
+        }
+
         this->addTab("Settings", settings_list);
     }
 

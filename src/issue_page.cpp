@@ -49,8 +49,10 @@ void IssuePage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
             short_wait += 1;
         else
         {
-            set_setting(setting_recursive_search, "false");
+            set_setting(setting_search_subfolders, "false");
             set_setting(setting_search_root, "false");
+            set_setting(setting_scan_full_card, "false");
+            set_setting(setting_autoscan, "false");
 
             asked = true;
             brls::Application::popView();

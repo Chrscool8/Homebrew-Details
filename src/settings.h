@@ -10,8 +10,10 @@ namespace fs = std::filesystem;
 
 enum setting
 {
-    setting_recursive_search,
+    setting_search_subfolders,
     setting_search_root,
+    setting_scan_full_card,
+    setting_autoscan,
     settings_num
 };
 
