@@ -32,8 +32,6 @@ class MainPage : public brls::TabFrame
     std::vector<app_entry> store_file_data;
 
     void read_store_apps();
-    void read_nacp_from_file(std::string path, app_entry* current);
-    bool read_icon_from_file(std::string path, app_entry* current);
     void process_app_file(std::string filename);
     void load_all_apps();
     brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to);

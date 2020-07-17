@@ -14,8 +14,16 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 //
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+
 #include <algorithm>
+#include <array>
 #include <borealis.hpp>
+#include <cassert>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -110,7 +118,7 @@ void MainPage::read_store_apps()
     }
 }
 
-void MainPage::read_nacp_from_file(std::string path, app_entry* current)
+void read_nacp_from_file(std::string path, app_entry* current)
 {
     FILE* file = fopen(path.c_str(), "rb");
     if (file)
@@ -156,7 +164,7 @@ void MainPage::read_nacp_from_file(std::string path, app_entry* current)
     }
 }
 
-bool MainPage::read_icon_from_file(std::string path, app_entry* current)
+bool read_icon_from_file(std::string path, app_entry* current)
 {
     FILE* file = fopen(path.c_str(), "rb");
     if (!file)
@@ -401,8 +409,7 @@ bool download_update()
     printf("update time\n");
 
     CURL* curl_handle;
-    static const char* pagefilename = "sdmc:/switch/homebrew_details_update.nro";
-    FILE* pagefile;
+    static const char* pagefilename = "sdmc:/config/homebrew_details/hbupdate.nro";
 
     remove(pagefilename);
 
@@ -428,7 +435,7 @@ bool download_update()
 
         curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
 
-        pagefile = fopen(pagefilename, "wb");
+        FILE* pagefile = fopen(pagefilename, "wb");
         if (pagefile)
         {
             printf("pagefile good\n");
@@ -446,11 +453,20 @@ bool download_update()
                 {
                     printf("new version downloaded\n");
 
-                    romfsExit();
-                    remove("sdmc:/switch/homebrew_details.nro");
-                    rename("sdmc:/switch/homebrew_details_update.nro", "sdmc:/switch/homebrew_details.nro");
+                    app_entry check;
+                    read_nacp_from_file(pagefilename, &check);
+                    if (check.name == "Homebrew Details")
+                    {
+                        printf("good nacp\n");
 
-                    return true;
+                        romfsExit();
+                        remove("sdmc:/switch/homebrew_details.nro");
+                        rename(pagefilename, "sdmc:/switch/homebrew_details.nro");
+
+                        return true;
+                    }
+                    else
+                        printf("bad nacp\n");
                 }
             }
             //brls::Application::notify("problem parsing online version\n");
