@@ -103,4 +103,5 @@ IssuePage::~IssuePage()
 {
     delete this->label;
     delete this->button;
+    delete this->image;
 }

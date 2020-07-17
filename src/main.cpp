@@ -18,6 +18,7 @@
 #include "issue_page.hpp"
 #include "main_page.hpp"
 #include "settings.h"
+#include "update_page.hpp"
 
 #ifndef APP_VERSION
 #error APP_VERSION define missing

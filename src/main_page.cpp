@@ -27,6 +27,7 @@
 #include "intro_page.hpp"
 #include "reboot_to_payload.h"
 #include "settings.h"
+#include "update_page.hpp"
 
 #ifndef APP_VERSION
 #error APP_VERSION define missing
@@ -36,28 +37,10 @@ namespace fs = std::filesystem;
 
 std::string online_version = "0";
 
-struct app_entry
+std::string get_online_version()
 {
-    std::string name;
-    std::string file_name;
-    std::string full_path;
-    std::string author;
-    std::string version;
-    std::size_t size;
-    std::size_t icon_size;
-    uint8_t* icon;
-    bool from_appstore;
-    std::string url;
-    std::string category;
-    std::string license;
-    std::string description;
-    std::string summary;
-    std::string changelog;
-};
-
-std::vector<app_entry> local_apps;
-std::vector<app_entry> store_apps;
-std::vector<app_entry> store_file_data;
+    return online_version;
+}
 
 std::string json_load_value_string(nlohmann::json json, std::string key)
 {
@@ -80,7 +63,7 @@ bool compare_by_name(const app_entry& a, const app_entry& b)
         return (a.version.compare(b.version) > 0);
 }
 
-void read_store_apps()
+void MainPage::read_store_apps()
 {
     store_file_data.clear();
     store_apps.clear();
@@ -127,7 +110,7 @@ void read_store_apps()
     }
 }
 
-void read_nacp_from_file(std::string path, app_entry* current)
+void MainPage::read_nacp_from_file(std::string path, app_entry* current)
 {
     FILE* file = fopen(path.c_str(), "rb");
     if (file)
@@ -173,7 +156,7 @@ void read_nacp_from_file(std::string path, app_entry* current)
     }
 }
 
-bool read_icon_from_file(std::string path, app_entry* current)
+bool MainPage::read_icon_from_file(std::string path, app_entry* current)
 {
     FILE* file = fopen(path.c_str(), "rb");
     if (!file)
@@ -202,7 +185,7 @@ bool read_icon_from_file(std::string path, app_entry* current)
     return true;
 }
 
-void process_app_file(std::string filename)
+void MainPage::process_app_file(std::string filename)
 {
     if (filename.substr(filename.length() - 4) == ".nro")
     {
@@ -240,7 +223,7 @@ void process_app_file(std::string filename)
     }
 }
 
-void load_all_apps()
+void MainPage::load_all_apps()
 {
     local_apps.clear();
 
@@ -285,7 +268,7 @@ void load_all_apps()
     sort(local_apps.begin(), local_apps.end(), compare_by_name);
 }
 
-brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to)
+brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to)
 {
     brls::ListItem* item = new brls::ListItem(title);
 
@@ -321,12 +304,12 @@ void purge_entry(app_entry* entry)
 {
 }
 
-brls::ListItem* make_app_entry(app_entry* entry)
+brls::ListItem* MainPage::make_app_entry(app_entry* entry)
 {
     brls::ListItem* popupItem = new brls::ListItem(entry->name);
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
-    popupItem->getClickEvent()->subscribe([entry](brls::View* view) mutable {
+    popupItem->getClickEvent()->subscribe([this, entry](brls::View* view) mutable {
         brls::TabFrame* appView = new brls::TabFrame();
         brls::List* appInfoList = new brls::List();
 
@@ -407,6 +390,76 @@ bool is_number(const std::string& s)
     return (strspn(s.c_str(), "-.0123456789") == s.size() && s.length() > 0);
 }
 
+static size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream)
+{
+    size_t written = fwrite(ptr, size, nmemb, (FILE*)stream);
+    return written;
+}
+
+bool download_update()
+{
+    printf("update time\n");
+
+    CURL* curl_handle;
+    static const char* pagefilename = "sdmc:/switch/homebrew_details_update.nro";
+    FILE* pagefile;
+
+    remove(pagefilename);
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+
+    /* init the curl session */
+    curl_handle = curl_easy_init();
+
+    if (curl_handle)
+    {
+
+        std::string url = "https://github.com/Chrscool8/Homebrew-Details/releases/download/v" + online_version + "/homebrew_details.nro";
+
+        printf((url + "\n").c_str());
+
+        curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Homebrew-Details");
+        curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
+        curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
+
+        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
+        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
+
+        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
+
+        pagefile = fopen(pagefilename, "wb");
+        if (pagefile)
+        {
+            printf("pagefile good\n");
+            curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
+
+            CURLcode res = curl_easy_perform(curl_handle);
+            curl_easy_cleanup(curl_handle);
+
+            fclose(pagefile);
+            printf((std::string("res ") + std::to_string(res) + "\n").c_str());
+            if (res == CURLE_OK)
+            {
+                printf("curl update okay\n");
+                if (fs::exists(pagefilename))
+                {
+                    printf("new version downloaded\n");
+
+                    romfsExit();
+                    remove("sdmc:/switch/homebrew_details.nro");
+                    rename("sdmc:/switch/homebrew_details_update.nro", "sdmc:/switch/homebrew_details.nro");
+
+                    return true;
+                }
+            }
+            //brls::Application::notify("problem parsing online version\n");
+        }
+    }
+
+    return false;
+}
+
 bool check_for_updates()
 {
     printf("curl time\n");
@@ -428,8 +481,7 @@ bool check_for_updates()
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
 
-        CURLcode res;
-        res = curl_easy_perform(curl);
+        CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
 
         if (res == CURLE_OK)
@@ -450,6 +502,7 @@ bool check_for_updates()
 
                     if (std::stod(online_version) > std::stod(APP_VERSION))
                     {
+
                         return true;
                     }
                 }
@@ -510,17 +563,30 @@ MainPage::MainPage()
 
     if (check_for_updates())
     {
+
+        brls::Dialog* link_info_dialog = new brls::Dialog("Update Found!");
+
+        brls::GenericEvent::Callback closeCallback1 = [link_info_dialog](brls::View* view) {
+            link_info_dialog->close();
+        };
+
+        link_info_dialog->addButton("Okay.", closeCallback1);
+        link_info_dialog->setCancelable(true);
+        link_info_dialog->setParent(this);
+        link_info_dialog->open();
+
         this->addSeparator();
         brls::List* settingsList = new brls::List();
         settingsList->addView(new brls::Header("Newer Version Found Online", false));
 
         brls::ListItem* dialogItem = new brls::ListItem("More Info...");
-        dialogItem->getClickEvent()->subscribe([](brls::View* view) {
-            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + APP_VERSION + " but v" + online_version + " is out.\n\n The auto-updater isn't ready quite yet, but you can find the new version in the GBATemp forum topic or my Github.");
+        dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
+            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + APP_VERSION + " but v" + online_version + " is out.\n\nWould you like to download the newest version?");
 
-            brls::GenericEvent::Callback closeCallback = [version_compare_dialog](brls::View* view) {
-                version_compare_dialog->close();
+            brls::GenericEvent::Callback downloadCallback = [this, version_compare_dialog](brls::View* view) {
+                brls::Application::pushView(new UpdatePage());
             };
+
             brls::GenericEvent::Callback infoCallback = [version_compare_dialog](brls::View* view) {
                 brls::Dialog* link_info_dialog = new brls::Dialog(std::string("") + "GBATemp Discussion Topic:\nhttps://gbatemp.net/threads/homebrew-details-a-homebrew-app-manager.569528/\n\nGithub Repo:\nhttps://github.com/Chrscool8/Homebrew-Details");
 
@@ -533,13 +599,14 @@ MainPage::MainPage()
                 link_info_dialog->open();
             };
 
-            version_compare_dialog->addButton("Okay.", closeCallback);
-            version_compare_dialog->addButton("Link Info.", infoCallback);
+            version_compare_dialog->addButton("Yes", downloadCallback);
+            version_compare_dialog->addButton("More Info", infoCallback);
             version_compare_dialog->setCancelable(true);
 
             version_compare_dialog->open();
         });
         settingsList->addView(dialogItem);
+
         this->addTab("Update Available!", settingsList);
     }
 

@@ -106,4 +106,5 @@ IntroPage::~IntroPage()
 {
     delete this->label;
     delete this->button;
+    delete this->image;
 }
