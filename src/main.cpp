@@ -30,6 +30,8 @@ namespace fs = std::filesystem;
 
 int main(int argc, char* argv[])
 {
+    printf(argv[0]);
+
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
     std::string title = "Homebrew Details v" APP_VERSION;
@@ -41,6 +43,7 @@ int main(int argc, char* argv[])
 
     file_load_settings();
     init_settings();
+    set_setting(setting_nro_path, argv[0]);
 
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
         brls::Application::pushView(new IssuePage());

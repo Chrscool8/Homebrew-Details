@@ -460,8 +460,8 @@ bool download_update()
                         printf("good nacp\n");
 
                         romfsExit();
-                        remove("sdmc:/switch/homebrew_details.nro");
-                        rename(pagefilename, "sdmc:/switch/homebrew_details.nro");
+                        remove(get_setting(setting_nro_path).c_str());
+                        rename(pagefilename, get_setting(setting_nro_path).c_str());
 
                         return true;
                     }

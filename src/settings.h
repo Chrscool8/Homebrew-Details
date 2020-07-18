@@ -14,6 +14,7 @@ enum setting
     setting_search_root,
     setting_scan_full_card,
     setting_autoscan,
+    setting_nro_path,
     settings_num
 };
 
