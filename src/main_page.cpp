@@ -195,39 +195,44 @@ bool read_icon_from_file(std::string path, app_entry* current)
 
 void MainPage::process_app_file(std::string filename)
 {
-    if (filename.substr(filename.length() - 4) == ".nro")
+    //printf((filename + "\n").c_str());
+
+    if (filename.length() > 3)
     {
-        app_entry current;
-        read_nacp_from_file(filename, &current);
-        read_icon_from_file(filename, &current);
-        current.from_appstore = false;
-
-        // Check against store apps
-        int count = 0;
-        for (auto store_entry : store_file_data)
+        if (filename.substr(filename.length() - 4) == ".nro")
         {
-            count++;
-            if (store_entry.name != current.name || store_entry.version != current.version)
-            { }
-            else
+            app_entry current;
+            read_nacp_from_file(filename, &current);
+            read_icon_from_file(filename, &current);
+            current.from_appstore = false;
+
+            // Check against store apps
+            int count = 0;
+            for (auto store_entry : store_file_data)
             {
-                //current.author        = store_entry.author;
-                current.from_appstore = true;
-                current.category      = store_entry.category;
-                current.url           = store_entry.url;
-                current.license       = store_entry.license;
-                current.description   = store_entry.description;
-                current.summary       = store_entry.summary;
-                current.changelog     = store_entry.changelog;
+                count++;
+                if (store_entry.name != current.name || store_entry.version != current.version)
+                { }
+                else
+                {
+                    //current.author        = store_entry.author;
+                    current.from_appstore = true;
+                    current.category      = store_entry.category;
+                    current.url           = store_entry.url;
+                    current.license       = store_entry.license;
+                    current.description   = store_entry.description;
+                    current.summary       = store_entry.summary;
+                    current.changelog     = store_entry.changelog;
 
-                store_apps.push_back(store_entry);
-                store_file_data.erase(store_file_data.begin() + count);
-                break;
+                    store_apps.push_back(store_entry);
+                    store_file_data.erase(store_file_data.begin() + count);
+                    break;
+                }
             }
-        }
 
-        if (!current.name.empty())
-            local_apps.push_back(current);
+            if (!current.name.empty())
+                local_apps.push_back(current);
+        }
     }
 }
 
