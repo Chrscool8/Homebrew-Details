@@ -33,6 +33,7 @@
 #include <vector>
 
 #include "intro_page.hpp"
+#include "launching.h"
 #include "reboot_to_payload.h"
 #include "settings.h"
 #include "update_page.hpp"
@@ -158,8 +159,8 @@ void read_nacp_from_file(std::string path, app_entry* current)
         current->name      = name;
         current->author    = author;
         current->version   = version;
-        current->file_name = path.substr(path.find_last_of("/\\") + 1);
         current->full_path = path;
+        current->file_name = path.substr(path.find_last_of("/\\") + 1);
         current->size      = fs::file_size(path);
     }
 }
@@ -321,43 +322,39 @@ void purge_entry(app_entry* entry)
 {
 }
 
+#include <thread>
+
 brls::ListItem* MainPage::make_app_entry(app_entry* entry)
 {
     brls::ListItem* popupItem = new brls::ListItem(entry->name, "", entry->full_path);
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
+
     popupItem->getClickEvent()->subscribe([this, entry](brls::View* view) mutable {
         brls::TabFrame* appView = new brls::TabFrame();
-        brls::List* appInfoList = new brls::List();
-
-        appInfoList->addView(new brls::Header(".NRO File Info", false));
-
-        add_list_entry("Name", entry->name, "", appInfoList);
-        add_list_entry("Filename", entry->file_name, "Full Path:\n\nsdmc:" + entry->full_path, appInfoList);
-        add_list_entry("Author", entry->author, "", appInfoList);
-        add_list_entry("Version", entry->version, "", appInfoList);
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(2) << entry->size / 1000. / 1000.;
-        std::string str = stream.str();
-        add_list_entry("Size", str + " MB", "Exact Size:\n\n" + std::to_string(entry->size) + " bytes", appInfoList);
-        add_list_entry("Icon Size", std::to_string(entry->icon_size), "", appInfoList);
-        appView->addTab("File Info", appInfoList);
-
-        brls::List* appStoreInfoList = new brls::List();
-        appStoreInfoList->addView(new brls::Header("App Store Info", false));
-
-        add_list_entry("From Appstore", (entry->from_appstore ? "Yes" : "No"), "", appStoreInfoList);
-        add_list_entry("URL", entry->url, "", appStoreInfoList);
-        add_list_entry("Category", entry->category, "", appStoreInfoList);
-        add_list_entry("License", entry->license, "", appStoreInfoList);
-        add_list_entry("Description", entry->description, "", appStoreInfoList);
-        add_list_entry("Summary", entry->summary, "", appStoreInfoList);
-        add_list_entry("Changelog", entry->changelog, "", appStoreInfoList);
-
-        appView->addTab("App Store Info", appStoreInfoList);
 
         brls::List* manageList = new brls::List();
         manageList->addView(new brls::Header("File Management Actions", false));
+
+        brls::ListItem* launch_item = new brls::ListItem("Launch App (Beta)");
+        launch_item->getClickEvent()->subscribe([this, entry](brls::View* view) {
+            print_debug("launch app\n");
+            unsigned int r = launch_nro("sdmc:" + entry->full_path, "");
+            print_debug("r: " + std::to_string(r) + "\n");
+            if (R_FAILED(r))
+            {
+                print_debug("Uh oh.\n");
+            }
+            else
+            {
+                local_apps.clear();
+                store_apps.clear();
+                store_file_data.clear();
+
+                brls::Application::quit();
+            }
+        });
+        manageList->addView(launch_item);
 
         brls::ListItem* delete_item = new brls::ListItem("Delete App");
         delete_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
@@ -386,6 +383,32 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         manageList->addView(delete_item);
 
         appView->addTab("Manage", manageList);
+
+        brls::List* appInfoList = new brls::List();
+        appInfoList->addView(new brls::Header(".NRO File Info", false));
+        add_list_entry("Name", entry->name, "", appInfoList);
+        add_list_entry("Filename", entry->file_name, "Full Path:\n\nsdmc:" + entry->full_path, appInfoList);
+        add_list_entry("Author", entry->author, "", appInfoList);
+        add_list_entry("Version", entry->version, "", appInfoList);
+        std::stringstream stream;
+        stream << std::fixed << std::setprecision(2) << entry->size / 1000. / 1000.;
+        std::string str = stream.str();
+        add_list_entry("Size", str + " MB", "Exact Size:\n\n" + std::to_string(entry->size) + " bytes", appInfoList);
+        add_list_entry("Icon Size", std::to_string(entry->icon_size), "", appInfoList);
+        appView->addTab("File Info", appInfoList);
+
+        brls::List* appStoreInfoList = new brls::List();
+        appStoreInfoList->addView(new brls::Header("App Store Info", false));
+
+        add_list_entry("From Appstore", (entry->from_appstore ? "Yes" : "No"), "", appStoreInfoList);
+        add_list_entry("URL", entry->url, "", appStoreInfoList);
+        add_list_entry("Category", entry->category, "", appStoreInfoList);
+        add_list_entry("License", entry->license, "", appStoreInfoList);
+        add_list_entry("Description", entry->description, "", appStoreInfoList);
+        add_list_entry("Summary", entry->summary, "", appStoreInfoList);
+        add_list_entry("Changelog", entry->changelog, "", appStoreInfoList);
+
+        appView->addTab("App Store Info", appStoreInfoList);
 
         //appView->addTab("Notes", new brls::Rectangle(nvgRGB(120, 120, 120)));
 
@@ -713,7 +736,6 @@ MainPage::MainPage()
             }
         });
 
-
         brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Scan Range", { "Scan Whole SD Card (Slow!)", "Only scan some folders" });
 
         layerSelectItem->getValueSelectedEvent()->subscribe([item_scan_switch, item_scan_switch_subs, item_scan_root](size_t selection) {
@@ -806,6 +828,14 @@ MainPage::MainPage()
             reboot_to_payload();
         });
         debug_list->addView(rtp_item);
+
+        brls::ListItem* launch_item = new brls::ListItem("Launch App");
+        launch_item->getClickEvent()->subscribe([](brls::View* view) {
+            print_debug("launch app\n");
+            launch_nro("", "");
+            brls::Application::quit();
+        });
+        debug_list->addView(launch_item);
 
         this->addTab("Debug Menu", debug_list);
     }
