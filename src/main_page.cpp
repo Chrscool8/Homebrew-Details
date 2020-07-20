@@ -336,25 +336,28 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         brls::List* manageList = new brls::List();
         manageList->addView(new brls::Header("File Management Actions", false));
 
-        brls::ListItem* launch_item = new brls::ListItem("Launch App (Beta)");
-        launch_item->getClickEvent()->subscribe([this, entry](brls::View* view) {
-            print_debug("launch app\n");
-            unsigned int r = launch_nro("sdmc:" + entry->full_path, "");
-            print_debug("r: " + std::to_string(r) + "\n");
-            if (R_FAILED(r))
-            {
-                print_debug("Uh oh.\n");
-            }
-            else
-            {
-                local_apps.clear();
-                store_apps.clear();
-                store_file_data.clear();
-
-                brls::Application::quit();
-            }
-        });
-        manageList->addView(launch_item);
+        if (get_setting_true(setting_debug))
+        {
+            brls::ListItem* launch_item = new brls::ListItem("Launch App (Beta)");
+            launch_item->getClickEvent()->subscribe([this, entry](brls::View* view) {
+                print_debug("launch app\n");
+                unsigned int r = launch_nro("sdmc:" + entry->full_path, "");
+                print_debug("r: " + std::to_string(r) + "\n");
+                if (R_FAILED(r))
+                {
+                    print_debug("Uh oh.\n");
+                }
+                else
+                {
+                    local_apps.clear();
+                    store_apps.clear();
+                    store_file_data.clear();
+                    romfsExit();
+                    brls::Application::quit();
+                }
+            });
+            manageList->addView(launch_item);
+        }
 
         brls::ListItem* delete_item = new brls::ListItem("Delete App");
         delete_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
@@ -779,7 +782,7 @@ MainPage::MainPage()
 
         settings_list->addView(new brls::Header("Misc. Settings"));
 
-        brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes effect on next launch.");
+        brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes full effect on next launch.");
         debug_switch->setChecked((get_setting(setting_debug) == "true"));
         debug_switch->updateActionHint(brls::Key::A, "Toggle");
         debug_switch->getClickEvent()->subscribe([debug_switch](brls::View* view) {
