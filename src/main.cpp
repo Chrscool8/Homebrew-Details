@@ -30,7 +30,7 @@ namespace fs = std::filesystem;
 
 int main(int argc, char* argv[])
 {
-    printf(argv[0]);
+    print_debug(argv[0]);
 
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     while (brls::Application::mainLoop())
         ;
 
-    printf("Main loop end.\n");
+    print_debug("Main loop end.\n");
 
     // Protect from crash
     //rootFrame->setParent(NULL);

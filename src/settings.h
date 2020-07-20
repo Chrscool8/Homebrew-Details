@@ -15,16 +15,17 @@ enum setting
     setting_scan_full_card,
     setting_autoscan,
     setting_nro_path,
+    setting_debug,
+    setting_local_version,
     settings_num
 };
 
 ////////
 
 void file_load_settings();
-
 void file_save_settings();
-
 void set_setting(int setting, std::string value);
 std::string get_setting(int setting);
-
 void init_settings();
+bool get_setting_true(int setting);
+void print_debug(std::string str);

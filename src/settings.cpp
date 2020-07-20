@@ -60,13 +60,18 @@ void file_save_settings()
 void set_setting(int setting, std::string value)
 {
     settings[setting] = base64_encode(value);
-    printf(("Set " + std::to_string(setting) + " to " + value).c_str());
+    print_debug(("Set " + std::to_string(setting) + " to " + value + "\n").c_str());
     file_save_settings();
 }
 
 std::string get_setting(int setting)
 {
     return base64_decode(settings[setting]);
+}
+
+bool get_setting_true(int setting)
+{
+    return (get_setting(setting) == "true");
 }
 
 void init_settings()
@@ -90,4 +95,20 @@ void init_settings()
     {
         set_setting(setting_autoscan, "false");
     }
+
+    if (get_setting(setting_debug) == "")
+    {
+        set_setting(setting_debug, "false");
+    }
+
+    if (get_setting_true(setting_debug))
+        set_setting(setting_local_version, std::string(APP_VERSION) + "d");
+    else
+        set_setting(setting_local_version, APP_VERSION);
+}
+
+void print_debug(std::string str)
+{
+    if (get_setting_true(setting_debug))
+        printf(str.c_str());
 }

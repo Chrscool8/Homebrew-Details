@@ -23,7 +23,7 @@ UpdatePage::UpdatePage()
         {
             if (!asked)
             {
-                printf("Clicked DL\n");
+                print_debug("Clicked DL\n");
 
                 this->button->setLabel("Download in Progress");
                 this->button->invalidate();
@@ -31,7 +31,7 @@ UpdatePage::UpdatePage()
             }
             else
             {
-                printf("Closing.\n");
+                print_debug("Closing.\n");
                 brls::Application::quit();
                 //exit(0);
             }
@@ -41,7 +41,7 @@ UpdatePage::UpdatePage()
     this->image = (new brls::Image(BOREALIS_ASSET("download.jpg")));
     this->image->setParent(this);
 
-    this->label = new brls::Label(brls::LabelStyle::DIALOG, (std::string("Update Wizard Engaged.\nv") + APP_VERSION + "  ->  v" + get_online_version()).c_str(), true);
+    this->label = new brls::Label(brls::LabelStyle::DIALOG, (std::string("Update Wizard Engaged.\nv") + get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version()).c_str(), true);
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);
@@ -59,7 +59,7 @@ void UpdatePage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned hei
             short_wait += 1;
         else
         {
-            //printf("update\n");
+            print_debug("update\n");
 
             bool updated = download_update();
 

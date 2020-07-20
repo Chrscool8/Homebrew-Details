@@ -5,14 +5,17 @@
 #include <fstream>
 
 #include "main_page.hpp"
+#include "settings.h"
 
 IntroPage::IntroPage(std::string label)
 {
     this->setActionAvailable(brls::Key::B, false);
 
-    go         = false;
-    asked      = false;
-    short_wait = 0;
+    autoscanned       = false;
+    go                = false;
+    asked             = false;
+    short_wait        = 0;
+    autoscan_cooldown = 0;
 
     this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel(label)->setImage(BOREALIS_ASSET("arrows_small.jpg"));
     this->button->setParent(this);
@@ -65,6 +68,18 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
             this->button->invalidate();
         }
     }
+
+    if (!autoscanned && autoscan_cooldown > 5)
+    {
+        if (get_setting_true(setting_autoscan))
+        {
+            this->button->getClickEvent()->fire(this);
+        }
+        autoscanned = true;
+    }
+
+    if (autoscan_cooldown <= 5)
+        autoscan_cooldown += 1;
 }
 
 brls::View* IntroPage::getDefaultFocus()

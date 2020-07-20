@@ -84,12 +84,12 @@ void MainPage::read_store_apps()
             std::string folder = entry.path();
             if (fs::is_directory(folder))
             {
-                //printf(("folder: " + folder + "\n").c_str());
+                print_debug(("folder: " + folder + "\n").c_str());
 
                 std::string info_file = folder + "/info.json";
                 if (fs::exists(info_file))
                 {
-                    //printf(("info_file: " + info_file + "\n").c_str());
+                    print_debug(("info_file: " + info_file + "\n").c_str());
 
                     std::ifstream i(info_file);
                     nlohmann::json info_json;
@@ -110,7 +110,7 @@ void MainPage::read_store_apps()
                     if (!current.name.empty())
                         store_file_data.push_back(current);
 
-                    //printf((current.name + "\n").c_str());
+                    print_debug((current.name + "\n").c_str());
                 }
             }
         }
@@ -195,17 +195,18 @@ bool read_icon_from_file(std::string path, app_entry* current)
 
 void MainPage::process_app_file(std::string filename)
 {
-    //printf((filename + "\n").c_str());
+    print_debug((filename + "\n").c_str());
 
     if (filename.length() > 3)
     {
         if (filename.substr(filename.length() - 4) == ".nro")
         {
+            print_debug("read:\n");
             app_entry current;
             read_nacp_from_file(filename, &current);
             read_icon_from_file(filename, &current);
             current.from_appstore = false;
-
+            print_debug("nacp and icon okay\n");
             // Check against store apps
             int count = 0;
             for (auto store_entry : store_file_data)
@@ -230,6 +231,8 @@ void MainPage::process_app_file(std::string filename)
                 }
             }
 
+            print_debug("done with stores\n");
+
             if (!current.name.empty())
                 local_apps.push_back(current);
         }
@@ -242,7 +245,7 @@ void MainPage::load_all_apps()
 
     if (get_setting(setting_scan_full_card) == "true")
     {
-        printf("Searching recursively within /\n");
+        print_debug("Searching recursively within /\n");
         for (const auto& entry : fs::recursive_directory_iterator("/"))
         {
             process_app_file(entry.path());
@@ -252,15 +255,16 @@ void MainPage::load_all_apps()
     {
         if (get_setting(setting_search_subfolders) == "true")
         {
-            printf("Searching recursively within /switch/\n");
+            print_debug("Searching recursively within /switch/\n");
             for (const auto& entry : fs::recursive_directory_iterator("/switch/"))
             {
+                print_debug("entry\n");
                 process_app_file(entry.path());
             }
         }
         else
         {
-            printf("Searching only within /switch/\n");
+            print_debug("Searching only within /switch/\n");
             for (const auto& entry : fs::directory_iterator("/switch/"))
             {
                 process_app_file(entry.path());
@@ -269,7 +273,7 @@ void MainPage::load_all_apps()
 
         if (get_setting(setting_search_root) == "true")
         {
-            printf("Searching only within /\n");
+            print_debug("Searching only within /\n");
             for (const auto& entry : fs::directory_iterator("/"))
             {
                 process_app_file(entry.path());
@@ -319,7 +323,7 @@ void purge_entry(app_entry* entry)
 
 brls::ListItem* MainPage::make_app_entry(app_entry* entry)
 {
-    brls::ListItem* popupItem = new brls::ListItem(entry->name);
+    brls::ListItem* popupItem = new brls::ListItem(entry->name, "", entry->full_path);
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
     popupItem->getClickEvent()->subscribe([this, entry](brls::View* view) mutable {
@@ -411,7 +415,7 @@ static size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream)
 
 bool download_update()
 {
-    printf("update time\n");
+    print_debug("update time\n");
 
     CURL* curl_handle;
     static const char* pagefilename = "sdmc:/config/homebrew_details/hbupdate.nro";
@@ -428,7 +432,7 @@ bool download_update()
 
         std::string url = "https://github.com/Chrscool8/Homebrew-Details/releases/download/v" + online_version + "/homebrew_details.nro";
 
-        printf((url + "\n").c_str());
+        print_debug(url + "\n");
 
         curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Homebrew-Details");
@@ -443,26 +447,26 @@ bool download_update()
         FILE* pagefile = fopen(pagefilename, "wb");
         if (pagefile)
         {
-            printf("pagefile good\n");
+            print_debug("pagefile good\n");
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
 
             CURLcode res = curl_easy_perform(curl_handle);
             curl_easy_cleanup(curl_handle);
 
             fclose(pagefile);
-            printf((std::string("res ") + std::to_string(res) + "\n").c_str());
+            print_debug((std::string("res ") + std::to_string(res) + "\n").c_str());
             if (res == CURLE_OK)
             {
-                printf("curl update okay\n");
+                print_debug("curl update okay\n");
                 if (fs::exists(pagefilename))
                 {
-                    printf("new version downloaded\n");
+                    print_debug("new version downloaded\n");
 
                     app_entry check;
                     read_nacp_from_file(pagefilename, &check);
                     if (check.name == "Homebrew Details")
                     {
-                        printf("good nacp\n");
+                        print_debug("good nacp\n");
 
                         romfsExit();
                         remove(get_setting(setting_nro_path).c_str());
@@ -471,7 +475,7 @@ bool download_update()
                         return true;
                     }
                     else
-                        printf("bad nacp\n");
+                        print_debug("bad nacp\n");
                 }
             }
             //brls::Application::notify("problem parsing online version\n");
@@ -483,7 +487,7 @@ bool download_update()
 
 bool check_for_updates()
 {
-    printf("curl time\n");
+    print_debug("curl time\n");
 
     CURL* curl;
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -517,18 +521,21 @@ bool check_for_updates()
                     online_version = online_version.substr(1);
                 }
 
-                if (is_number(online_version))
+                print_debug((std::string("") + online_version + " : " + get_setting(setting_local_version) + "\n").c_str());
+                if (is_number(online_version) && is_number(get_setting(setting_local_version)))
                 {
-                    printf((std::string("") + online_version + " : " + APP_VERSION + "\n").c_str());
-
-                    if (std::stod(online_version) > std::stod(APP_VERSION))
+                    if (std::stod(online_version) > std::stod(get_setting(setting_local_version)))
                     {
-
                         return true;
                     }
                 }
             }
         }
+    }
+
+    if (get_setting_true(setting_debug))
+    {
+        return true;
     }
 
     //brls::Application::notify("problem parsing online version\n");
@@ -539,13 +546,24 @@ void emptyfunc()
 {
 }
 
+std::string pad_string_with_spaces(std::string initial, int ending, unsigned int padding_amount)
+{
+    std::string str = "(" + std::to_string(ending) + ")";
+    while ((str.length()) < padding_amount)
+        str = " " + str;
+    str = initial + str;
+    return str;
+}
+
 MainPage::MainPage()
 {
-    std::string title = "Homebrew Details v" APP_VERSION;
+    std::string title = "Homebrew Details v" + get_setting(setting_local_version);
+    if (get_setting_true(setting_debug))
+        title += " [Debug Mode]";
 
     this->setTitle(title.c_str());
     this->setIcon(BOREALIS_ASSET("icon.jpg"));
-    printf("init rootframe\n");
+    print_debug("init rootframe\n");
     //this->setActionAvailable(brls::Key::B, false);
 
     read_store_apps();
@@ -566,12 +584,12 @@ MainPage::MainPage()
             localAppsList->addView(make_app_entry(current));
     }
 
-    this->addTab("All Apps               (" + std::to_string(store_apps.size() + local_apps.size()) + ")", appsList);
+    this->addTab(pad_string_with_spaces("All Apps", store_apps.size() + local_apps.size(), 20).c_str(), appsList);
     this->addSeparator();
     if (!store_apps.empty())
-        this->addTab("App Store Apps     (" + std::to_string(store_apps.size()) + ")", storeAppsList);
+        this->addTab(pad_string_with_spaces("App Store Apps", store_apps.size(), 9).c_str(), storeAppsList);
     if (!local_apps.empty())
-        this->addTab("Local Apps            (" + std::to_string(local_apps.size()) + ")", localAppsList);
+        this->addTab(pad_string_with_spaces("Local Apps", local_apps.size(), 16).c_str(), localAppsList);
 
     //rootFrame->addSeparator();
     //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));
@@ -582,27 +600,16 @@ MainPage::MainPage()
 
     //this->addTab("Read: "+std::to_string(batteryCharge), new brls::Rectangle(nvgRGB(120, 120, 120)));
 
+    print_debug("Check for updates.");
     if (check_for_updates())
     {
-
-        brls::Dialog* link_info_dialog = new brls::Dialog("Update Found!");
-
-        brls::GenericEvent::Callback closeCallback1 = [link_info_dialog](brls::View* view) {
-            link_info_dialog->close();
-        };
-
-        link_info_dialog->addButton("Okay.", closeCallback1);
-        link_info_dialog->setCancelable(true);
-        link_info_dialog->setParent(this);
-        link_info_dialog->open();
-
         this->addSeparator();
         brls::List* settingsList = new brls::List();
         settingsList->addView(new brls::Header("Newer Version Found Online", false));
 
         brls::ListItem* dialogItem = new brls::ListItem("More Info...");
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
-            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + APP_VERSION + " but v" + online_version + " is out.\n\nWould you like to download the newest version?");
+            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + get_setting(setting_local_version) + " but v" + online_version + " is out.\n\nWould you like to download the newest version?");
 
             brls::GenericEvent::Callback downloadCallback = [this, version_compare_dialog](brls::View* view) {
                 brls::Application::pushView(new UpdatePage());
@@ -631,6 +638,7 @@ MainPage::MainPage()
         this->addTab("Update Available!", settingsList);
     }
 
+    print_debug("Toolbox.");
     {
         this->addSeparator();
 
@@ -638,7 +646,7 @@ MainPage::MainPage()
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
         rtp_item->setValue("atmosphere/reboot_payload.bin");
         rtp_item->getClickEvent()->subscribe([](brls::View* view) {
-            printf("reboot_to_payload\n");
+            print_debug("reboot_to_payload\n");
             int result = reboot_to_payload();
             if (result == -1)
                 brls::Application::notify("Problem initializing spl");
@@ -649,8 +657,28 @@ MainPage::MainPage()
         this->addTab("Toolbox", tools_list);
     }
 
+    print_debug("Settings.");
     {
-        brls::List* settings_list        = new brls::List();
+        brls::List* settings_list = new brls::List();
+        settings_list->addView(new brls::Header("Scan Settings"));
+
+        brls::ListItem* autoscan_switch = new brls::ListItem("Autoscan");
+        autoscan_switch->setChecked((get_setting(setting_autoscan) == "true"));
+        autoscan_switch->updateActionHint(brls::Key::A, "Toggle");
+        autoscan_switch->getClickEvent()->subscribe([autoscan_switch](brls::View* view) {
+            if (get_setting(setting_autoscan) == "true")
+            {
+                set_setting(setting_autoscan, "false");
+                autoscan_switch->setChecked(false);
+            }
+            else
+            {
+                set_setting(setting_autoscan, "true");
+                autoscan_switch->setChecked(true);
+            }
+        });
+        settings_list->addView(autoscan_switch);
+
         brls::ListItem* item_scan_switch = new brls::ListItem("Scan /switch/");
         item_scan_switch->setChecked(true);
         brls::ListItem* item_scan_switch_subs = new brls::ListItem("Scan /switch/'s subfolders");
@@ -685,7 +713,6 @@ MainPage::MainPage()
             }
         });
 
-        settings_list->addView(new brls::Header("Scan Settings"));
 
         brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Scan Range", { "Scan Whole SD Card (Slow!)", "Only scan some folders" });
 
@@ -726,11 +753,32 @@ MainPage::MainPage()
             item_scan_root->collapse(true);
         }
 
+        //
+
+        settings_list->addView(new brls::Header("Misc. Settings"));
+
+        brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes effect on next launch.");
+        debug_switch->setChecked((get_setting(setting_debug) == "true"));
+        debug_switch->updateActionHint(brls::Key::A, "Toggle");
+        debug_switch->getClickEvent()->subscribe([debug_switch](brls::View* view) {
+            if (get_setting(setting_debug) == "true")
+            {
+                set_setting(setting_debug, "false");
+                debug_switch->setChecked(false);
+            }
+            else
+            {
+                set_setting(setting_debug, "true");
+                debug_switch->setChecked(true);
+            }
+        });
+        settings_list->addView(debug_switch);
+        //
+
         this->addTab("Settings", settings_list);
     }
 
-    bool debug = true;
-    if (debug)
+    if (get_setting_true(setting_debug))
     {
         this->addSeparator();
         brls::List* debug_list = new brls::List();
@@ -747,22 +795,22 @@ MainPage::MainPage()
         psmGetChargerType(&chargerType);
 
         add_list_entry("Charging Status", chargerTypes[chargerType], "", debug_list);
-        add_list_entry("Local Version", std::string("v") + APP_VERSION, "", debug_list);
+        add_list_entry("Local Version", std::string("v") + get_setting(setting_local_version), "", debug_list);
         add_list_entry("Online Version", std::string("v") + online_version, "", debug_list);
         add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list);
         add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list);
 
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
         rtp_item->getClickEvent()->subscribe([](brls::View* view) {
-            printf("reboot_to_payload\n");
+            print_debug("reboot_to_payload\n");
             reboot_to_payload();
         });
         debug_list->addView(rtp_item);
 
         this->addTab("Debug Menu", debug_list);
-
-        remove("sdmc:/config/homebrew_details/lock");
     }
+
+    remove("sdmc:/config/homebrew_details/lock");
 }
 
 MainPage::~MainPage()
