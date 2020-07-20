@@ -1,6 +1,7 @@
 # Homebrew Details - A Homebrew App Manager
 
 Discussion here: https://gbatemp.net/threads/homebrew-details-a-homebrew-app-manager.569528/
+
 Trello Planning Here: https://trello.com/b/C987oGK3/homebrew-details
 
 
