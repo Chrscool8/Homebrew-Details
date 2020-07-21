@@ -46,6 +46,10 @@ namespace fs = std::filesystem;
 
 std::string online_version = "0";
 
+struct online_version
+{
+};
+
 std::string get_online_version()
 {
     return online_version;
@@ -249,26 +253,68 @@ void MainPage::load_all_apps()
         print_debug("Searching recursively within /\n");
         for (const auto& entry : fs::recursive_directory_iterator("/"))
         {
-            process_app_file(entry.path());
+            if (fs::is_regular_file(entry))
+                process_app_file(entry.path());
         }
     }
     else
     {
         if (get_setting(setting_search_subfolders) == "true")
         {
+            print_debug("---------------\n");
             print_debug("Searching recursively within /switch/\n");
-            for (const auto& entry : fs::recursive_directory_iterator("/switch/"))
+
+            // search base folder
+            std::vector<std::string> folders;
+            for (const auto& entry : fs::directory_iterator("/switch/"))
             {
-                print_debug("entry\n");
-                process_app_file(entry.path());
+                print_debug(entry.path());
+                print_debug("\n");
+                std::string path_str = entry.path();
+
+                if (fs::is_directory(entry))
+                {
+                    transform(path_str.begin(), path_str.end(), path_str.begin(), ::tolower);
+                    //print_debug("Folder:\n");
+                    //print_debug(path_str + "\n");
+                    if (path_str != "/switch/checkpoint" && path_str != "/switch/appstore")
+                    {
+                        path_str += "/";
+                        folders.push_back(path_str);
+                    }
+                }
+                else
+                    process_app_file(path_str);
             }
+
+            if (!folders.empty())
+            {
+                for (unsigned int i = 0; i < folders.size(); i++)
+                {
+                    // print_debug("Searching within " + folders.at(i) + "\n");
+                    for (const auto& entry : fs::recursive_directory_iterator(folders.at(i)))
+                    {
+                        process_app_file(entry.path());
+                    }
+                }
+            }
+
+            folders.clear();
+
+            //for (const auto& entry : fs::recursive_directory_iterator("/switch/"))
+            //{
+            //    print_debug("entry\n");
+            //    if (fs::is_regular_file(entry))
+            //        process_app_file(entry.path());
+            //}
         }
         else
         {
             print_debug("Searching only within /switch/\n");
             for (const auto& entry : fs::directory_iterator("/switch/"))
             {
-                process_app_file(entry.path());
+                if (fs::is_regular_file(entry))
+                    process_app_file(entry.path());
             }
         }
 
@@ -277,13 +323,15 @@ void MainPage::load_all_apps()
             print_debug("Searching only within /\n");
             for (const auto& entry : fs::directory_iterator("/"))
             {
-                process_app_file(entry.path());
+                if (fs::is_regular_file(entry))
+                    process_app_file(entry.path());
             }
         }
     }
 
     store_file_data.clear();
-    sort(local_apps.begin(), local_apps.end(), compare_by_name);
+    if (local_apps.size() > 1)
+        sort(local_apps.begin(), local_apps.end(), compare_by_name);
 }
 
 brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to)
@@ -610,8 +658,20 @@ MainPage::MainPage()
             localAppsList->addView(make_app_entry(current));
     }
 
-    this->addTab(pad_string_with_spaces("All Apps", store_apps.size() + local_apps.size(), 20).c_str(), appsList);
-    this->addSeparator();
+    /* if (local_apps.size() == 0)
+    {
+        brls::ListItem nothing_item = new brls::ListItem("No Apps Found");
+        appsList->addView(nothing_item);
+
+        brls::ListItem nothing_item2 = new brls::ListItem("No Apps Found");
+        localAppsList->addView(nothing_item2);
+    }*/
+
+    if (!local_apps.empty() && !store_apps.empty())
+    {
+        this->addTab(pad_string_with_spaces("All Apps", store_apps.size() + local_apps.size(), 20).c_str(), appsList);
+        this->addSeparator();
+    }
     if (!store_apps.empty())
         this->addTab(pad_string_with_spaces("App Store Apps", store_apps.size(), 9).c_str(), storeAppsList);
     if (!local_apps.empty())
