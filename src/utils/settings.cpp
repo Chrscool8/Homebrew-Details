@@ -1,12 +1,13 @@
-#include "settings.h"
+#include <utils/launching.h>
+#include <utils/nacp_utils.h>
+#include <utils/reboot_to_payload.h>
+#include <utils/settings.h>
+#include <utils/utilities.h>
 
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
-
-#include "base64.h"
-#include "utilities.h"
 
 namespace fs = std::filesystem;
 

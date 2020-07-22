@@ -1,10 +1,9 @@
 // From atmosphere
 
-#include "reboot_to_payload.h"
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <switch.h>
+#include <utils/reboot_to_payload.h>
 
 #include <string>
 

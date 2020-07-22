@@ -1,4 +1,15 @@
-#include "nacp_utils.h"
+#include <utils/launching.h>
+#include <utils/nacp_utils.h>
+#include <utils/reboot_to_payload.h>
+#include <utils/settings.h>
+#include <utils/utilities.h>
+
+#include <pages/intro_page.hpp>
+#include <pages/issue_page.hpp>
+#include <pages/main_page.hpp>
+#include <pages/update_page.hpp>
+
+//
 
 #include <dirent.h>
 #include <math.h>
@@ -31,13 +42,6 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
-
-#include "intro_page.hpp"
-#include "launching.h"
-#include "nacp_utils.h"
-#include "reboot_to_payload.h"
-#include "settings.h"
-#include "update_page.hpp"
 
 void read_nacp_from_file(std::string path, app_entry* current)
 {

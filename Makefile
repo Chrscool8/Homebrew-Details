@@ -39,13 +39,13 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	homebrew_details
 BUILD		:=	build.nx
-SOURCES		:=	src
+SOURCES		:=	src src/pages src/utils
 DATA		:=	data
 ICON		:=	resources/icon.jpg
-INCLUDES	:=	include
+INCLUDES	:=	include include/pages include/utils
 APP_TITLE	:=	Homebrew Details
 APP_AUTHOR	:=	Chris Bradel
-APP_VERSION	:=	0.74
+APP_VERSION	:=	0.75
 
 ROMFS				:=	resources
 BOREALIS_PATH		:=	.

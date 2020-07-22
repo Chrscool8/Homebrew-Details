@@ -1,10 +1,10 @@
-#include "launching.h"
+#include <utils/launching.h>
+#include <utils/settings.h>
+#include <utils/utilities.h>
 
 #include <string>
 
-#include "settings.h"
 #include "switch.h"
-#include "utilities.h"
 
 unsigned int launch_nro(std::string path, std::string args)
 {

@@ -1,5 +1,8 @@
 #pragma once
+#include <string.h>
+
 #include <borealis.hpp>
+#include <string>
 
 class IntroPage : public brls::View
 {

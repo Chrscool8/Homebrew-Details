@@ -1,4 +1,14 @@
-#include "main_page.hpp"
+#include <utils/launching.h>
+#include <utils/nacp_utils.h>
+#include <utils/reboot_to_payload.h>
+#include <utils/settings.h>
+#include <utils/utilities.h>
+
+#include <pages/intro_page.hpp>
+#include <pages/issue_page.hpp>
+#include <pages/main_page.hpp>
+#include <pages/update_page.hpp>
+//
 
 #include <dirent.h>
 #include <math.h>
@@ -31,14 +41,6 @@
 #include <string>
 #include <vector>
 
-#include "intro_page.hpp"
-#include "launching.h"
-#include "nacp_utils.h"
-#include "reboot_to_payload.h"
-#include "settings.h"
-#include "update_page.hpp"
-#include "utilities.h"
-
 #ifndef APP_VERSION
 #error APP_VERSION define missing
 #endif
@@ -63,8 +65,6 @@ std::string json_load_value_string(nlohmann::json json, std::string key)
     else
         return "---";
 }
-
-
 
 void MainPage::read_store_apps()
 {
@@ -447,8 +447,6 @@ bool check_for_updates()
     printf("no update\n");
     return false;
 }
-
-
 
 MainPage::MainPage()
 {

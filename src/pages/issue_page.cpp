@@ -1,10 +1,9 @@
-#include "issue_page.hpp"
-
 #include <math.h>
+#include <utils/settings.h>
 
-#include "intro_page.hpp"
-#include "main_page.hpp"
-#include "settings.h"
+#include <pages/intro_page.hpp>
+#include <pages/issue_page.hpp>
+#include <pages/main_page.hpp>
 
 IssuePage::IssuePage()
 {

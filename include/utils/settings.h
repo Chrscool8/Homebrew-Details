@@ -1,10 +1,10 @@
 #pragma once
+#include <utils/base64.h>
+
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
-
-#include "base64.h"
 
 namespace fs = std::filesystem;
 

@@ -1,4 +1,14 @@
-#include "update_page.hpp"
+#include <utils/launching.h>
+#include <utils/nacp_utils.h>
+#include <utils/reboot_to_payload.h>
+#include <utils/settings.h>
+#include <utils/utilities.h>
+
+#include <pages/intro_page.hpp>
+#include <pages/issue_page.hpp>
+#include <pages/main_page.hpp>
+#include <pages/update_page.hpp>
+//
 
 #include <math.h>
 #include <sys/select.h>
@@ -6,10 +16,6 @@
 #include <chrono>
 #include <thread>
 
-#include "intro_page.hpp"
-#include "issue_page.hpp"
-#include "main_page.hpp"
-#include "settings.h"
 //
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -38,8 +44,6 @@
 #include <thread>
 #include <vector>
 
-#include "main_page.hpp"
-#include "nacp_utils.h"
 #include "switch/services/psm.h"
 
 size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream)

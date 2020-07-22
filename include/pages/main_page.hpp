@@ -1,8 +1,8 @@
 #pragma once
 
-#include <borealis.hpp>
+#include <utils/utilities.h>
 
-#include "utilities.h"
+#include <borealis.hpp>
 
 std::string get_online_version();
 bool is_number(const std::string& s);

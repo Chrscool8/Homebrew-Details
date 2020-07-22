@@ -1,11 +1,9 @@
-#include "intro_page.hpp"
-
 #include <math.h>
+#include <utils/settings.h>
 
 #include <fstream>
-
-#include "main_page.hpp"
-#include "settings.h"
+#include <pages/intro_page.hpp>
+#include <pages/main_page.hpp>
 
 IntroPage::IntroPage(std::string label)
 {
@@ -59,7 +57,6 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
         else
         {
             asked = true;
-            // brls::Application::popView();
             brls::Application::pushView(new MainPage());
             go         = false;
             asked      = false;

@@ -1,10 +1,9 @@
-#include "utilities.h"
-
 #include <string.h>
+#include <utils/settings.h>
+#include <utils/utilities.h>
 
 #include <algorithm>
 #include <string>
-#include "settings.h"
 
 bool is_number(const std::string& s)
 {
