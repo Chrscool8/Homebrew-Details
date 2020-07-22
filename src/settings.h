@@ -28,4 +28,3 @@ void set_setting(int setting, std::string value);
 std::string get_setting(int setting);
 void init_settings();
 bool get_setting_true(int setting);
-void print_debug(std::string str);

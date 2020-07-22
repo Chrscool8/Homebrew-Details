@@ -4,6 +4,7 @@
 
 #include "settings.h"
 #include "switch.h"
+#include "utilities.h"
 
 unsigned int launch_nro(std::string path, std::string args)
 {

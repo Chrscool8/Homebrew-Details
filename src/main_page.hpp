@@ -2,24 +2,7 @@
 
 #include <borealis.hpp>
 
-struct app_entry
-{
-    std::string name;
-    std::string file_name;
-    std::string full_path;
-    std::string author;
-    std::string version;
-    std::size_t size;
-    std::size_t icon_size;
-    uint8_t* icon;
-    bool from_appstore;
-    std::string url;
-    std::string category;
-    std::string license;
-    std::string description;
-    std::string summary;
-    std::string changelog;
-};
+#include "utilities.h"
 
 std::string get_online_version();
 bool is_number(const std::string& s);

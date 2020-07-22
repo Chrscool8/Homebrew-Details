@@ -17,7 +17,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/stat.h>
 
 #include <algorithm>
@@ -38,6 +37,7 @@
 #include "reboot_to_payload.h"
 #include "settings.h"
 #include "update_page.hpp"
+#include "utilities.h"
 
 #ifndef APP_VERSION
 #error APP_VERSION define missing
@@ -64,18 +64,7 @@ std::string json_load_value_string(nlohmann::json json, std::string key)
         return "---";
 }
 
-bool compare_by_name(const app_entry& a, const app_entry& b)
-{
-    std::string _a = a.name;
-    transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
-    std::string _b = b.name;
-    transform(_b.begin(), _b.end(), _b.begin(), ::tolower);
 
-    if (_a != _b)
-        return (_a.compare(_b) < 0);
-    else
-        return (a.version.compare(b.version) > 0);
-}
 
 void MainPage::read_store_apps()
 {
@@ -398,11 +387,6 @@ size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmem
     return newLength;
 }
 
-bool is_number(const std::string& s)
-{
-    return (s.length() > 0 && strspn(s.c_str(), "-.0123456789") == s.size());
-}
-
 bool check_for_updates()
 {
     print_debug("curl time\n");
@@ -464,14 +448,7 @@ bool check_for_updates()
     return false;
 }
 
-std::string pad_string_with_spaces(std::string initial, int ending, unsigned int padding_amount)
-{
-    std::string str = "(" + std::to_string(ending) + ")";
-    while ((str.length()) < padding_amount)
-        str = " " + str;
-    str = initial + str;
-    return str;
-}
+
 
 MainPage::MainPage()
 {

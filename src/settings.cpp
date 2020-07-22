@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "base64.h"
+#include "utilities.h"
 
 namespace fs = std::filesystem;
 
@@ -105,10 +106,4 @@ void init_settings()
         set_setting(setting_local_version, std::string(APP_VERSION) + "d");
     else
         set_setting(setting_local_version, APP_VERSION);
-}
-
-void print_debug(std::string str)
-{
-    if (get_setting_true(setting_debug))
-        printf(str.c_str());
 }

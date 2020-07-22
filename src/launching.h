@@ -1,3 +1,4 @@
+#pragma once 
 #include "switch.h"
 #include <string>
 
