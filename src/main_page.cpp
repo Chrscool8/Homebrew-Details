@@ -34,6 +34,7 @@
 
 #include "intro_page.hpp"
 #include "launching.h"
+#include "nacp_utils.h"
 #include "reboot_to_payload.h"
 #include "settings.h"
 #include "update_page.hpp"
@@ -123,81 +124,6 @@ void MainPage::read_store_apps()
     }
 }
 
-void read_nacp_from_file(std::string path, app_entry* current)
-{
-    FILE* file = fopen(path.c_str(), "rb");
-    if (file)
-    {
-        char name[513];
-        char author[257];
-        char version[17];
-
-        fseek(file, sizeof(NroStart), SEEK_SET);
-        NroHeader header;
-        fread(&header, sizeof(header), 1, file);
-        fseek(file, header.size, SEEK_SET);
-        NroAssetHeader asset_header;
-        fread(&asset_header, sizeof(asset_header), 1, file);
-
-        NacpStruct* nacp = (NacpStruct*)malloc(sizeof(NacpStruct));
-        if (nacp != NULL)
-        {
-            fseek(file, header.size + asset_header.nacp.offset, SEEK_SET);
-            fread(nacp, sizeof(NacpStruct), 1, file);
-
-            NacpLanguageEntry* langentry = NULL;
-            Result rc                    = nacpGetLanguageEntry(nacp, &langentry);
-            if (R_SUCCEEDED(rc) && langentry != NULL)
-            {
-                strncpy(name, langentry->name, sizeof(name) - 1);
-                strncpy(author, langentry->author, sizeof(author) - 1);
-            }
-            strncpy(version, nacp->display_version, sizeof(version) - 1);
-
-            free(nacp);
-            nacp = NULL;
-        }
-
-        fclose(file);
-
-        current->name      = name;
-        current->author    = author;
-        current->version   = version;
-        current->full_path = path;
-        current->file_name = path.substr(path.find_last_of("/\\") + 1);
-        current->size      = fs::file_size(path);
-    }
-}
-
-bool read_icon_from_file(std::string path, app_entry* current)
-{
-    FILE* file = fopen(path.c_str(), "rb");
-    if (!file)
-        return false;
-
-    fseek(file, sizeof(NroStart), SEEK_SET);
-    NroHeader header;
-    fread(&header, sizeof(header), 1, file);
-    fseek(file, header.size, SEEK_SET);
-    NroAssetHeader asset_header;
-    fread(&asset_header, sizeof(asset_header), 1, file);
-
-    size_t icon_size = asset_header.icon.size;
-    uint8_t* icon    = (uint8_t*)malloc(icon_size);
-    if (icon != NULL && icon_size != 0)
-    {
-        memset(icon, 0, icon_size);
-        fseek(file, header.size + asset_header.icon.offset, SEEK_SET);
-        fread(icon, icon_size, 1, file);
-
-        current->icon      = icon;
-        current->icon_size = icon_size;
-    }
-
-    fclose(file);
-    return true;
-}
-
 void MainPage::process_app_file(std::string filename)
 {
     print_debug((filename + "\n").c_str());
@@ -275,8 +201,6 @@ void MainPage::load_all_apps()
                 if (fs::is_directory(entry))
                 {
                     transform(path_str.begin(), path_str.end(), path_str.begin(), ::tolower);
-                    //print_debug("Folder:\n");
-                    //print_debug(path_str + "\n");
                     if (path_str != "/switch/checkpoint" && path_str != "/switch/appstore")
                     {
                         path_str += "/";
@@ -369,8 +293,6 @@ brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_in
 void purge_entry(app_entry* entry)
 {
 }
-
-#include <thread>
 
 brls::ListItem* MainPage::make_app_entry(app_entry* entry)
 {
@@ -478,85 +400,7 @@ size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmem
 
 bool is_number(const std::string& s)
 {
-    return (strspn(s.c_str(), "-.0123456789") == s.size() && s.length() > 0);
-}
-
-static size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream)
-{
-    size_t written = fwrite(ptr, size, nmemb, (FILE*)stream);
-    return written;
-}
-
-bool download_update()
-{
-    print_debug("update time\n");
-
-    CURL* curl_handle;
-    static const char* pagefilename = "sdmc:/config/homebrew_details/hbupdate.nro";
-
-    remove(pagefilename);
-
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
-    /* init the curl session */
-    curl_handle = curl_easy_init();
-
-    if (curl_handle)
-    {
-
-        std::string url = "https://github.com/Chrscool8/Homebrew-Details/releases/download/v" + online_version + "/homebrew_details.nro";
-
-        print_debug(url + "\n");
-
-        curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Homebrew-Details");
-        curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
-        curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
-
-        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
-        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
-
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
-
-        FILE* pagefile = fopen(pagefilename, "wb");
-        if (pagefile)
-        {
-            print_debug("pagefile good\n");
-            curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
-
-            CURLcode res = curl_easy_perform(curl_handle);
-            curl_easy_cleanup(curl_handle);
-
-            fclose(pagefile);
-            print_debug((std::string("res ") + std::to_string(res) + "\n").c_str());
-            if (res == CURLE_OK)
-            {
-                print_debug("curl update okay\n");
-                if (fs::exists(pagefilename))
-                {
-                    print_debug("new version downloaded\n");
-
-                    app_entry check;
-                    read_nacp_from_file(pagefilename, &check);
-                    if (check.name == "Homebrew Details")
-                    {
-                        print_debug("good nacp\n");
-
-                        romfsExit();
-                        remove(get_setting(setting_nro_path).c_str());
-                        rename(pagefilename, get_setting(setting_nro_path).c_str());
-
-                        return true;
-                    }
-                    else
-                        print_debug("bad nacp\n");
-                }
-            }
-            //brls::Application::notify("problem parsing online version\n");
-        }
-    }
-
-    return false;
+    return (s.length() > 0 && strspn(s.c_str(), "-.0123456789") == s.size());
 }
 
 bool check_for_updates()
@@ -579,6 +423,7 @@ bool check_for_updates()
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
 
         CURLcode res = curl_easy_perform(curl);
         curl_easy_cleanup(curl);
@@ -598,8 +443,10 @@ bool check_for_updates()
                 print_debug((std::string("") + online_version + " : " + get_setting(setting_local_version) + "\n").c_str());
                 if (is_number(online_version) && is_number(get_setting(setting_local_version)))
                 {
+                    printf("nums\n");
                     if (std::stod(online_version) > std::stod(get_setting(setting_local_version)))
                     {
+                        printf("need up\n");
                         return true;
                     }
                 }
@@ -609,15 +456,12 @@ bool check_for_updates()
 
     if (get_setting_true(setting_debug))
     {
+        printf("debug force up\n");
         return true;
     }
 
-    //brls::Application::notify("problem parsing online version\n");
+    printf("no update\n");
     return false;
-}
-
-void emptyfunc()
-{
 }
 
 std::string pad_string_with_spaces(std::string initial, int ending, unsigned int padding_amount)
@@ -686,7 +530,7 @@ MainPage::MainPage()
 
     //this->addTab("Read: "+std::to_string(batteryCharge), new brls::Rectangle(nvgRGB(120, 120, 120)));
 
-    print_debug("Check for updates.");
+    print_debug("Check for updates.\n");
     if (check_for_updates())
     {
         this->addSeparator();
@@ -697,11 +541,11 @@ MainPage::MainPage()
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
             brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + get_setting(setting_local_version) + " but v" + online_version + " is out.\n\nWould you like to download the newest version?");
 
-            brls::GenericEvent::Callback downloadCallback = [this, version_compare_dialog](brls::View* view) {
+            brls::GenericEvent::Callback downloadCallback = [this](brls::View* view) {
                 brls::Application::pushView(new UpdatePage());
             };
 
-            brls::GenericEvent::Callback infoCallback = [version_compare_dialog](brls::View* view) {
+            brls::GenericEvent::Callback infoCallback = [](brls::View* view) {
                 brls::Dialog* link_info_dialog = new brls::Dialog(std::string("") + "GBATemp Discussion Topic:\nhttps://gbatemp.net/threads/homebrew-details-a-homebrew-app-manager.569528/\n\nGithub Repo:\nhttps://github.com/Chrscool8/Homebrew-Details");
 
                 brls::GenericEvent::Callback closeCallback1 = [link_info_dialog](brls::View* view) {
@@ -724,7 +568,7 @@ MainPage::MainPage()
         this->addTab("Update Available!", settingsList);
     }
 
-    print_debug("Toolbox.");
+    print_debug("Toolbox.\n");
     {
         this->addSeparator();
 
@@ -743,7 +587,7 @@ MainPage::MainPage()
         this->addTab("Toolbox", tools_list);
     }
 
-    print_debug("Settings.");
+    print_debug("Settings.\n");
     {
         brls::List* settings_list = new brls::List();
         settings_list->addView(new brls::Header("Scan Settings"));
@@ -839,7 +683,7 @@ MainPage::MainPage()
         }
 
         //
-
+        print_debug("Misc.\n");
         settings_list->addView(new brls::Header("Misc. Settings"));
 
         brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes full effect on next launch.");
@@ -863,6 +707,7 @@ MainPage::MainPage()
         this->addTab("Settings", settings_list);
     }
 
+    print_debug("Debug Menu.\n");
     if (get_setting_true(setting_debug))
     {
         this->addSeparator();
@@ -895,7 +740,7 @@ MainPage::MainPage()
         brls::ListItem* launch_item = new brls::ListItem("Launch App");
         launch_item->getClickEvent()->subscribe([](brls::View* view) {
             print_debug("launch app\n");
-            launch_nro("", "");
+            //launch_nro("", "");
             brls::Application::quit();
         });
         debug_list->addView(launch_item);
@@ -903,7 +748,10 @@ MainPage::MainPage()
         this->addTab("Debug Menu", debug_list);
     }
 
-    remove("sdmc:/config/homebrew_details/lock");
+    print_debug("rm lock.\n");
+
+    if (fs::exists("sdmc:/config/homebrew_details/lock"))
+        remove("sdmc:/config/homebrew_details/lock");
 }
 
 MainPage::~MainPage()

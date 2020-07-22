@@ -21,8 +21,8 @@ struct app_entry
     std::string changelog;
 };
 
-bool download_update();
 std::string get_online_version();
+bool is_number(const std::string& s);
 
 class MainPage : public brls::TabFrame
 {
