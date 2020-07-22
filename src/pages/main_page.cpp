@@ -66,6 +66,62 @@ std::string json_load_value_string(nlohmann::json json, std::string key)
         return "---";
 }
 
+void MainPage::read_favorites()
+{
+    std::ifstream inputFile("sdmc:/config/homebrew_details/favorites.txt");
+    if (inputFile)
+    {
+        int index = 0;
+        while (inputFile)
+        {
+            char line[513];
+            inputFile.getline(line, 512);
+            favorites.push_back(base64_decode(line));
+            print_debug(line);
+            print_debug("\n");
+            index += 1;
+        }
+        inputFile.close();
+    }
+    else
+        print_debug("Can't find favorites file.\n");
+}
+
+void MainPage::write_favorites()
+{
+    if (!fs::exists("sdmc:/config/"))
+        fs::create_directory("sdmc:/config/");
+    if (!fs::exists("sdmc:/config/homebrew_details/"))
+        fs::create_directory("sdmc:/config/homebrew_details/");
+
+    remove("sdmc:/config/homebrew_details/favorites.txt");
+    std::ofstream outputFile("sdmc:/config/homebrew_details/favorites.txt");
+    if (outputFile)
+    {
+        unsigned int index = 0;
+        while (index < favorites.size())
+        {
+            outputFile << (base64_encode(favorites.at(index))).c_str() << std::endl;
+            index += 1;
+        }
+        outputFile.close();
+    }
+    else
+        print_debug("Can't open favorites.\n");
+}
+
+void MainPage::add_favorite(std::string str)
+{
+    favorites.push_back(str);
+    write_favorites();
+}
+
+void MainPage::remove_favorite(std::string str)
+{
+    favorites.erase(std::remove(favorites.begin(), favorites.end(), str), favorites.end());
+    write_favorites();
+}
+
 void MainPage::read_store_apps()
 {
     store_file_data.clear();
@@ -151,6 +207,8 @@ void MainPage::process_app_file(std::string filename)
                 }
             }
 
+            current.favorite = vector_contains(favorites, current.full_path);
+
             print_debug("done with stores\n");
 
             if (!current.name.empty())
@@ -163,83 +221,90 @@ void MainPage::load_all_apps()
 {
     local_apps.clear();
 
-    if (get_setting(setting_scan_full_card) == "true")
+    try //icky
     {
-        print_debug("Searching recursively within /\n");
-        for (const auto& entry : fs::recursive_directory_iterator("/"))
+        if (get_setting(setting_scan_full_card) == "true")
         {
-            if (fs::is_regular_file(entry))
-                process_app_file(entry.path());
-        }
-    }
-    else
-    {
-        if (get_setting(setting_search_subfolders) == "true")
-        {
-            print_debug("---------------\n");
-            print_debug("Searching recursively within /switch/\n");
-
-            // search base folder
-            std::vector<std::string> folders;
-            for (const auto& entry : fs::directory_iterator("/switch/"))
+            print_debug("Searching recursively within /\n");
+            for (const auto& entry : fs::recursive_directory_iterator("/"))
             {
-                print_debug(entry.path());
-                print_debug("\n");
-                std::string path_str = entry.path();
-
-                if (fs::is_directory(entry))
-                {
-                    transform(path_str.begin(), path_str.end(), path_str.begin(), ::tolower);
-                    if (path_str != "/switch/checkpoint" && path_str != "/switch/appstore")
-                    {
-                        path_str += "/";
-                        folders.push_back(path_str);
-                    }
-                }
-                else
-                    process_app_file(path_str);
+                if (fs::is_regular_file(entry))
+                    process_app_file(entry.path());
             }
-
-            if (!folders.empty())
-            {
-                for (unsigned int i = 0; i < folders.size(); i++)
-                {
-                    // print_debug("Searching within " + folders.at(i) + "\n");
-                    for (const auto& entry : fs::recursive_directory_iterator(folders.at(i)))
-                    {
-                        process_app_file(entry.path());
-                    }
-                }
-            }
-
-            folders.clear();
-
-            //for (const auto& entry : fs::recursive_directory_iterator("/switch/"))
-            //{
-            //    print_debug("entry\n");
-            //    if (fs::is_regular_file(entry))
-            //        process_app_file(entry.path());
-            //}
         }
         else
         {
-            print_debug("Searching only within /switch/\n");
-            for (const auto& entry : fs::directory_iterator("/switch/"))
+            if (get_setting(setting_search_subfolders) == "true")
             {
-                if (fs::is_regular_file(entry))
-                    process_app_file(entry.path());
-            }
-        }
+                print_debug("---------------\n");
+                print_debug("Searching recursively within /switch/\n");
 
-        if (get_setting(setting_search_root) == "true")
-        {
-            print_debug("Searching only within /\n");
-            for (const auto& entry : fs::directory_iterator("/"))
+                // search base folder
+                std::vector<std::string> folders;
+                for (const auto& entry : fs::directory_iterator("/switch/"))
+                {
+                    print_debug(entry.path());
+                    print_debug("\n");
+                    std::string path_str = entry.path();
+
+                    if (fs::is_directory(entry))
+                    {
+                        transform(path_str.begin(), path_str.end(), path_str.begin(), ::tolower);
+                        if (path_str != "/switch/checkpoint" && path_str != "/switch/appstore")
+                        {
+                            path_str += "/";
+                            folders.push_back(path_str);
+                        }
+                    }
+                    else
+                        process_app_file(path_str);
+                }
+
+                if (!folders.empty())
+                {
+                    for (unsigned int i = 0; i < folders.size(); i++)
+                    {
+                        // print_debug("Searching within " + folders.at(i) + "\n");
+                        for (const auto& entry : fs::recursive_directory_iterator(folders.at(i)))
+                        {
+                            process_app_file(entry.path());
+                        }
+                    }
+                }
+
+                folders.clear();
+
+                //for (const auto& entry : fs::recursive_directory_iterator("/switch/"))
+                //{
+                //    print_debug("entry\n");
+                //    if (fs::is_regular_file(entry))
+                //        process_app_file(entry.path());
+                //}
+            }
+            else
             {
-                if (fs::is_regular_file(entry))
-                    process_app_file(entry.path());
+                print_debug("Searching only within /switch/\n");
+                for (const auto& entry : fs::directory_iterator("/switch/"))
+                {
+                    if (fs::is_regular_file(entry))
+                        process_app_file(entry.path());
+                }
+            }
+
+            if (get_setting(setting_search_root) == "true")
+            {
+                print_debug("Searching only within /\n");
+                for (const auto& entry : fs::directory_iterator("/"))
+                {
+                    if (fs::is_regular_file(entry))
+                        process_app_file(entry.path());
+                }
             }
         }
+    }
+    catch (...)
+    {
+        print_debug("There was a problem with the search!\n");
     }
 
     store_file_data.clear();
@@ -285,9 +350,34 @@ void purge_entry(app_entry* entry)
 
 brls::ListItem* MainPage::make_app_entry(app_entry* entry)
 {
-    brls::ListItem* popupItem = new brls::ListItem(entry->name, "", entry->full_path);
+    std::string label = entry->name;
+
+    if (entry->favorite)
+    {
+        //popupItem->setChecked(true);
+        label = "\u2606 " + label;
+    }
+
+    brls::ListItem* popupItem = new brls::ListItem(label, "", entry->full_path);
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
+
+    popupItem->registerAction("Favorite", brls::Key::X, [this, entry, popupItem]() {
+        if (vector_contains(favorites, entry->full_path))
+        {
+            remove_favorite(entry->full_path);
+            entry->favorite = false;
+            popupItem->setChecked(false);
+        }
+        else
+        {
+            add_favorite(entry->full_path);
+            entry->favorite = true;
+            popupItem->setChecked(true);
+        }
+
+        return true;
+    });
 
     popupItem->getClickEvent()->subscribe([this, entry](brls::View* view) mutable {
         brls::TabFrame* appView = new brls::TabFrame();
@@ -427,10 +517,10 @@ bool check_for_updates()
                 print_debug((std::string("") + online_version + " : " + get_setting(setting_local_version) + "\n").c_str());
                 if (is_number(online_version) && is_number(get_setting(setting_local_version)))
                 {
-                    printf("nums\n");
+                    print_debug("nums\n");
                     if (std::stod(online_version) > std::stod(get_setting(setting_local_version)))
                     {
-                        printf("need up\n");
+                        print_debug("need up\n");
                         return true;
                     }
                 }
@@ -440,11 +530,11 @@ bool check_for_updates()
 
     if (get_setting_true(setting_debug))
     {
-        printf("debug force up\n");
+        print_debug("debug force up\n");
         return true;
     }
 
-    printf("no update\n");
+    print_debug("no update\n");
     return false;
 }
 
@@ -459,6 +549,7 @@ MainPage::MainPage()
     print_debug("init rootframe\n");
     //this->setActionAvailable(brls::Key::B, false);
 
+    read_favorites();
     read_store_apps();
     load_all_apps();
 
