@@ -510,13 +510,9 @@ MainPage::MainPage()
     {
         this->addSeparator();
         brls::List* settingsList = new brls::List();
-        settingsList->addView(new brls::Header("Newer Version Found Online", false));
+        settingsList->addView(new brls::Header("Update Actions", false));
 
-        add_list_entry("Online Version", get_online_version_number(), "", settingsList, 40);
-        add_list_entry("Title", get_online_version_name(), "", settingsList, 40);
-        add_list_entry("Description", get_online_version_description(), "", settingsList, 40);
-
-        brls::ListItem* dialogItem = new brls::ListItem("Update Now...");
+        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard", get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version_number());
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
             brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + get_setting(setting_local_version) + " but v" + get_online_version_number() + " is out.\n\nWould you like to download the newest version?");
 
@@ -543,6 +539,12 @@ MainPage::MainPage()
             version_compare_dialog->open();
         });
         settingsList->addView(dialogItem);
+
+        settingsList->addView(new brls::Header("New Version Details", false));
+        add_list_entry("Online Version", get_online_version_number(), "", settingsList, 40);
+        add_list_entry("Title", get_online_version_name(), "", settingsList, 40);
+        add_list_entry("Description", get_online_version_description(), "", settingsList, 40);
+        add_list_entry("Date", get_online_version_date(), "", settingsList, 40);
 
         this->addTab("Update Available!", settingsList);
     }

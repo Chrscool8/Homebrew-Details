@@ -14,6 +14,7 @@ void init_online_info()
     online_info.online_version_number      = "0";
     online_info.online_version_description = "No Desc.";
     online_info.update_available           = false;
+    online_info.online_version_date        = "x";
 }
 
 std::string get_online_version_name()
@@ -29,6 +30,11 @@ std::string get_online_version_number()
 std::string get_online_version_description()
 {
     return online_info.online_version_description;
+}
+
+std::string get_online_version_date()
+{
+    return online_info.online_version_date;
 }
 
 bool get_online_version_available()
@@ -54,6 +60,11 @@ void set_online_version_description(std::string desc)
 void set_online_version_available(bool available)
 {
     online_info.update_available = available;
+}
+
+void set_online_version_date(std::string date)
+{
+    online_info.online_version_date = date;
 }
 
 size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmemb, std::string* s)
@@ -94,6 +105,7 @@ bool check_for_updates()
             set_online_version_number(parse_version(json_load_value_string(j, "tag_name")));
             set_online_version_name(json_load_value_string(j, "name"));
             set_online_version_description(json_load_value_string(j, "body"));
+            set_online_version_date(json_load_value_string(j, "created_at"));
 
             print_debug((std::string("") + get_online_version_number() + " : " + get_setting(setting_local_version) + "\n").c_str());
             if (is_number(get_online_version_number()) && is_number(get_setting(setting_local_version)))
