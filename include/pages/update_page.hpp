@@ -3,6 +3,7 @@
 #include <sys/select.h>
 #include <utils/nacp_utils.h>
 #include <utils/settings.h>
+#include <utils/update.h>
 
 #include <chrono>
 #include <pages/intro_page.hpp>

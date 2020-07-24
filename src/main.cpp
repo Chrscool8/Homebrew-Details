@@ -3,6 +3,7 @@
 #include <utils/reboot_to_payload.h>
 #include <utils/settings.h>
 #include <utils/utilities.h>
+#include <utils/update.h>
 
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
@@ -52,6 +53,9 @@ int main(int argc, char* argv[])
     init_settings();
     set_setting(setting_nro_path, argv[0]);
 
+    init_online_info();
+    check_for_updates();
+
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
         brls::Application::pushView(new IssuePage());
     else
@@ -63,7 +67,5 @@ int main(int argc, char* argv[])
 
     print_debug("Main loop end.\n");
 
-    // Protect from crash
-    //rootFrame->setParent(NULL);
     return EXIT_SUCCESS;
 }

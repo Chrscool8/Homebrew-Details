@@ -3,6 +3,7 @@
 #include <utils/reboot_to_payload.h>
 #include <utils/settings.h>
 #include <utils/utilities.h>
+#include <utils/update.h>
 
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
@@ -99,7 +100,7 @@ bool UpdatePage::download_update()
         prog.success     = false;
         prog.downloading = false;
 
-        std::string url = "https://github.com/Chrscool8/Homebrew-Details/releases/download/v" + get_online_version() + "/homebrew_details.nro";
+        std::string url = "https://github.com/Chrscool8/Homebrew-Details/releases/download/v" + get_online_version_number() + "/homebrew_details.nro";
 
         print_debug(url + "\n");
 
@@ -231,7 +232,7 @@ UpdatePage::UpdatePage()
     this->image = (new brls::Image(BOREALIS_ASSET("download.jpg")));
     this->image->setParent(this);
 
-    this->label = new brls::Label(brls::LabelStyle::DIALOG, (std::string("Update Wizard Engaged.\nv") + get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version()).c_str(), true);
+    this->label = new brls::Label(brls::LabelStyle::DIALOG, (std::string("Update Wizard Engaged.\nv") + get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version_number()).c_str(), true);
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);

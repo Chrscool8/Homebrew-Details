@@ -2,6 +2,7 @@
 #include <utils/nacp_utils.h>
 #include <utils/reboot_to_payload.h>
 #include <utils/settings.h>
+#include <utils/update.h>
 #include <utils/utilities.h>
 
 #include <pages/intro_page.hpp>
@@ -46,25 +47,6 @@
 #endif
 
 namespace fs = std::filesystem;
-
-std::string online_version = "0";
-
-struct online_version
-{
-};
-
-std::string get_online_version()
-{
-    return online_version;
-}
-
-std::string json_load_value_string(nlohmann::json json, std::string key)
-{
-    if (json.contains(key))
-        return json[key].get<std::string>();
-    else
-        return "---";
-}
 
 void MainPage::read_favorites()
 {
@@ -312,16 +294,15 @@ void MainPage::load_all_apps()
         sort(local_apps.begin(), local_apps.end(), compare_by_name);
 }
 
-brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to)
+brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length = 21)
 {
     brls::ListItem* item = new brls::ListItem(title);
 
-    const int clip_length = 21;
-    if (short_info.length() > clip_length)
+    if (short_info.length() > (unsigned int)clip_length)
     {
         if (long_info.empty())
             long_info = "Full " + title + ":\n\n" + short_info;
-        short_info = short_info.substr(0, 21) + "[...]";
+        short_info = short_info.substr(0, clip_length) + "[...]";
     }
 
     item->setValue(short_info);
@@ -470,72 +451,32 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
     return popupItem;
 }
 
-size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmemb, std::string* s)
+void MainPage::build_main_tabs()
 {
-    size_t newLength = size * nmemb;
-    s->append((char*)contents, newLength);
-    return newLength;
-}
+    brls::List* appsList      = new brls::List();
+    brls::List* storeAppsList = new brls::List();
+    brls::List* localAppsList = new brls::List();
 
-bool check_for_updates()
-{
-    print_debug("curl time\n");
-
-    CURL* curl;
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
-    curl = curl_easy_init();
-    if (curl)
+    for (unsigned int i = 0; i < this->local_apps.size(); i++)
     {
-        std::string s;
+        app_entry* current = &this->local_apps.at(i);
+        appsList->addView(make_app_entry(current));
 
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.github.com/repos/Chrscool8/Homebrew-Details/releases/latest");
-
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
-
-        CURLcode res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-
-        if (res == CURLE_OK)
-        {
-            nlohmann::json j = nlohmann::json::parse(s);
-            if (j.contains("tag_name"))
-            {
-                online_version = j["tag_name"].get<std::string>();
-
-                if (online_version.length() > 0)
-                {
-                    online_version = online_version.substr(1);
-                }
-
-                print_debug((std::string("") + online_version + " : " + get_setting(setting_local_version) + "\n").c_str());
-                if (is_number(online_version) && is_number(get_setting(setting_local_version)))
-                {
-                    print_debug("nums\n");
-                    if (std::stod(online_version) > std::stod(get_setting(setting_local_version)))
-                    {
-                        print_debug("need up\n");
-                        return true;
-                    }
-                }
-            }
-        }
+        if (current->from_appstore)
+            storeAppsList->addView(make_app_entry(current));
+        else
+            localAppsList->addView(make_app_entry(current));
     }
 
-    if (get_setting_true(setting_debug))
+    if (!this->local_apps.empty() && !this->store_apps.empty())
     {
-        print_debug("debug force up\n");
-        return true;
+        this->addTab(pad_string_with_spaces("All Apps", this->store_apps.size() + this->local_apps.size(), 20).c_str(), appsList);
+        this->addSeparator();
     }
-
-    print_debug("no update\n");
-    return false;
+    if (!this->store_apps.empty())
+        this->addTab(pad_string_with_spaces("App Store Apps", this->store_apps.size(), 9).c_str(), storeAppsList);
+    if (!this->local_apps.empty())
+        this->addTab(pad_string_with_spaces("Local Apps", this->local_apps.size(), 16).c_str(), localAppsList);
 }
 
 MainPage::MainPage()
@@ -553,39 +494,7 @@ MainPage::MainPage()
     read_store_apps();
     load_all_apps();
 
-    brls::List* appsList      = new brls::List();
-    brls::List* storeAppsList = new brls::List();
-    brls::List* localAppsList = new brls::List();
-
-    for (unsigned int i = 0; i < local_apps.size(); i++)
-    {
-        app_entry* current = &local_apps.at(i);
-        appsList->addView(make_app_entry(current));
-
-        if (current->from_appstore)
-            storeAppsList->addView(make_app_entry(current));
-        else
-            localAppsList->addView(make_app_entry(current));
-    }
-
-    /* if (local_apps.size() == 0)
-    {
-        brls::ListItem nothing_item = new brls::ListItem("No Apps Found");
-        appsList->addView(nothing_item);
-
-        brls::ListItem nothing_item2 = new brls::ListItem("No Apps Found");
-        localAppsList->addView(nothing_item2);
-    }*/
-
-    if (!local_apps.empty() && !store_apps.empty())
-    {
-        this->addTab(pad_string_with_spaces("All Apps", store_apps.size() + local_apps.size(), 20).c_str(), appsList);
-        this->addSeparator();
-    }
-    if (!store_apps.empty())
-        this->addTab(pad_string_with_spaces("App Store Apps", store_apps.size(), 9).c_str(), storeAppsList);
-    if (!local_apps.empty())
-        this->addTab(pad_string_with_spaces("Local Apps", local_apps.size(), 16).c_str(), localAppsList);
+    build_main_tabs();
 
     //rootFrame->addSeparator();
     //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));
@@ -597,15 +506,19 @@ MainPage::MainPage()
     //this->addTab("Read: "+std::to_string(batteryCharge), new brls::Rectangle(nvgRGB(120, 120, 120)));
 
     print_debug("Check for updates.\n");
-    if (check_for_updates())
+    if (get_online_version_available())
     {
         this->addSeparator();
         brls::List* settingsList = new brls::List();
         settingsList->addView(new brls::Header("Newer Version Found Online", false));
 
-        brls::ListItem* dialogItem = new brls::ListItem("More Info...");
+        add_list_entry("Online Version", get_online_version_number(), "", settingsList, 40);
+        add_list_entry("Title", get_online_version_name(), "", settingsList, 40);
+        add_list_entry("Description", get_online_version_description(), "", settingsList, 40);
+
+        brls::ListItem* dialogItem = new brls::ListItem("Update Now...");
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
-            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + get_setting(setting_local_version) + " but v" + online_version + " is out.\n\nWould you like to download the newest version?");
+            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + get_setting(setting_local_version) + " but v" + get_online_version_number() + " is out.\n\nWould you like to download the newest version?");
 
             brls::GenericEvent::Callback downloadCallback = [this](brls::View* view) {
                 brls::Application::pushView(new UpdatePage());
@@ -792,7 +705,7 @@ MainPage::MainPage()
 
         add_list_entry("Charging Status", chargerTypes[chargerType], "", debug_list);
         add_list_entry("Local Version", std::string("v") + get_setting(setting_local_version), "", debug_list);
-        add_list_entry("Online Version", std::string("v") + online_version, "", debug_list);
+        add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list);
         add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list);
         add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list);
 

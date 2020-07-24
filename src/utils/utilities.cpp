@@ -3,8 +3,33 @@
 #include <utils/utilities.h>
 
 #include <algorithm>
+#include <nlohmann/json.hpp>
 #include <pages/main_page.hpp>
 #include <string>
+
+std::string json_load_value_string(nlohmann::json json, std::string key)
+{
+    if (json.contains(key))
+        return json[key].get<std::string>();
+    else
+        return "---";
+}
+
+std::string parse_version(std::string version)
+{
+    if (!version.empty())
+    {
+        if (version.at(version.length() - 1) == 'd')
+            version = version.substr(0, version.length() - 1);
+        if (version.at(0) == 'v')
+            version = version.substr(1);
+    }
+
+    if (!version.empty())
+        return version;
+    else
+        return "0";
+}
 
 bool is_number(const std::string& s)
 {
@@ -51,5 +76,8 @@ std::string pad_string_with_spaces(std::string initial, int ending, unsigned int
 void print_debug(std::string str)
 {
     if (get_setting_true(setting_debug))
+    {
+        str += "[DETAILS] ";
         printf(str.c_str());
+    }
 }
