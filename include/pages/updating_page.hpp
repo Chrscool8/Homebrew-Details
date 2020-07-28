@@ -1,4 +1,5 @@
 #pragma once
+
 #include <math.h>
 #include <sys/select.h>
 #include <utils/nacp_utils.h>
@@ -41,6 +42,7 @@
 #include "switch/services/psm.h"
 
 size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream);
+int progress_func(void* p, long long dltotal, long long dlnow, long long ultotal, long long ulnow);
 
 struct myprogress
 {
@@ -53,21 +55,18 @@ struct myprogress
     bool end_thread;
 };
 
-class UpdatePage : public brls::View
+extern myprogress prog;
+
+class UpdatingPage : public brls::View
 {
   private:
-    brls::Button* button;
+    brls::StagedAppletFrame* frame;
+    brls::ProgressDisplay* progressDisp;
     brls::Label* label;
-    brls::Image* image;
+    int progressValue = 0;
 
   public:
-    struct myprogress prog;
-
-    std::promise<void> exitSignal;
-
     std::thread* counter;
-    UpdatePage();
-    ~UpdatePage();
 
     bool go;
     int short_wait;
@@ -77,7 +76,13 @@ class UpdatePage : public brls::View
     bool download_update();
 
     void thread_counter();
+
+    UpdatingPage(brls::StagedAppletFrame* frame);
+    ~UpdatingPage();
+
     void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
     void layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash) override;
-    brls::View* getDefaultFocus() override;
+
+    void willAppear(bool resetState = false) override;
+    void willDisappear(bool resetState = false) override;
 };

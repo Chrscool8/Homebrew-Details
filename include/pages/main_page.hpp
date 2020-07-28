@@ -4,6 +4,12 @@
 
 #include <borealis.hpp>
 
+enum info_page_type
+{
+    info_page_dl_intro,
+    info_page_dl_done
+};
+
 class MainPage : public brls::TabFrame
 {
   public:

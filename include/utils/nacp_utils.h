@@ -33,7 +33,6 @@
 #include <nlohmann/json.hpp>
 #include <pages/intro_page.hpp>
 #include <pages/main_page.hpp>
-#include <pages/update_page.hpp>
 #include <string>
 #include <vector>
 

@@ -8,7 +8,7 @@
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
 #include <pages/main_page.hpp>
-#include <pages/update_page.hpp>
+#include <pages/updating_page.hpp>
 //
 
 #include <math.h>
@@ -47,6 +47,8 @@
 
 #include "switch/services/psm.h"
 
+myprogress prog;
+
 size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream)
 {
     size_t written = fwrite(ptr, size, nmemb, (FILE*)stream);
@@ -82,7 +84,7 @@ int progress_func(void* p, long long dltotal, long long dlnow, long long ultotal
     return 0;
 }
 
-bool UpdatePage::download_update()
+bool UpdatingPage::download_update()
 {
     print_debug("update time\n");
 
@@ -168,42 +170,18 @@ bool UpdatePage::download_update()
     return false;
 }
 
-void UpdatePage::thread_counter()
+void UpdatingPage::thread_counter()
 {
     print_debug("count go\n");
     bool updated = download_update();
 
-    if (updated)
-    {
-        brls::Dialog* update_results_dialog         = new brls::Dialog("Your app has been updated!\nPlease restart to see changes.");
-        brls::GenericEvent::Callback closeCallback1 = [update_results_dialog](brls::View* view) {
-            update_results_dialog->close();
-        };
-        update_results_dialog->addButton("Okay.", closeCallback1);
-        update_results_dialog->setCancelable(true);
-        update_results_dialog->open();
-    }
-    else
-    {
-        brls::Dialog* update_results_dialog         = new brls::Dialog("There was a problem updating, sorry.");
-        brls::GenericEvent::Callback closeCallback1 = [update_results_dialog](brls::View* view) {
-            update_results_dialog->close();
-        };
-        update_results_dialog->addButton("Okay.", closeCallback1);
-        update_results_dialog->setCancelable(true);
-        update_results_dialog->open();
-    }
-
-    this->label->setText("Update Process Complete.");
-    this->label->invalidate();
-
-    this->button->setLabel("Close App.");
-    this->button->invalidate();
-
     print_debug("thread end\n");
+
+    frame->nextStage();
 }
 
-UpdatePage::UpdatePage()
+UpdatingPage::UpdatingPage(brls::StagedAppletFrame* frame)
+    : frame(frame)
 {
     finished_download = false;
 
@@ -218,117 +196,68 @@ UpdatePage::UpdatePage()
     prog.downloading = false;
 
     // Label
-    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel("Get Started.")->setImage(BOREALIS_ASSET("download.jpg"));
-    this->button->setParent(this);
-    this->button->getClickEvent()->subscribe([this](View* view) {
-        if (!go)
-        {
-            print_debug("Clicked DL\n");
-            go = true;
-        }
-
-        if (finished_download)
-        {
-            print_debug("Closing.\n");
-            brls::Application::quit();
-        }
-    });
-
-    this->image = (new brls::Image(BOREALIS_ASSET("download.jpg")));
-    this->image->setParent(this);
-
-    this->label = new brls::Label(brls::LabelStyle::DIALOG, (std::string("Update Wizard Engaged.\nv") + get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version_number()).c_str(), true);
+    this->progressDisp = new brls::ProgressDisplay();
+    this->progressDisp->setProgress(0, 1);
+    this->progressDisp->setParent(this);
+    this->label = new brls::Label(brls::LabelStyle::DIALOG, "Downloading: Homebrew_Details.nro", true);
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
-    this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);
 }
 
-void UpdatePage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
+void UpdatingPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
 {
-    this->image->frame(ctx);
+    //if (progressValue == 500)
+    //    this->frame->nextStage();
+    if (!go)
+    {
+        go      = true;
+        counter = new std::thread(&UpdatingPage::thread_counter, this);
+    }
+
+    this->progressDisp->setProgress(prog.progress, 100);
+    this->progressDisp->frame(ctx);
     this->label->frame(ctx);
-    this->button->frame(ctx);
-
-    std::string button_text = "";
-
-    if (prog.downloading)
-    {
-        int progress_per = round(prog.progress);
-        if (is_number(std::to_string(progress_per)))
-            button_text = std::string("Progress: ") + std::to_string(progress_per) + "%";
-    }
-    else if (prog.complete)
-    {
-        button_text = "Close App.";
-    }
-    else
-    {
-        button_text = "Start Download";
-    }
-
-    this->button->setLabel(button_text.c_str());
-    this->button->invalidate();
-
-    if (go && !asked)
-    {
-        if (short_wait < 5)
-            short_wait += 1;
-        else
-        {
-            print_debug("update\n");
-
-            //bool updated = download_update();
-
-            prog.end_thread = false;
-            counter         = new std::thread(&UpdatePage::thread_counter, this);
-
-            asked = true;
-            go    = false;
-        }
-    }
 }
 
-brls::View* UpdatePage::getDefaultFocus()
+void UpdatingPage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash)
 {
-    return this->button;
-}
-
-void UpdatePage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash)
-{
-    this->image->setWidth(256);
-    this->image->setHeight(256);
-    this->image->invalidate(true);
-    this->image->setBoundaries(
-        this->x + 230 + 43,
-        this->y + (this->height / 2) - this->image->getHeight() / 2,
-        this->image->getWidth(),
-        this->image->getHeight());
-
-    //
-
     this->label->setWidth(roundf((float)this->width * style->CrashFrame.labelWidth));
     this->label->invalidate(true);
 
     this->label->setBoundaries(
-        this->x + this->width / 2 - this->label->getWidth() / 2 + 140 + 43,
-        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2,
+        this->x + this->width / 2 - this->label->getWidth() / 2,
+        this->y + (this->height - style->AppletFrame.footerHeight) / 2,
         this->label->getWidth(),
         this->label->getHeight());
 
-    this->button->setBoundaries(
-        this->x + this->width / 2 - style->CrashFrame.buttonWidth / 2 + 140 + 43,
-        this->y + this->height / 2 + 100 - this->button->getHeight(),
-        style->CrashFrame.buttonWidth,
+    this->progressDisp->setBoundaries(
+        this->x + this->width / 2 - style->CrashFrame.buttonWidth,
+        this->y + this->height / 2,
+        style->CrashFrame.buttonWidth * 2,
         style->CrashFrame.buttonHeight);
-    this->button->invalidate();
 }
 
-UpdatePage::~UpdatePage()
+void UpdatingPage::willAppear(bool resetState)
 {
-    prog.end_thread = true;
-    counter->join();
+    this->progressDisp->willAppear(resetState);
+}
 
+void UpdatingPage::willDisappear(bool resetState)
+{
+    this->progressDisp->willDisappear(resetState);
+}
+
+UpdatingPage::~UpdatingPage()
+{
+    print_debug("Page End\n");
+
+    if (go && counter->joinable())
+    {
+        print_debug("Joinable\n");
+        prog.end_thread = true;
+        counter->join();
+    }
+
+    delete this->progressDisp;
     delete this->label;
-    delete this->button;
-    delete this->image;
 }

@@ -77,7 +77,7 @@ void print_debug(std::string str)
 {
     if (get_setting_true(setting_debug))
     {
-        str += "[DETAILS] ";
+        str = "[DETAILS] " + str;
         printf(str.c_str());
     }
 }

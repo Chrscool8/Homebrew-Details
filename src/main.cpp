@@ -2,13 +2,12 @@
 #include <utils/nacp_utils.h>
 #include <utils/reboot_to_payload.h>
 #include <utils/settings.h>
-#include <utils/utilities.h>
 #include <utils/update.h>
+#include <utils/utilities.h>
 
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
 #include <pages/main_page.hpp>
-#include <pages/update_page.hpp>
 
 //
 

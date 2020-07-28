@@ -26,14 +26,14 @@ void file_load_settings()
             char line[513];
             inputFile.getline(line, 512);
             settings[index] = line;
-            printf(line);
-            printf("\n");
+            print_debug(line);
+            print_debug("\n");
             index += 1;
         }
         inputFile.close();
     }
     else
-        printf("Can't find loadfile.\n");
+        print_debug("Can't find loadfile.\n");
 }
 
 void file_save_settings()
@@ -50,13 +50,15 @@ void file_save_settings()
         int index = 0;
         while (index < settings_num)
         {
-            outputFile << settings[index].c_str() << std::endl;
+            outputFile << settings[index].c_str();
+            if (index != settings_num - 1)
+                outputFile << std::endl;
             index += 1;
         }
         outputFile.close();
     }
     else
-        printf("Can't open savefile.\n");
+        print_debug("Can't open savefile.\n");
 }
 
 void set_setting(int setting, std::string value)

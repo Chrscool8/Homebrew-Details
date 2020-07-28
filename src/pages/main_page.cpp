@@ -5,10 +5,11 @@
 #include <utils/update.h>
 #include <utils/utilities.h>
 
+#include <pages/info_page.hpp>
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
 #include <pages/main_page.hpp>
-#include <pages/update_page.hpp>
+#include <pages/updating_page.hpp>
 //
 
 #include <dirent.h>
@@ -77,19 +78,25 @@ void MainPage::write_favorites()
         fs::create_directory("sdmc:/config/homebrew_details/");
 
     remove("sdmc:/config/homebrew_details/favorites.txt");
-    std::ofstream outputFile("sdmc:/config/homebrew_details/favorites.txt");
-    if (outputFile)
+
+    if (!favorites.empty())
     {
-        unsigned int index = 0;
-        while (index < favorites.size())
+        std::ofstream outputFile("sdmc:/config/homebrew_details/favorites.txt");
+        if (outputFile)
         {
-            outputFile << (base64_encode(favorites.at(index))).c_str() << std::endl;
-            index += 1;
+            unsigned int index = 0;
+            while (index < favorites.size())
+            {
+                outputFile << (base64_encode(favorites.at(index))).c_str();
+                if (index != favorites.size() - 1)
+                    outputFile << std::endl;
+                index += 1;
+            }
+            outputFile.close();
         }
-        outputFile.close();
+        else
+            print_debug("Can't open favorites.\n");
     }
-    else
-        print_debug("Can't open favorites.\n");
 }
 
 void MainPage::add_favorite(std::string str)
@@ -343,22 +350,25 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
 
-    popupItem->registerAction("Favorite", brls::Key::X, [this, entry, popupItem]() {
-        if (vector_contains(favorites, entry->full_path))
-        {
-            remove_favorite(entry->full_path);
-            entry->favorite = false;
-            popupItem->setChecked(false);
-        }
-        else
-        {
-            add_favorite(entry->full_path);
-            entry->favorite = true;
-            popupItem->setChecked(true);
-        }
+    if (get_setting_true(setting_debug))
+    {
+        popupItem->registerAction("Favorite", brls::Key::X, [this, entry, popupItem]() {
+            if (vector_contains(favorites, entry->full_path))
+            {
+                remove_favorite(entry->full_path);
+                entry->favorite = false;
+                popupItem->setChecked(false);
+            }
+            else
+            {
+                add_favorite(entry->full_path);
+                entry->favorite = true;
+                popupItem->setChecked(true);
+            }
 
-        return true;
-    });
+            return true;
+        });
+    }
 
     popupItem->getClickEvent()->subscribe([this, entry](brls::View* view) mutable {
         brls::TabFrame* appView = new brls::TabFrame();
@@ -411,7 +421,6 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
             dialog->setCancelable(true);
             dialog->open();
         });
-        //delete_item->updateActionHint(brls::Key::A, "Show Extended Info");
 
         manageList->addView(delete_item);
 
@@ -514,29 +523,17 @@ MainPage::MainPage()
 
         brls::ListItem* dialogItem = new brls::ListItem("Update Wizard", get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version_number());
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
-            brls::Dialog* version_compare_dialog = new brls::Dialog(std::string("") + "You have v" + get_setting(setting_local_version) + " but v" + get_online_version_number() + " is out.\n\nWould you like to download the newest version?");
+            brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
+            stagedFrame->setTitle("Update Wizard");
+            stagedFrame->setIcon(BOREALIS_ASSET("icon.jpg"));
+            stagedFrame->setActionAvailable(brls::Key::B, false);
+            //stagedFrame->updateActionHint(brls::Key::B, "");
 
-            brls::GenericEvent::Callback downloadCallback = [this](brls::View* view) {
-                brls::Application::pushView(new UpdatePage());
-            };
+            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
+            stagedFrame->addStage(new UpdatingPage(stagedFrame));
+            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_done));
 
-            brls::GenericEvent::Callback infoCallback = [](brls::View* view) {
-                brls::Dialog* link_info_dialog = new brls::Dialog(std::string("") + "GBATemp Discussion Topic:\nhttps://gbatemp.net/threads/homebrew-details-a-homebrew-app-manager.569528/\n\nGithub Repo:\nhttps://github.com/Chrscool8/Homebrew-Details");
-
-                brls::GenericEvent::Callback closeCallback1 = [link_info_dialog](brls::View* view) {
-                    link_info_dialog->close();
-                };
-
-                link_info_dialog->addButton("Okay.", closeCallback1);
-                link_info_dialog->setCancelable(true);
-                link_info_dialog->open();
-            };
-
-            version_compare_dialog->addButton("Yes", downloadCallback);
-            version_compare_dialog->addButton("More Info", infoCallback);
-            version_compare_dialog->setCancelable(true);
-
-            version_compare_dialog->open();
+            brls::Application::pushView(stagedFrame);
         });
         settingsList->addView(dialogItem);
 
@@ -717,14 +714,6 @@ MainPage::MainPage()
             reboot_to_payload();
         });
         debug_list->addView(rtp_item);
-
-        brls::ListItem* launch_item = new brls::ListItem("Launch App");
-        launch_item->getClickEvent()->subscribe([](brls::View* view) {
-            print_debug("launch app\n");
-            //launch_nro("", "");
-            brls::Application::quit();
-        });
-        debug_list->addView(launch_item);
 
         this->addTab("Debug Menu", debug_list);
     }

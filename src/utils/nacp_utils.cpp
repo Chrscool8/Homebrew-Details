@@ -7,7 +7,6 @@
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
 #include <pages/main_page.hpp>
-#include <pages/update_page.hpp>
 
 //
 
