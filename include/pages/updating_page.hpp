@@ -74,7 +74,6 @@ class UpdatingPage : public brls::View
     bool finished_download;
 
     bool download_update();
-
     void thread_counter();
 
     UpdatingPage(brls::StagedAppletFrame* frame);
