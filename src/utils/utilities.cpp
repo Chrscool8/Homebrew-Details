@@ -38,7 +38,10 @@ bool is_number(const std::string& s)
 
 bool vector_contains(std::vector<std::string> vec, std::string str)
 {
-    return (std::find(vec.begin(), vec.end(), str) != vec.end());
+    if (vec.empty())
+        return false;
+    else
+        return (std::find(vec.begin(), vec.end(), str) != vec.end());
 }
 
 bool compare_by_name(const app_entry& a, const app_entry& b)
