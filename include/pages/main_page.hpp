@@ -14,6 +14,7 @@ class MainPage : public brls::TabFrame
 {
   public:
     std::vector<std::string> favorites;
+    std::vector<std::string> blacklist;
     std::vector<app_entry> local_apps;
     std::vector<app_entry> store_apps;
     std::vector<app_entry> store_file_data;
@@ -24,6 +25,7 @@ class MainPage : public brls::TabFrame
     void remove_favorite(std::string str);
     void read_store_apps();
     void process_app_file(std::string filename);
+    void list_files(const char* basePath, bool recursive);
     void load_all_apps();
     brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length);
     brls::ListItem* make_app_entry(app_entry* entry);

@@ -206,94 +206,78 @@ void MainPage::process_app_file(std::string filename)
     }
 }
 
+void MainPage::list_files(const char* basePath, bool recursive)
+{
+    char path[1000];
+    struct dirent* dp;
+    DIR* dir = opendir(basePath);
+
+    if (!dir)
+        return;
+
+    // blacklist
+    std::string pa = std::string(basePath);
+    replace(pa, "//", "/");
+    if (vector_contains(blacklist, pa))
+    {
+        print_debug("Blacklist: " + pa + " = " + "sdmc:/retroarch\n");
+    }
+    else
+    {
+        while ((dp = readdir(dir)) != NULL)
+        {
+            if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
+            {
+                std::string filename = std::string(basePath) + "/" + std::string(dp->d_name);
+                replace(filename, "//", "/");
+                if (filename.length() > 3 && filename.substr(filename.length() - 4) == ".nro")
+                {
+                    process_app_file(filename);
+                }
+                else
+                    print_debug("Skip: " + filename + "\n");
+
+                // Construct new path from our base path
+                strcpy(path, basePath);
+                strcat(path, "/");
+                strcat(path, dp->d_name);
+
+                if (recursive)
+                    list_files(path, true);
+            }
+        }
+    }
+
+    closedir(dir);
+}
+
 void MainPage::load_all_apps()
 {
     local_apps.clear();
 
-    try //icky
+    if (get_setting_true(setting_scan_full_card))
     {
-        if (get_setting(setting_scan_full_card) == "true")
+        print_debug("Searching recursively within /\n");
+        list_files("sdmc:/", true);
+    }
+    else
+    {
+        if (get_setting_true(setting_search_subfolders))
         {
-            print_debug("Searching recursively within /\n");
-            for (const auto& entry : fs::recursive_directory_iterator("/"))
-            {
-                if (fs::is_regular_file(entry))
-                    process_app_file(entry.path());
-            }
+            print_debug("Searching recursively within /switch/\n");
+            list_files("sdmc:/switch", true);
         }
         else
         {
-            if (get_setting(setting_search_subfolders) == "true")
-            {
-                print_debug("---------------\n");
-                print_debug("Searching recursively within /switch/\n");
-
-                // search base folder
-                std::vector<std::string> folders;
-                for (const auto& entry : fs::directory_iterator("/switch/"))
-                {
-                    print_debug(entry.path());
-                    print_debug("\n");
-                    std::string path_str = entry.path();
-
-                    if (fs::is_directory(entry))
-                    {
-                        transform(path_str.begin(), path_str.end(), path_str.begin(), ::tolower);
-                        if (path_str != "/switch/checkpoint" && path_str != "/switch/appstore")
-                        {
-                            path_str += "/";
-                            folders.push_back(path_str);
-                        }
-                    }
-                    else
-                        process_app_file(path_str);
-                }
-
-                if (!folders.empty())
-                {
-                    for (unsigned int i = 0; i < folders.size(); i++)
-                    {
-                        // print_debug("Searching within " + folders.at(i) + "\n");
-                        for (const auto& entry : fs::recursive_directory_iterator(folders.at(i)))
-                        {
-                            process_app_file(entry.path());
-                        }
-                    }
-                }
-
-                folders.clear();
-
-                //for (const auto& entry : fs::recursive_directory_iterator("/switch/"))
-                //{
-                //    print_debug("entry\n");
-                //    if (fs::is_regular_file(entry))
-                //        process_app_file(entry.path());
-                //}
-            }
-            else
-            {
-                print_debug("Searching only within /switch/\n");
-                for (const auto& entry : fs::directory_iterator("/switch/"))
-                {
-                    if (fs::is_regular_file(entry))
-                        process_app_file(entry.path());
-                }
-            }
-
-            if (get_setting(setting_search_root) == "true")
-            {
-                print_debug("Searching only within /\n");
-                for (const auto& entry : fs::directory_iterator("/"))
-                {
-                    if (fs::is_regular_file(entry))
-                        process_app_file(entry.path());
-                }
-            }
+            print_debug("Searching only within /switch/\n");
+            list_files("sdmc:/switch", false);
         }
-    }
-    catch (...)
-    {
-        print_debug("There was a problem with the search!\n");
+
+        if (get_setting_true(setting_search_root))
+        {
+            print_debug("Searching only within /\n");
+            list_files("sdmc:/", false);
+        }
     }
 
     store_file_data.clear();
