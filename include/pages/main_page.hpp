@@ -40,4 +40,5 @@ class MainPage : public brls::TabFrame
   private:
     brls::Label* battery_label;
     brls::Label* time_label;
+    brls::Label* date_label;
 };

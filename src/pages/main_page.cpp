@@ -721,11 +721,18 @@ MainPage::MainPage()
     this->time_label = new brls::Label(brls::LabelStyle::DIALOG, "TestLabel", false);
     this->time_label->setHorizontalAlign(NVG_ALIGN_LEFT);
     this->time_label->setParent(this);
+
+    this->date_label = new brls::Label(brls::LabelStyle::DIALOG, "TestLabel", false);
+    this->date_label->setHorizontalAlign(NVG_ALIGN_LEFT);
+    this->date_label->setParent(this);
 }
 
 MainPage::~MainPage()
 {
     //psmExit();
+    delete time_label;
+    delete battery_label;
+    delete date_label;
 }
 
 void MainPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
@@ -739,8 +746,14 @@ void MainPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heigh
     this->battery_label->frame(ctx);
 
     this->time_label->setFontSize(18);
-    this->time_label->setText(get_date() + "  |  " + get_time());
+    this->time_label->setText(get_time());
     this->time_label->setBoundaries(x + this->width - this->time_label->getWidth() - 50, y + style->AppletFrame.headerHeightRegular * .5 - 14 + 4, this->time_label->getWidth(), this->time_label->getHeight());
     this->time_label->invalidate(true);
     this->time_label->frame(ctx);
+
+    this->date_label->setFontSize(18);
+    this->date_label->setText(get_date() + "   |");
+    this->date_label->setBoundaries(x + this->width - this->date_label->getWidth() - 145, y + style->AppletFrame.headerHeightRegular * .5 - 14 + 4, this->date_label->getWidth(), this->date_label->getHeight());
+    this->date_label->invalidate(true);
+    this->date_label->frame(ctx);
 }
