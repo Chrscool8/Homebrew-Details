@@ -29,3 +29,4 @@ std::string pad_string_with_spaces(std::string initial, int ending, unsigned int
 void print_debug(std::string str);
 std::string json_load_value_string(nlohmann::json json, std::string key);
 std::string parse_version(std::string version);
+bool replace(std::string& str, const std::string& from, const std::string& to);
