@@ -35,5 +35,9 @@ class MainPage : public brls::TabFrame
     MainPage();
     ~MainPage();
 
+    void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx) override;
+
   private:
+    brls::Label* battery_label;
+    brls::Label* time_label;
 };

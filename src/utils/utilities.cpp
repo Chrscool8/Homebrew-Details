@@ -1,4 +1,5 @@
 #include <string.h>
+#include <switch.h>
 #include <utils/settings.h>
 #include <utils/utilities.h>
 
@@ -6,6 +7,10 @@
 #include <nlohmann/json.hpp>
 #include <pages/main_page.hpp>
 #include <string>
+
+#include "switch/services/psm.h"
+
+std::string months[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
 std::string json_load_value_string(nlohmann::json json, std::string key)
 {
@@ -92,4 +97,45 @@ bool replace(std::string& str, const std::string& from, const std::string& to)
         return false;
     str.replace(start_pos, from.length(), to);
     return true;
+}
+
+std::uint32_t get_battery_percent()
+{
+    std::uint32_t batteryCharge = 0;
+    psmGetBatteryChargePercentage(&batteryCharge);
+    return batteryCharge;
+}
+
+std::string get_battery_status()
+{
+    ChargerType chargerType;
+    // Not Charging, Charging Via Power, Charging via USB
+    std::string chargerTypes[3] = { std::string(""), std::string(" Charging"), std::string(" via USB") };
+    psmGetChargerType(&chargerType);
+    // Error by Default
+    std::string chargeStatus = "";
+    if ((int)chargerType >= 0 && (int)chargerType < 3)
+        chargeStatus = chargerTypes[chargerType];
+    return chargeStatus;
+}
+
+std::string digits_string(int value, int numDigits)
+{
+    std::ostringstream oss;
+    oss << std::setfill('0') << std::setw(numDigits) << value;
+    return oss.str();
+}
+
+std::string get_time()
+{
+    auto t  = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    return (digits_string(tm.tm_hour, 2) + ":" + digits_string(tm.tm_min, 2) + ":" + digits_string(tm.tm_sec, 2));
+}
+
+std::string get_date()
+{
+    auto t  = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    return (months[tm.tm_mon] + " " + digits_string(tm.tm_mday, 2) + ", " + std::to_string(1900 + tm.tm_year));
 }

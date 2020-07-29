@@ -30,3 +30,8 @@ void print_debug(std::string str);
 std::string json_load_value_string(nlohmann::json json, std::string key);
 std::string parse_version(std::string version);
 bool replace(std::string& str, const std::string& from, const std::string& to);
+std::uint32_t get_battery_percent();
+std::string get_battery_status();
+std::string digits_string(int value, int digitsCount);
+std::string get_time();
+std::string get_date();

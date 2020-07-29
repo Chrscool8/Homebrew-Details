@@ -30,14 +30,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #include <algorithm>
 #include <array>
 #include <borealis.hpp>
 #include <cassert>
+#include <chrono>
 #include <cstring>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -676,8 +680,6 @@ MainPage::MainPage()
         brls::List* debug_list = new brls::List();
         debug_list->addView(new brls::Header("Super Secret Dev Menu Unlocked!", false));
 
-        psmInitialize();
-
         std::uint32_t batteryCharge = 0;
         psmGetBatteryChargePercentage(&batteryCharge);
         add_list_entry("Battery Percent", std::to_string(batteryCharge) + "%", "", debug_list);
@@ -685,12 +687,9 @@ MainPage::MainPage()
         ChargerType chargerType;
         std::string chargerTypes[3] = { std::string("None"), std::string("Charging"), std::string("USB") };
         psmGetChargerType(&chargerType);
-
         std::string chargeStatus = "Error";
         if ((int)chargerType >= 0 && (int)chargerType < 3)
             chargeStatus = chargerTypes[chargerType];
-
-        psmExit();
 
         add_list_entry("Charging Status", chargeStatus, "", debug_list);
         add_list_entry("Local Version", std::string("v") + get_setting(setting_local_version), "", debug_list);
@@ -712,8 +711,36 @@ MainPage::MainPage()
 
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
         remove("sdmc:/config/homebrew_details/lock");
+
+    ///////////////////////
+
+    this->battery_label = new brls::Label(brls::LabelStyle::DIALOG, "TestLabel", false);
+    this->battery_label->setHorizontalAlign(NVG_ALIGN_RIGHT);
+    this->battery_label->setParent(this);
+
+    this->time_label = new brls::Label(brls::LabelStyle::DIALOG, "TestLabel", false);
+    this->time_label->setHorizontalAlign(NVG_ALIGN_LEFT);
+    this->time_label->setParent(this);
 }
 
 MainPage::~MainPage()
 {
+    //psmExit();
+}
+
+void MainPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
+{
+    TabFrame::draw(vg, x, y, width, height, style, ctx);
+
+    this->battery_label->setFontSize(18);
+    this->battery_label->setText("Battery" + get_battery_status() + ": " + std::to_string(get_battery_percent()) + "%");
+    this->battery_label->setBoundaries(x + this->width - this->battery_label->getWidth() - 50, y + style->AppletFrame.headerHeightRegular * .5 + 14 + 4, this->battery_label->getWidth(), this->battery_label->getHeight());
+    this->battery_label->invalidate(true);
+    this->battery_label->frame(ctx);
+
+    this->time_label->setFontSize(18);
+    this->time_label->setText(get_date() + "  |  " + get_time());
+    this->time_label->setBoundaries(x + this->width - this->time_label->getWidth() - 50, y + style->AppletFrame.headerHeightRegular * .5 - 14 + 4, this->time_label->getWidth(), this->time_label->getHeight());
+    this->time_label->invalidate(true);
+    this->time_label->frame(ctx);
 }

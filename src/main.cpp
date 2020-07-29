@@ -55,6 +55,8 @@ int main(int argc, char* argv[])
     init_online_info();
     check_for_updates();
 
+    psmInitialize();
+
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
         brls::Application::pushView(new IssuePage());
     else
