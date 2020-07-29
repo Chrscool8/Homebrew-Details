@@ -480,7 +480,7 @@ MainPage::MainPage()
         title += " [Debug Mode]";
 
     this->setTitle(title.c_str());
-    this->setIcon(BOREALIS_ASSET("icon.jpg"));
+    this->setIcon(get_resource_path("icon.jpg"));
     print_debug("init rootframe\n");
     //this->setActionAvailable(brls::Key::B, false);
 
@@ -510,7 +510,7 @@ MainPage::MainPage()
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
             brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
             stagedFrame->setTitle("Update Wizard");
-            stagedFrame->setIcon(BOREALIS_ASSET("icon.jpg"));
+            stagedFrame->setIcon(get_resource_path("icon.jpg"));
             stagedFrame->setActionAvailable(brls::Key::B, false);
             //stagedFrame->updateActionHint(brls::Key::B, "");
 

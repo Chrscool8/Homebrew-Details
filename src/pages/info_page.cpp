@@ -26,17 +26,17 @@ InfoPage::InfoPage(brls::StagedAppletFrame* frame, int type)
     {
         case info_page_dl_intro:
             button_label = "Begin Download";
-            icon         = BOREALIS_ASSET("download.jpg");
+            icon         = get_resource_path("download.jpg");
             title        = std::string(" Update Wizard Engaged.\nv ") + get_setting(setting_local_version) + " " + " \uE090 " + " v " + get_online_version_number();
             break;
         case info_page_dl_done:
             button_label = "Proceed!";
-            icon         = BOREALIS_ASSET("download.jpg");
+            icon         = get_resource_path("download.jpg");
             title        = "Done";
             break;
         default:
             button_label = "Info";
-            icon         = BOREALIS_ASSET("icon.jpg");
+            icon         = get_resource_path("icon.jpg");
             title        = "Info";
             break;
     }

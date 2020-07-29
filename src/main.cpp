@@ -35,6 +35,34 @@ namespace fs = std::filesystem;
 
 ////
 
+void export_resource(std::string src)
+{
+    if (!fs::exists("sdmc:/config/homebrew_details/assets/" + src))
+    {
+        std::ifstream srcfile(("romfs:/" + src).c_str(), std::ios::binary);
+        std::ofstream dstfile("sdmc:/config/homebrew_details/assets/" + src, std::ios::binary);
+
+        dstfile << srcfile.rdbuf();
+    }
+}
+
+void copy_resources()
+{
+    if (!fs::exists("sdmc:/config/"))
+        fs::create_directory("sdmc:/config/");
+    if (!fs::exists("sdmc:/config/homebrew_details/"))
+        fs::create_directory("sdmc:/config/homebrew_details/");
+    if (!fs::exists("sdmc:/config/homebrew_details/assets/"))
+        fs::create_directory("sdmc:/config/homebrew_details/assets/");
+
+    export_resource("arrows.jpg");
+    export_resource("arrows_small.jpg");
+    export_resource("download.jpg");
+    export_resource("icon.jpg");
+    export_resource("warning.jpg");
+    export_resource("warning_arrows.jpg");
+}
+
 int main(int argc, char* argv[])
 {
     print_debug(argv[0]);
@@ -47,6 +75,8 @@ int main(int argc, char* argv[])
         brls::Logger::error("Unable to init Borealis application, Homebrew Details");
         return EXIT_FAILURE;
     }
+
+    copy_resources();
 
     file_load_settings();
     init_settings();

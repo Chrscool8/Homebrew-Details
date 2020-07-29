@@ -14,7 +14,7 @@ IssuePage::IssuePage()
     short_wait = 0;
 
     // Label
-    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel("Back to Basics.")->setImage(BOREALIS_ASSET("warning_arrows.jpg"));
+    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel("Back to Basics.")->setImage(get_resource_path("warning_arrows.jpg"));
     this->button->setParent(this);
     this->button->getClickEvent()->subscribe([this](View* view) {
         if (!go)
@@ -27,7 +27,7 @@ IssuePage::IssuePage()
         }
     });
 
-    this->image = (new brls::Image(BOREALIS_ASSET("warning.jpg")));
+    this->image = (new brls::Image(get_resource_path("warning.jpg")));
     this->image->setParent(this);
 
     this->label = new brls::Label(brls::LabelStyle::DIALOG, "Safe Mode Engaged!\nLooks like HD didn't finish its last scan.\nSome settings have been reset.", true);

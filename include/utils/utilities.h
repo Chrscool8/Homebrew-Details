@@ -35,3 +35,4 @@ std::string get_battery_status();
 std::string digits_string(int value, int digitsCount);
 std::string get_time();
 std::string get_date();
+std::string get_resource_path(std::string str);

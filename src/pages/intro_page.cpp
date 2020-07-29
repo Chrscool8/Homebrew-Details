@@ -15,7 +15,7 @@ IntroPage::IntroPage(std::string label)
     short_wait        = 0;
     autoscan_cooldown = 0;
 
-    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel(label)->setImage(BOREALIS_ASSET("arrows_small.jpg"));
+    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel(label)->setImage(get_resource_path("arrows_small.jpg"));
     this->button->setParent(this);
     this->button->getClickEvent()->subscribe([this](View* view) {
         if (!go)
@@ -35,7 +35,7 @@ IntroPage::IntroPage(std::string label)
         }
     });
 
-    this->image = (new brls::Image(BOREALIS_ASSET("icon.jpg")));
+    this->image = (new brls::Image(get_resource_path("icon.jpg")));
     this->image->setParent(this);
 
     this->label = new brls::Label(brls::LabelStyle::DIALOG, "Welcome to Homebrew Details\nBy: Chris Bradel", true);
