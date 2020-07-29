@@ -702,7 +702,13 @@ MainPage::MainPage()
         std::string chargerTypes[3] = { std::string("None"), std::string("Charging"), std::string("USB") };
         psmGetChargerType(&chargerType);
 
-        add_list_entry("Charging Status", chargerTypes[chargerType], "", debug_list);
+        std::string chargeStatus = "Error";
+        if ((int)chargerType >= 0 && (int)chargerType < 3)
+            chargeStatus = chargerTypes[chargerType];
+
+        psmExit();
+
+        add_list_entry("Charging Status", chargeStatus, "", debug_list);
         add_list_entry("Local Version", std::string("v") + get_setting(setting_local_version), "", debug_list);
         add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list);
         add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list);
