@@ -357,7 +357,41 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         });
     }
 
-    popupItem->getClickEvent()->subscribe([this, entry](brls::View* view) mutable {
+    brls::Key key = brls::Key::A;
+    if (get_setting(setting_control_scheme) == "0")
+        key = brls::Key::X;
+    else if (get_setting(setting_control_scheme) == "1")
+        key = brls::Key::A;
+
+    popupItem->updateActionHint(key, "Launch");
+    popupItem->registerAction("Launch", key, [this, entry, popupItem]() {
+        print_debug("launch app\n");
+        unsigned int r = launch_nro(entry->full_path, "\"" + entry->full_path + "\"");
+        print_debug("r: " + std::to_string(r) + "\n");
+        if (R_FAILED(r))
+        {
+            print_debug("Uh oh.\n");
+        }
+        else
+        {
+            local_apps.clear();
+            store_apps.clear();
+            store_file_data.clear();
+            //romfsExit();
+            brls::Application::quit();
+        }
+
+        return true;
+    });
+
+    key = brls::Key::X;
+    if (get_setting(setting_control_scheme) == "0")
+        key = brls::Key::A;
+    else if (get_setting(setting_control_scheme) == "1")
+        key = brls::Key::X;
+
+    popupItem->updateActionHint(key, "Details");
+    popupItem->registerAction("Details", key, [this, entry, popupItem]() {
         brls::TabFrame* appView = new brls::TabFrame();
 
         brls::List* manageList = new brls::List();
@@ -439,6 +473,8 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         //appView->addTab("Notes", new brls::Rectangle(nvgRGB(120, 120, 120)));
 
         brls::PopupFrame::open(entry->name, entry->icon, entry->icon_size, appView, "Author: " + entry->author, "Version: " + entry->version);
+
+        return true;
     });
 
     return popupItem;
@@ -664,6 +700,16 @@ MainPage::MainPage()
             }
         });
         settings_list->addView(lax_switch);
+
+        //
+        settings_list->addView(new brls::Header("Control Settings"));
+
+        brls::SelectListItem* controlSelectItem = new brls::SelectListItem("Control Settings", { "A: Details; X: Launch", "A: Launch; X: Details" }, std::stoi(get_setting(setting_control_scheme)), "Takes full effect on next launch.");
+        controlSelectItem->getValueSelectedEvent()->subscribe([](size_t selection) {
+            set_setting(setting_control_scheme, std::to_string(selection));
+        });
+        settings_list->addView(controlSelectItem);
+
         //
         print_debug("Misc.\n");
         settings_list->addView(new brls::Header("Misc. Settings"));

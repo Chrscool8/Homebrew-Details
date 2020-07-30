@@ -109,4 +109,9 @@ void init_settings()
         set_setting(setting_local_version, std::string(APP_VERSION) + "d");
     else
         set_setting(setting_local_version, APP_VERSION);
+
+    if (get_setting(setting_control_scheme) == "")
+    {
+        set_setting(setting_control_scheme, "0");
+    }
 }

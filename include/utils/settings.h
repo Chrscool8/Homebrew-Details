@@ -18,6 +18,7 @@ enum setting
     setting_debug,
     setting_local_version,
     setting_lax_store_compare,
+    setting_control_scheme,
     settings_num
 };
 
