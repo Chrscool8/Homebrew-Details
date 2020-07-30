@@ -413,7 +413,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         brls::List* appInfoList = new brls::List();
         appInfoList->addView(new brls::Header(".NRO File Info", false));
         add_list_entry("Name", entry->name, "", appInfoList);
-        add_list_entry("Filename", entry->file_name, "Full Path:\n\nsdmc:" + entry->full_path, appInfoList);
+        add_list_entry("Filename", entry->file_name, "Full Path:\n\n" + entry->full_path, appInfoList);
         add_list_entry("Author", entry->author, "", appInfoList);
         add_list_entry("Version", entry->version, "", appInfoList);
         std::stringstream stream;
@@ -554,8 +554,8 @@ MainPage::MainPage()
         brls::List* settings_list = new brls::List();
         settings_list->addView(new brls::Header("Scan Settings"));
 
-        brls::ListItem* autoscan_switch = new brls::ListItem("Autoscan");
-        autoscan_switch->setChecked((get_setting(setting_autoscan) == "true"));
+        brls::ListItem* autoscan_switch = new brls::ListItem("Autoscan", "", "Begin scanning as soon as the app is launched.");
+        autoscan_switch->setChecked((get_setting_true(setting_autoscan)));
         autoscan_switch->updateActionHint(brls::Key::A, "Toggle");
         autoscan_switch->getClickEvent()->subscribe([autoscan_switch](brls::View* view) {
             if (get_setting(setting_autoscan) == "true")
@@ -574,7 +574,7 @@ MainPage::MainPage()
         brls::ListItem* item_scan_switch = new brls::ListItem("Scan /switch/");
         item_scan_switch->setChecked(true);
         brls::ListItem* item_scan_switch_subs = new brls::ListItem("Scan /switch/'s subfolders");
-        item_scan_switch_subs->setChecked((get_setting(setting_search_subfolders) == "true"));
+        item_scan_switch_subs->setChecked((get_setting_true(setting_search_subfolders)));
         item_scan_switch_subs->updateActionHint(brls::Key::A, "Toggle");
         item_scan_switch_subs->getClickEvent()->subscribe([item_scan_switch_subs](brls::View* view) {
             if (get_setting(setting_search_subfolders) == "true")
@@ -590,7 +590,7 @@ MainPage::MainPage()
         });
 
         brls::ListItem* item_scan_root = new brls::ListItem("Scan / (not subfolders)");
-        item_scan_root->setChecked((get_setting(setting_search_root) == "true"));
+        item_scan_root->setChecked((get_setting_true(setting_search_root)));
         item_scan_root->updateActionHint(brls::Key::A, "Toggle");
         item_scan_root->getClickEvent()->subscribe([item_scan_root](brls::View* view) {
             if (get_setting(setting_search_root) == "true")
@@ -669,7 +669,7 @@ MainPage::MainPage()
         settings_list->addView(new brls::Header("Misc. Settings"));
 
         brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes full effect on next launch.");
-        debug_switch->setChecked((get_setting(setting_debug) == "true"));
+        debug_switch->setChecked(get_setting_true(setting_debug));
         debug_switch->updateActionHint(brls::Key::A, "Toggle");
         debug_switch->getClickEvent()->subscribe([debug_switch](brls::View* view) {
             if (get_setting(setting_debug) == "true")
