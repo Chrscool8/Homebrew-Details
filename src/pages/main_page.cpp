@@ -685,6 +685,15 @@ MainPage::MainPage()
         }
 
         //
+        settings_list->addView(new brls::Header("Control Settings"));
+
+        brls::SelectListItem* controlSelectItem = new brls::SelectListItem("Control Settings", { "A: Details; X: Launch", "A: Launch; X: Details" }, std::stoi(get_setting(setting_control_scheme)), "Takes full effect on next launch.");
+        controlSelectItem->getValueSelectedEvent()->subscribe([](size_t selection) {
+            set_setting(setting_control_scheme, std::to_string(selection));
+        });
+        settings_list->addView(controlSelectItem);
+
+        //
 
         settings_list->addView(new brls::Header("App Store Settings"));
 
@@ -704,15 +713,6 @@ MainPage::MainPage()
             }
         });
         settings_list->addView(lax_switch);
-
-        //
-        settings_list->addView(new brls::Header("Control Settings"));
-
-        brls::SelectListItem* controlSelectItem = new brls::SelectListItem("Control Settings", { "A: Details; X: Launch", "A: Launch; X: Details" }, std::stoi(get_setting(setting_control_scheme)), "Takes full effect on next launch.");
-        controlSelectItem->getValueSelectedEvent()->subscribe([](size_t selection) {
-            set_setting(setting_control_scheme, std::to_string(selection));
-        });
-        settings_list->addView(controlSelectItem);
 
         //
         print_debug("Misc.\n");
