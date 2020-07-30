@@ -12,20 +12,24 @@ Discussion here: [https://gbatemp.net/threads/homebrew-details-a-homebrew-app-ma
 
 
 **What is it?** <br>
-This is an app that allows you to view details about, categorize, and manage all the .nro files on your Switch using [borealis](https://github.com/natinusala/borealis) for a native-feeling UI. It also includes a toolbox of handy quick actions like rebooting to a payload. It could soon become an alternative for the official hbmenu.
+This is an app that allows you to view details about, categorize, and manage all the .nro files on your Switch using [borealis](https://github.com/natinusala/borealis) for a native-feeling UI. It also includes a toolbox of handy quick actions like rebooting to a payload. It is nearly a feature-complete replacement/alternative for the official hbmenu.
 
 **What's the current feature-set?**<br>
+- Launch Apps
 - Scan your SD card for homebrew programs (.nros)
-- View details about the files
+- View details about your apps
 - Sort the files into AppStore-acquired and local app categories
 - Delete an app
 - Reboot to a payload
 - Check online for and download HD updates
+- Themeable image assets
+- Status info in the main page header (Date, time, battery level, charging status)
+- Customizable Controls
 - Use an installable forwarder nsp to access directly from the home menu
-- Launch Apps (Experimental)
+- Pin/Favorite Apps to the top of the list (Available now in debug mode)
 
 **What will it be?**<br>
-Hopefully, an all-around manager for all your apps. I'd like to add the ability to rename, move, and otherwise organize your nros. Some people have already expressed that they'd like it to be a full hbmenu replacement. With app launching, it'd be just about there already.
+Hopefully, an all-around manager for all your apps. I'd like to add the ability to rename, move, and otherwise organize your nros. Some people have already expressed that they'd like it to be a full hbmenu replacement. With app launching, it's just about there already. Coming soon is blacklisting folders in the scan, checking for and updating app store apps, and more.
 
 **Why does it exist?**<br>
 Two main reasons: I've contributed some code to the official hbmenu, but I wanted to try making something totally original for practice working with Switch dev tools. Also, I wanted a new and modern way to do the above current and future features, but there wasn't really a centralized app with a pretty GUI that accomplished all of that.
