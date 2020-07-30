@@ -220,7 +220,7 @@ void MainPage::list_files(const char* basePath, bool recursive)
 
     // blacklist
     std::string pa = std::string(basePath);
-    replace(pa, "//", "/");
+    string_replace(pa, "//", "/");
     if (vector_contains(blacklist, pa))
     {
         print_debug("Blacklist: " + pa + " = " + "sdmc:/retroarch\n");
@@ -232,7 +232,7 @@ void MainPage::list_files(const char* basePath, bool recursive)
             if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
             {
                 std::string filename = std::string(basePath) + "/" + std::string(dp->d_name);
-                replace(filename, "//", "/");
+                string_replace(filename, "//", "/");
                 if (filename.length() > 3 && filename.substr(filename.length() - 4) == ".nro")
                 {
                     process_app_file(filename);
@@ -290,14 +290,18 @@ void MainPage::load_all_apps()
 
 brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length = 21)
 {
+
     brls::ListItem* item = new brls::ListItem(title);
 
     if (short_info.length() > (unsigned int)clip_length)
     {
         if (long_info.empty())
             long_info = "Full " + title + ":\n\n" + short_info;
+        string_replace(short_info, "\\n", " ");
         short_info = short_info.substr(0, clip_length) + "[...]";
     }
+
+    string_replace(long_info, "\\n", "\n");
 
     item->setValue(short_info);
 
