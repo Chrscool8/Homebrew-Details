@@ -17,6 +17,7 @@ enum setting
     setting_nro_path,
     setting_debug,
     setting_local_version,
+    setting_lax_store_compare,
     settings_num
 };
 

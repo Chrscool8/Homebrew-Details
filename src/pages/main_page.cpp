@@ -181,9 +181,8 @@ void MainPage::process_app_file(std::string filename)
             for (auto store_entry : store_file_data)
             {
                 count++;
-                if (store_entry.name != current.name || store_entry.version != current.version)
-                { }
-                else
+                if ((get_setting_true(setting_lax_store_compare) && (store_entry.name == current.name))
+                    || (!get_setting_true(setting_lax_store_compare) && (store_entry.name == current.name && store_entry.version == current.version)))
                 {
                     //current.author        = store_entry.author;
                     current.from_appstore = true;
@@ -645,6 +644,26 @@ MainPage::MainPage()
             item_scan_root->collapse(true);
         }
 
+        //
+
+        settings_list->addView(new brls::Header("App Store Settings"));
+
+        brls::ListItem* lax_switch = new brls::ListItem("More Lax Search", "If you find that some of your app store apps don't show up in the category, enable this. This may allow some false positives as well (like when you have multiple versions of the same app).");
+        lax_switch->setChecked(get_setting_true(setting_lax_store_compare));
+        lax_switch->updateActionHint(brls::Key::A, "Toggle");
+        lax_switch->getClickEvent()->subscribe([lax_switch](brls::View* view) {
+            if (get_setting(setting_lax_store_compare) == "true")
+            {
+                set_setting(setting_lax_store_compare, "false");
+                lax_switch->setChecked(false);
+            }
+            else
+            {
+                set_setting(setting_lax_store_compare, "true");
+                lax_switch->setChecked(true);
+            }
+        });
+        settings_list->addView(lax_switch);
         //
         print_debug("Misc.\n");
         settings_list->addView(new brls::Header("Misc. Settings"));
