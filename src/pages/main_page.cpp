@@ -688,7 +688,7 @@ MainPage::MainPage()
 
         settings_list->addView(new brls::Header("App Store Settings"));
 
-        brls::ListItem* lax_switch = new brls::ListItem("More Lax Search", "If you find that some of your app store apps don't show up in the category, enable this. This may allow some false positives as well (like when you have multiple versions of the same app).");
+        brls::ListItem* lax_switch = new brls::ListItem("More Lax Search", "If you find that some of your app store apps don't show up in the category, enable this. This may allow some false positives as well (like when you have multiple versions of the same app).\n\nIf you find that it's still missing things, don't fret, I have an update incoming to make this more robust.");
         lax_switch->setChecked(get_setting_true(setting_lax_store_compare));
         lax_switch->updateActionHint(brls::Key::A, "Toggle");
         lax_switch->getClickEvent()->subscribe([lax_switch](brls::View* view) {
