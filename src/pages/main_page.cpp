@@ -331,11 +331,11 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
 {
     std::string label = entry->name;
 
-    if (entry->favorite)
-    {
-        //popupItem->setChecked(true);
-        label = "\u2606 " + label;
-    }
+    if (get_setting_true(setting_debug))
+        if (entry->favorite)
+        {
+            label = "\u2606 " + label;
+        }
 
     brls::ListItem* popupItem = new brls::ListItem(label, "", entry->full_path);
     popupItem->setValue("v" + entry->version);
@@ -343,7 +343,13 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
 
     if (get_setting_true(setting_debug))
     {
-        popupItem->registerAction("Favorite", brls::Key::X, [this, entry, popupItem]() {
+        if (entry->favorite)
+        {
+            popupItem->setChecked(true);
+        }
+
+        popupItem->updateActionHint(brls::Key::Y, "Favorite");
+        popupItem->registerAction("Favorite", brls::Key::Y, [this, entry, popupItem]() {
             if (vector_contains(favorites, entry->full_path))
             {
                 remove_favorite(entry->full_path);
