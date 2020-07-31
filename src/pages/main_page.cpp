@@ -765,6 +765,7 @@ MainPage::MainPage()
         add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list);
         add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list);
         add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list);
+        add_list_entry("Free Space", get_free_space(), "", debug_list);
 
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
         rtp_item->getClickEvent()->subscribe([](brls::View* view) {

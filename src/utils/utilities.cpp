@@ -1,5 +1,6 @@
 #include <string.h>
 #include <switch.h>
+#include <sys/statvfs.h>
 #include <utils/settings.h>
 #include <utils/utilities.h>
 
@@ -146,6 +147,7 @@ std::string get_date()
 std::string get_resource_path(std::string str)
 {
     return "sdmc:/config/homebrew_details/assets/" + str;
+}
 
 std::string to_megabytes(unsigned int size)
 {
@@ -162,4 +164,17 @@ std::string to_gigabytes(uint64_t size)
     std::string str = stream.str();
     return str;
 }
+
+std::string get_free_space()
+{
+    struct statvfs st;
+    if (::statvfs("sdmc:/", &st) != 0)
+    {
+        return "-1";
+    }
+    else
+    {
+        uint64_t freeSpace = static_cast<std::uint64_t>(st.f_bsize) * st.f_bfree;
+        return (to_gigabytes(freeSpace) + " GB\n");
+    }
 }
