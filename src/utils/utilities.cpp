@@ -146,4 +146,20 @@ std::string get_date()
 std::string get_resource_path(std::string str)
 {
     return "sdmc:/config/homebrew_details/assets/" + str;
+
+std::string to_megabytes(unsigned int size)
+{
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(2) << (size / 1024. / 1024.);
+    std::string str = stream.str();
+    return str;
+}
+
+std::string to_gigabytes(uint64_t size)
+{
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(2) << (size / 1024. / 1024. / 1024.);
+    std::string str = stream.str();
+    return str;
+}
 }

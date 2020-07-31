@@ -460,10 +460,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         add_list_entry("Filename", entry->file_name, "Full Path:\n\n" + entry->full_path, appInfoList);
         add_list_entry("Author", entry->author, "", appInfoList);
         add_list_entry("Version", entry->version, "", appInfoList);
-        std::stringstream stream;
-        stream << std::fixed << std::setprecision(2) << entry->size / 1000. / 1000.;
-        std::string str = stream.str();
-        add_list_entry("Size", str + " MB", "Exact Size:\n\n" + std::to_string(entry->size) + " bytes", appInfoList);
+        add_list_entry("Size", to_megabytes(entry->size) + " MB", "Exact Size:\n\n" + std::to_string(entry->size) + " bytes", appInfoList);
         add_list_entry("Icon Size", std::to_string(entry->icon_size), "", appInfoList);
         appView->addTab("File Info", appInfoList);
 
