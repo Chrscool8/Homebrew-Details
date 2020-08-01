@@ -1,3 +1,4 @@
+#include <main.h>
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
 #include <utils/reboot_to_payload.h>
@@ -34,6 +35,11 @@
 namespace fs = std::filesystem;
 
 ////
+std::vector<std::string> favorites;
+std::vector<std::string> blacklist;
+std::vector<app_entry> local_apps;
+std::vector<app_entry> store_apps;
+std::vector<app_entry> store_file_data;
 
 void export_resource(std::string src)
 {
@@ -82,15 +88,24 @@ int main(int argc, char* argv[])
     init_settings();
     set_setting(setting_nro_path, argv[0]);
 
+    if (fs::exists("sdmc:/config/homebrew_details/debug"))
+        set_setting(setting_debug, "true");
+
     init_online_info();
     check_for_updates();
 
     psmInitialize();
 
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
+    {
+        print_debug("Issue Page\n");
         brls::Application::pushView(new IssuePage());
+    }
     else
+    {
+        print_debug("Intro Page\n");
         brls::Application::pushView(new IntroPage("Begin Scan"));
+    }
 
     // Run the app
     while (brls::Application::mainLoop())

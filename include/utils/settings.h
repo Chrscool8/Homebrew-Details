@@ -19,6 +19,8 @@ enum setting
     setting_local_version,
     setting_lax_store_compare,
     setting_control_scheme,
+    setting_scan_settings_changed,
+    setting_previous_num_files,
     settings_num
 };
 

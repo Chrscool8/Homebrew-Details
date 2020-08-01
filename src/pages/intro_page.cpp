@@ -4,6 +4,7 @@
 #include <fstream>
 #include <pages/intro_page.hpp>
 #include <pages/main_page.hpp>
+#include <pages/scanning_page.hpp>
 
 IntroPage::IntroPage(std::string label)
 {
@@ -29,8 +30,8 @@ IntroPage::IntroPage(std::string label)
                 outputFile.close();
             }
 
-            this->button->setLabel("Scanning...");
-            this->button->invalidate();
+            //this->button->setLabel("Scanning...");
+            //this->button->invalidate();
             go = true;
         }
     });
@@ -57,16 +58,16 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
         else
         {
             asked = true;
-            brls::Application::pushView(new MainPage());
+            brls::Application::pushView(new ScanningPage());
             go         = false;
             asked      = false;
             short_wait = 0;
-            this->button->setLabel("Scan Again");
-            this->button->invalidate();
+            //this->button->setLabel("Scan Again");
+            //this->button->invalidate();
         }
     }
 
-    if (!autoscanned && autoscan_cooldown > 5)
+    if (!go && !autoscanned && autoscan_cooldown > 5)
     {
         if (get_setting_true(setting_autoscan))
         {

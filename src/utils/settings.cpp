@@ -114,4 +114,19 @@ void init_settings()
     {
         set_setting(setting_control_scheme, "0");
     }
+
+    if (get_setting(setting_lax_store_compare) == "")
+    {
+        set_setting(setting_lax_store_compare, "false");
+    }
+
+    if (get_setting(setting_scan_settings_changed) == "")
+    {
+        set_setting(setting_scan_settings_changed, "true");
+    }
+
+    if (get_setting(setting_previous_num_files) == "")
+    {
+        set_setting(setting_previous_num_files, "1");
+    }
 }

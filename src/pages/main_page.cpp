@@ -1,6 +1,9 @@
+#include <main.h>
+#include <utils/favorites.h>
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
 #include <utils/reboot_to_payload.h>
+#include <utils/scanning.h>
 #include <utils/settings.h>
 #include <utils/update.h>
 #include <utils/utilities.h>
@@ -52,241 +55,6 @@
 #endif
 
 namespace fs = std::filesystem;
-
-void MainPage::read_favorites()
-{
-    std::ifstream inputFile("sdmc:/config/homebrew_details/favorites.txt");
-    if (inputFile)
-    {
-        int index = 0;
-        while (inputFile)
-        {
-            char line[513];
-            inputFile.getline(line, 512);
-            favorites.push_back(base64_decode(line));
-            print_debug(line);
-            print_debug("\n");
-            index += 1;
-        }
-        inputFile.close();
-    }
-    else
-        print_debug("Can't find favorites file.\n");
-}
-
-void MainPage::write_favorites()
-{
-    if (!fs::exists("sdmc:/config/"))
-        fs::create_directory("sdmc:/config/");
-    if (!fs::exists("sdmc:/config/homebrew_details/"))
-        fs::create_directory("sdmc:/config/homebrew_details/");
-
-    remove("sdmc:/config/homebrew_details/favorites.txt");
-
-    if (!favorites.empty())
-    {
-        std::ofstream outputFile("sdmc:/config/homebrew_details/favorites.txt");
-        if (outputFile)
-        {
-            unsigned int index = 0;
-            while (index < favorites.size())
-            {
-                outputFile << (base64_encode(favorites.at(index))).c_str();
-                if (index != favorites.size() - 1)
-                    outputFile << std::endl;
-                index += 1;
-            }
-            outputFile.close();
-        }
-        else
-            print_debug("Can't open favorites.\n");
-    }
-}
-
-void MainPage::add_favorite(std::string str)
-{
-    favorites.push_back(str);
-    write_favorites();
-}
-
-void MainPage::remove_favorite(std::string str)
-{
-    favorites.erase(std::remove(favorites.begin(), favorites.end(), str), favorites.end());
-    write_favorites();
-}
-
-void MainPage::read_store_apps()
-{
-    store_file_data.clear();
-    store_apps.clear();
-
-    std::string path = "/switch/appstore/.get/packages/";
-    if (fs::exists(path))
-    {
-        for (const auto& entry : fs::directory_iterator(path))
-        {
-            std::string folder = entry.path();
-            if (fs::is_directory(folder))
-            {
-                print_debug(("folder: " + folder + "\n").c_str());
-
-                std::string info_file = folder + "/info.json";
-                if (fs::exists(info_file))
-                {
-                    print_debug(("info_file: " + info_file + "\n").c_str());
-
-                    std::ifstream i(info_file);
-                    nlohmann::json info_json;
-                    i >> info_json;
-
-                    app_entry current;
-                    current.from_appstore = true;
-                    current.name          = json_load_value_string(info_json, "title");
-                    current.author        = json_load_value_string(info_json, "author");
-                    current.category      = json_load_value_string(info_json, "category");
-                    current.version       = json_load_value_string(info_json, "version");
-                    current.url           = json_load_value_string(info_json, "url");
-                    current.license       = json_load_value_string(info_json, "license");
-                    current.description   = json_load_value_string(info_json, "description");
-                    current.summary       = json_load_value_string(info_json, "details");
-                    current.changelog     = json_load_value_string(info_json, "changelog");
-
-                    if (!current.name.empty())
-                        store_file_data.push_back(current);
-
-                    print_debug((current.name + "\n").c_str());
-                }
-            }
-        }
-        sort(store_file_data.begin(), store_file_data.end(), compare_by_name);
-    }
-}
-
-void MainPage::process_app_file(std::string filename)
-{
-    print_debug((filename + "\n").c_str());
-
-    if (filename.length() > 3)
-    {
-        if (filename.substr(filename.length() - 4) == ".nro")
-        {
-            print_debug("read:\n");
-            app_entry current;
-            read_nacp_from_file(filename, &current);
-            read_icon_from_file(filename, &current);
-            current.from_appstore = false;
-            print_debug("nacp and icon okay\n");
-            // Check against store apps
-            int count = 0;
-            for (auto store_entry : store_file_data)
-            {
-                count++;
-                if ((get_setting_true(setting_lax_store_compare) && (store_entry.name == current.name))
-                    || (!get_setting_true(setting_lax_store_compare) && (store_entry.name == current.name && store_entry.version == current.version)))
-                {
-                    //current.author        = store_entry.author;
-                    current.from_appstore = true;
-                    current.category      = store_entry.category;
-                    current.url           = store_entry.url;
-                    current.license       = store_entry.license;
-                    current.description   = store_entry.description;
-                    current.summary       = store_entry.summary;
-                    current.changelog     = store_entry.changelog;
-
-                    store_apps.push_back(store_entry);
-                    store_file_data.erase(store_file_data.begin() + count);
-                    break;
-                }
-            }
-
-            current.favorite = vector_contains(favorites, current.full_path);
-
-            print_debug("done with stores\n");
-
-            if (!current.name.empty())
-                local_apps.push_back(current);
-        }
-    }
-}
-
-void MainPage::list_files(const char* basePath, bool recursive)
-{
-    char path[1000];
-    struct dirent* dp;
-    DIR* dir = opendir(basePath);
-
-    if (!dir)
-        return;
-
-    // blacklist
-    std::string pa = std::string(basePath);
-    string_replace(pa, "//", "/");
-    if (vector_contains(blacklist, pa))
-    {
-        print_debug("Blacklist: " + pa + " = " + "sdmc:/retroarch\n");
-    }
-    else
-    {
-        while ((dp = readdir(dir)) != NULL)
-        {
-            if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0)
-            {
-                std::string filename = std::string(basePath) + "/" + std::string(dp->d_name);
-                string_replace(filename, "//", "/");
-                if (filename.length() > 3 && filename.substr(filename.length() - 4) == ".nro")
-                {
-                    process_app_file(filename);
-                }
-                else
-                    print_debug("Skip: " + filename + "\n");
-
-                // Construct new path from our base path
-                strcpy(path, basePath);
-                strcat(path, "/");
-                strcat(path, dp->d_name);
-
-                if (recursive)
-                    list_files(path, true);
-            }
-        }
-    }
-
-    closedir(dir);
-}
-
-void MainPage::load_all_apps()
-{
-    local_apps.clear();
-
-    if (get_setting_true(setting_scan_full_card))
-    {
-        print_debug("Searching recursively within /\n");
-        list_files("sdmc:/", true);
-    }
-    else
-    {
-        if (get_setting_true(setting_search_subfolders))
-        {
-            print_debug("Searching recursively within /switch/\n");
-            list_files("sdmc:/switch", true);
-        }
-        else
-        {
-            print_debug("Searching only within /switch/\n");
-            list_files("sdmc:/switch", false);
-        }
-
-        if (get_setting_true(setting_search_root))
-        {
-            print_debug("Searching only within /\n");
-            list_files("sdmc:/", false);
-        }
-    }
-
-    store_file_data.clear();
-    if (local_apps.size() > 1)
-        sort(local_apps.begin(), local_apps.end(), compare_by_name);
-}
 
 brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length = 21)
 {
@@ -493,9 +261,9 @@ void MainPage::build_main_tabs()
     brls::List* storeAppsList = new brls::List();
     brls::List* localAppsList = new brls::List();
 
-    for (unsigned int i = 0; i < this->local_apps.size(); i++)
+    for (unsigned int i = 0; i < local_apps.size(); i++)
     {
-        app_entry* current = &this->local_apps.at(i);
+        app_entry* current = &local_apps.at(i);
         appsList->addView(make_app_entry(current));
 
         if (current->from_appstore)
@@ -504,15 +272,15 @@ void MainPage::build_main_tabs()
             localAppsList->addView(make_app_entry(current));
     }
 
-    if (!this->local_apps.empty() && !this->store_apps.empty())
+    if (!local_apps.empty() && !store_apps.empty())
     {
-        this->addTab(pad_string_with_spaces("All Apps", this->store_apps.size() + this->local_apps.size(), 20).c_str(), appsList);
+        this->addTab(pad_string_with_spaces("All Apps", store_apps.size() + local_apps.size(), 20).c_str(), appsList);
         this->addSeparator();
     }
-    if (!this->store_apps.empty())
-        this->addTab(pad_string_with_spaces("App Store Apps", this->store_apps.size(), 9).c_str(), storeAppsList);
-    if (!this->local_apps.empty())
-        this->addTab(pad_string_with_spaces("Local Apps", this->local_apps.size(), 16).c_str(), localAppsList);
+    if (!store_apps.empty())
+        this->addTab(pad_string_with_spaces("App Store Apps", store_apps.size(), 9).c_str(), storeAppsList);
+    if (!local_apps.empty())
+        this->addTab(pad_string_with_spaces("Local Apps", local_apps.size(), 16).c_str(), localAppsList);
 }
 
 MainPage::MainPage()
@@ -526,9 +294,9 @@ MainPage::MainPage()
     print_debug("init rootframe\n");
     //this->setActionAvailable(brls::Key::B, false);
 
-    read_favorites();
-    read_store_apps();
-    load_all_apps();
+    //read_favorites();
+    //read_store_apps();
+    //load_all_apps();
 
     build_main_tabs();
 
@@ -630,6 +398,8 @@ MainPage::MainPage()
                 set_setting(setting_search_subfolders, "true");
                 item_scan_switch_subs->setChecked(true);
             }
+
+            set_setting(setting_scan_settings_changed, "true");
         });
 
         brls::ListItem* item_scan_root = new brls::ListItem("Scan / (not subfolders)");
@@ -646,6 +416,8 @@ MainPage::MainPage()
                 set_setting(setting_search_root, "true");
                 item_scan_root->setChecked(true);
             }
+
+            set_setting(setting_scan_settings_changed, "true");
         });
 
         brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Scan Range", { "Scan Whole SD Card (Slow!)", "Only scan some folders" });
@@ -666,6 +438,8 @@ MainPage::MainPage()
                     item_scan_root->collapse(true);
                     break;
             }
+
+            set_setting(setting_scan_settings_changed, "true");
         });
         settings_list->addView(layerSelectItem);
         settings_list->addView(item_scan_switch);
@@ -781,6 +555,8 @@ MainPage::MainPage()
 
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
         remove("sdmc:/config/homebrew_details/lock");
+
+    set_setting(setting_scan_settings_changed, "false");
 
     ///////////////////////
 
