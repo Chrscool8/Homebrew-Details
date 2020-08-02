@@ -45,9 +45,12 @@ Comments, criticism, and suggestions are welcomed and encouraged. I'd love to ma
 
 **Thank you for your time, I hope you enjoy it!**
 
-<img src="https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922311500-DA63280140B1530CD17755515D814CFE.jpg?raw=true">
-<img src="https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922381500-DA63280140B1530CD17755515D814CFE.jpg?raw=true">
-<img src="https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922391100-DA63280140B1530CD17755515D814CFE.jpg?raw=true">
-<img src="https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922391900-DA63280140B1530CD17755515D814CFE.jpg?raw=true">
-<img src="https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922382900-DA63280140B1530CD17755515D814CFE.jpg?raw=true">
-<img src="https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922383400-DA63280140B1530CD17755515D814CFE.jpg?raw=true">
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922311500-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000154800-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922391100-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922391900-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000160000-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000170700-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000171500-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000172000-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000172700-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
