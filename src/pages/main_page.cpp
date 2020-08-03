@@ -316,7 +316,7 @@ MainPage::MainPage()
         brls::List* settingsList = new brls::List();
         settingsList->addView(new brls::Header("Update Actions", false));
 
-        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard", get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version_number());
+        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard", "v" + get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version_number());
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
             brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
             stagedFrame->setTitle("Update Wizard");
@@ -333,7 +333,7 @@ MainPage::MainPage()
         settingsList->addView(dialogItem);
 
         settingsList->addView(new brls::Header("New Version Details", false));
-        add_list_entry("Online Version", get_online_version_number(), "", settingsList, 40);
+        add_list_entry("Online Version", "v" + get_online_version_number(), "", settingsList, 40);
         add_list_entry("Title", get_online_version_name(), "", settingsList, 40);
         add_list_entry("Description", get_online_version_description(), "", settingsList, 40);
         add_list_entry("Date", get_online_version_date(), "", settingsList, 40);
