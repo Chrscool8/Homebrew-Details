@@ -33,11 +33,7 @@ void read_favorites()
 
 void write_favorites()
 {
-    if (!fs::exists("sdmc:/config/"))
-        fs::create_directory("sdmc:/config/");
-    if (!fs::exists("sdmc:/config/homebrew_details/"))
-        fs::create_directory("sdmc:/config/homebrew_details/");
-
+    create_directories("sdmc:/config/homebrew_details/");
     remove("sdmc:/config/homebrew_details/favorites.txt");
 
     if (!favorites.empty())

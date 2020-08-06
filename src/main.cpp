@@ -41,12 +41,14 @@ std::vector<app_entry> local_apps;
 std::vector<app_entry> store_apps;
 std::vector<app_entry> store_file_data;
 
+std::string asset_path = "sdmc:/config/homebrew_details/assets/";
+
 void export_resource(std::string src)
 {
-    if (!fs::exists("sdmc:/config/homebrew_details/assets/" + src))
+    if (!fs::exists(asset_path + src))
     {
         std::ifstream srcfile(("romfs:/" + src).c_str(), std::ios::binary);
-        std::ofstream dstfile("sdmc:/config/homebrew_details/assets/" + src, std::ios::binary);
+        std::ofstream dstfile(asset_path + src, std::ios::binary);
 
         dstfile << srcfile.rdbuf();
     }
@@ -66,7 +68,7 @@ void copy_resources()
 
 int main(int argc, char* argv[])
 {
-    print_debug(argv[0]);
+    printf(argv[0]);
 
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
@@ -77,11 +79,12 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    copy_resources();
 
     file_load_settings();
     init_settings();
     set_setting(setting_nro_path, argv[0]);
+
+    copy_resources();
 
     if (fs::exists("sdmc:/config/homebrew_details/debug"))
         set_setting(setting_debug, "true");
@@ -107,6 +110,8 @@ int main(int argc, char* argv[])
         ;
 
     print_debug("Main loop end.\n");
+
+    psmExit();
 
     return EXIT_SUCCESS;
 }

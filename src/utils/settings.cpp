@@ -27,8 +27,7 @@ void file_load_settings()
             char line[513];
             inputFile.getline(line, 512);
             settings[index] = line;
-            print_debug(line);
-            print_debug("\n");
+            print_debug(std::string(line) + "\n");
             index += 1;
         }
         inputFile.close();

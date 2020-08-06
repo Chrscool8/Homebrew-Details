@@ -50,6 +50,13 @@ bool vector_contains(std::vector<std::string> vec, std::string str)
         return (std::find(vec.begin(), vec.end(), str) != vec.end());
 }
 
+std::string to_lower(std::string str)
+{
+    std::string _str = str;
+    transform(_str.begin(), _str.end(), _str.begin(), ::tolower);
+    return _str;
+}
+
 bool compare_by_name(const app_entry& a, const app_entry& b)
 {
     std::string _a = a.name;
@@ -177,7 +184,52 @@ std::string get_free_space()
         uint64_t freeSpace = static_cast<std::uint64_t>(st.f_bsize) * st.f_bfree;
         return (to_gigabytes(freeSpace) + " GB\n");
     }
-}void create_directories(std::string path)
+}
+
+std::string get_keyboard_input(std::string default_str)
+{
+    SwkbdConfig kbd;
+    unsigned int str_len = 256;
+    if (R_SUCCEEDED(swkbdCreate(&kbd, 0)))
+    {
+        swkbdConfigMakePresetDefault(&kbd);
+        swkbdConfigSetInitialText(&kbd, default_str.c_str());
+        swkbdConfigSetStringLenMax(&kbd, str_len);
+        swkbdConfigSetHeaderText(&kbd, "Header Text");
+        swkbdConfigSetSubText(&kbd, "SubText");
+        swkbdConfigSetGuideText(&kbd, "Guide Text");
+        char keyboard_chars[str_len];
+        Result res = swkbdShow(&kbd, keyboard_chars, str_len);
+        swkbdClose(&kbd);
+        if (R_SUCCEEDED(res))
+        {
+            print_debug(std::string("kbd out: ") + keyboard_chars + "\n");
+            std::string str = keyboard_chars;
+            return str;
+        }
+        else
+        {
+            print_debug(std::string("kbd fail.\n"));
+        }
+    }
+
+    return "";
+}
+
+std::vector<std::string> explode(std::string const& s, char delim)
+{
+    std::vector<std::string> result;
+    std::istringstream iss(s);
+
+    for (std::string token; std::getline(iss, token, delim);)
+    {
+        result.push_back(std::move(token));
+    }
+
+    return result;
+}
+
+void create_directories(std::string path)
 {
     std::vector<std::string> folders = explode(path, '/');
     std::string subpath              = "";
@@ -188,4 +240,34 @@ std::string get_free_space()
         if (!fs::exists(subpath))
             fs::create_directory(subpath);
     }
+}
+
+bool copy_file(const char* source_file, const char* target_file)
+{
+    char buff[BUFSIZ];
+    FILE *in, *out;
+    size_t n;
+
+    in  = fopen(source_file, "rb");
+    out = fopen(target_file, "wb");
+
+    if (in && out)
+    {
+        while ((n = fread(buff, 1, BUFSIZ, in)) != 0)
+        {
+            fwrite(buff, 1, n, out);
+        }
+    }
+
+    if (in)
+        fclose(in);
+
+    if (out)
+        fclose(out);
+
+    if (!in || !out)
+        return false;
+
+    print_debug("done\n");
+    return true;
 }

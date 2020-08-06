@@ -9,8 +9,8 @@
 
 namespace fs = std::filesystem;
 
-std::atomic<int> file_count             = 0;
-std::string last_file_name = "";
+std::atomic<int> file_count = 0;
+std::string last_file_name  = "";
 
 void read_store_apps()
 {
@@ -116,7 +116,7 @@ void list_files(const char* basePath, bool recursive)
         return;
 
     // blacklist
-    std::string pa = std::string(basePath);
+    std::string pa = to_lower(std::string(basePath));
     string_replace(pa, "//", "/");
     if (vector_contains(blacklist, pa))
     {

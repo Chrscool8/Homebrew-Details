@@ -58,7 +58,6 @@ namespace fs = std::filesystem;
 
 brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length = 21)
 {
-
     brls::ListItem* item = new brls::ListItem(title);
 
     if (short_info.length() > (unsigned int)clip_length)
@@ -155,7 +154,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
             local_apps.clear();
             store_apps.clear();
             store_file_data.clear();
-            //romfsExit();
+            romfsExit();
             brls::Application::quit();
         }
 
@@ -189,11 +188,155 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
                 local_apps.clear();
                 store_apps.clear();
                 store_file_data.clear();
-                //romfsExit();
+                romfsExit();
                 brls::Application::quit();
             }
         });
         manageList->addView(launch_item);
+
+        //
+
+        brls::ListItem* move_item = new brls::ListItem("Move App");
+        move_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
+            std::string dest_string = get_keyboard_input(entry->full_path);
+
+            if (to_lower(dest_string) == to_lower(entry->full_path))
+            {
+                print_debug("Same path\n");
+                brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
+                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                    dialog->close();
+                };
+                dialog->addButton("Dismiss", closeCallback);
+                dialog->setCancelable(true);
+                dialog->open();
+            }
+            else if (dest_string.length() <= 4 || (dest_string).substr(dest_string.length() - 4) != ".nro")
+            {
+                print_debug("Isn't an nro\n");
+                brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\ndoesn't end with '.nro'.");
+                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                    dialog->close();
+                };
+                dialog->addButton("Dismiss", closeCallback);
+                dialog->setCancelable(true);
+                dialog->open();
+            }
+            else if (fs::exists(dest_string))
+            {
+                print_debug("File already exists.\n");
+                brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\nalready exists.");
+                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                    dialog->close();
+                };
+                dialog->addButton("Dismiss", closeCallback);
+                dialog->setCancelable(true);
+                dialog->open();
+            }
+            else
+            {
+                std::size_t found = dest_string.find_last_of("/");
+                if (found != std::string::npos)
+                {
+                    create_directories(dest_string.substr(0, found));
+                }
+
+                brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to move the following file? This action cannot be undone.\n\n" + entry->full_path + "\n\u21E9\n" + dest_string);
+                brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
+                    if (rename(entry->full_path.c_str(), dest_string.c_str()) != 0)
+                        brls::Application::notify("Issue moving file");
+                    else
+                    {
+                        brls::Application::notify("File successfully moved");
+                        purge_entry(entry);
+                    }
+
+                    confirm_dialog->close();
+                };
+                brls::GenericEvent::Callback noCallback = [confirm_dialog](brls::View* view) {
+                    confirm_dialog->close();
+                };
+                confirm_dialog->addButton("!!  [Yes]  !!", yesCallback);
+                confirm_dialog->addButton("No", noCallback);
+                confirm_dialog->setCancelable(false);
+                confirm_dialog->open();
+            }
+        });
+        manageList->addView(move_item);
+
+        //
+
+        brls::ListItem* copy_item = new brls::ListItem("Copy App");
+        copy_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
+            std::string dest_string = get_keyboard_input(entry->full_path);
+
+            if (to_lower(dest_string) == to_lower(entry->full_path))
+            {
+                print_debug("Same path\n");
+                brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
+                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                    dialog->close();
+                };
+                dialog->addButton("Dismiss", closeCallback);
+                dialog->setCancelable(true);
+                dialog->open();
+            }
+            else if (dest_string.length() <= 4 || (dest_string).substr(dest_string.length() - 4) != ".nro")
+            {
+                print_debug("Isn't an nro\n");
+                brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\ndoesn't end with '.nro'.");
+                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                    dialog->close();
+                };
+                dialog->addButton("Dismiss", closeCallback);
+                dialog->setCancelable(true);
+                dialog->open();
+            }
+            else if (fs::exists(dest_string))
+            {
+                print_debug("File already exists.\n");
+                brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\nalready exists.");
+                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                    dialog->close();
+                };
+                dialog->addButton("Dismiss", closeCallback);
+                dialog->setCancelable(true);
+                dialog->open();
+            }
+            else
+            {
+                std::size_t found = dest_string.find_last_of("/");
+                if (found != std::string::npos)
+                {
+                    create_directories(dest_string.substr(0, found));
+                }
+
+                brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to copy to the following file? This action cannot be undone.\n\n" + entry->full_path + "\n\u21E9\n" + dest_string);
+                brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
+                    if (copy_file(entry->full_path.c_str(), dest_string.c_str()))
+                    {
+                        brls::Application::notify("File successfully copied");
+                        purge_entry(entry);
+                    }
+                    else
+                    {
+                        brls::Application::notify("Issue copying file");
+                    }
+
+                    confirm_dialog->close();
+                };
+                brls::GenericEvent::Callback noCallback = [confirm_dialog](brls::View* view) {
+                    confirm_dialog->close();
+                };
+                confirm_dialog->addButton("!!  [Yes]  !!", yesCallback);
+                confirm_dialog->addButton("No", noCallback);
+                confirm_dialog->setCancelable(false);
+                confirm_dialog->open();
+            }
+        });
+        manageList->addView(copy_item);
+
+        //
 
         brls::ListItem* delete_item = new brls::ListItem("Delete App");
         delete_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
@@ -217,7 +360,6 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
             dialog->setCancelable(true);
             dialog->open();
         });
-
         manageList->addView(delete_item);
 
         appView->addTab("Manage", manageList);
@@ -548,6 +690,15 @@ MainPage::MainPage()
         });
         debug_list->addView(rtp_item);
 
+        brls::ListItem* keyboard_item = new brls::ListItem("Keyboard Test");
+        keyboard_item->setValue("Test Text");
+        keyboard_item->getClickEvent()->subscribe([keyboard_item](brls::View* view) {
+            print_debug("Keyboard\n");
+            std::string typed = get_keyboard_input(keyboard_item->getValue());
+            keyboard_item->setValue(typed);
+        });
+        debug_list->addView(keyboard_item);
+
         this->addTab("Debug Menu", debug_list);
     }
 
@@ -575,7 +726,6 @@ MainPage::MainPage()
 
 MainPage::~MainPage()
 {
-    //psmExit();
     delete time_label;
     delete battery_label;
     delete date_label;

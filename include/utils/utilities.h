@@ -21,4 +21,8 @@ std::string get_resource_path(std::string str);
 std::string to_megabytes(unsigned int size);
 std::string to_gigabytes(uint64_t size);
 std::string get_free_space();
+std::string get_keyboard_input(std::string default_str);
+std::vector<std::string> explode(std::string const& s, char delim);
+std::string to_lower(std::string str);
 void create_directories(std::string path);
+bool copy_file(const char* srce_file, const char* dest_file);
