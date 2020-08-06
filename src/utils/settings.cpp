@@ -17,6 +17,7 @@ std::string config_path = "sdmc:/config/homebrew_details/";
 
 void file_load_settings()
 {
+    create_directories(config_path);
     std::ifstream inputFile(config_path + "config.txt");
     if (inputFile)
     {
@@ -38,10 +39,7 @@ void file_load_settings()
 
 void file_save_settings()
 {
-    if (!fs::exists("sdmc:/config/"))
-        fs::create_directory("sdmc:/config/");
-    if (!fs::exists("sdmc:/config/homebrew_details/"))
-        fs::create_directory("sdmc:/config/homebrew_details/");
+    create_directories(config_path);
 
     remove((config_path + "config.txt").c_str());
     std::ofstream outputFile(config_path + "config.txt");

@@ -54,12 +54,7 @@ void export_resource(std::string src)
 
 void copy_resources()
 {
-    if (!fs::exists("sdmc:/config/"))
-        fs::create_directory("sdmc:/config/");
-    if (!fs::exists("sdmc:/config/homebrew_details/"))
-        fs::create_directory("sdmc:/config/homebrew_details/");
-    if (!fs::exists("sdmc:/config/homebrew_details/assets/"))
-        fs::create_directory("sdmc:/config/homebrew_details/assets/");
+    create_directories(asset_path);
 
     export_resource("arrows.jpg");
     export_resource("arrows_small.jpg");

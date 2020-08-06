@@ -177,4 +177,15 @@ std::string get_free_space()
         uint64_t freeSpace = static_cast<std::uint64_t>(st.f_bsize) * st.f_bfree;
         return (to_gigabytes(freeSpace) + " GB\n");
     }
+}void create_directories(std::string path)
+{
+    std::vector<std::string> folders = explode(path, '/');
+    std::string subpath              = "";
+    for (unsigned int i = 0; i < folders.size(); i++)
+    {
+        subpath += folders.at(i) + "/";
+        print_debug(subpath + "\n");
+        if (!fs::exists(subpath))
+            fs::create_directory(subpath);
+    }
 }
