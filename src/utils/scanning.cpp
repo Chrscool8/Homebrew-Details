@@ -63,7 +63,6 @@ void read_store_apps()
                     {
                         if (str.length() > 4 && str.substr(str.length() - 4) == ".nro")
                         {
-                            //printf((std::string("manny nro: ") + "sdmc:/" + str.substr(3, str.length()) + ":\n").c_str());
                             current.manifest_path = "sdmc:/" + str.substr(3, str.length());
                             current.from_appstore = true;
                             break;
