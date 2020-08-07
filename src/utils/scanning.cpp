@@ -26,6 +26,8 @@ void read_store_apps()
             if (fs::is_directory(folder))
             {
                 print_debug(("folder: " + folder + "\n").c_str());
+                app_entry current;
+                current.from_appstore = false;
 
                 std::string info_file = folder + "/info.json";
                 if (fs::exists(info_file))
@@ -36,7 +38,6 @@ void read_store_apps()
                     nlohmann::json info_json;
                     i >> info_json;
 
-                    app_entry current;
                     current.from_appstore = true;
                     current.name          = json_load_value_string(info_json, "title");
                     current.author        = json_load_value_string(info_json, "author");
@@ -48,11 +49,30 @@ void read_store_apps()
                     current.summary       = json_load_value_string(info_json, "details");
                     current.changelog     = json_load_value_string(info_json, "changelog");
 
-                    if (!current.name.empty())
-                        store_file_data.push_back(current);
-
                     print_debug((current.name + "\n").c_str());
                 }
+
+                std::string manifest_file = folder + "/manifest.install";
+                if (fs::exists(manifest_file))
+                {
+                    print_debug(("manifest: " + manifest_file + "\n").c_str());
+
+                    std::ifstream file(manifest_file);
+                    std::string str;
+                    while (std::getline(file, str))
+                    {
+                        if (str.length() > 4 && str.substr(str.length() - 4) == ".nro")
+                        {
+                            //printf((std::string("manny nro: ") + "sdmc:/" + str.substr(3, str.length()) + ":\n").c_str());
+                            current.manifest_path = "sdmc:/" + str.substr(3, str.length());
+                            current.from_appstore = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (current.from_appstore)
+                    store_file_data.push_back(current);
             }
         }
         sort(store_file_data.begin(), store_file_data.end(), compare_by_name);
@@ -63,7 +83,7 @@ void process_app_file(std::string filename)
 {
     print_debug((filename + "\n").c_str());
 
-    if (filename.length() > 3)
+    if (filename.length() > 4)
     {
         if (filename.substr(filename.length() - 4) == ".nro")
         {
@@ -73,15 +93,14 @@ void process_app_file(std::string filename)
             read_icon_from_file(filename, &current);
             current.from_appstore = false;
             print_debug("nacp and icon okay\n");
+
             // Check against store apps
             int count = 0;
             for (auto store_entry : store_file_data)
             {
                 count++;
-                if ((get_setting_true(setting_lax_store_compare) && (store_entry.name == current.name))
-                    || (!get_setting_true(setting_lax_store_compare) && (store_entry.name == current.name && store_entry.version == current.version)))
+                if (to_lower(store_entry.manifest_path) == to_lower(current.full_path))
                 {
-                    //current.author        = store_entry.author;
                     current.from_appstore = true;
                     current.category      = store_entry.category;
                     current.url           = store_entry.url;
@@ -89,6 +108,7 @@ void process_app_file(std::string filename)
                     current.description   = store_entry.description;
                     current.summary       = store_entry.summary;
                     current.changelog     = store_entry.changelog;
+                    current.manifest_path = store_entry.manifest_path;
 
                     store_apps.push_back(store_entry);
                     store_file_data.erase(store_file_data.begin() + count);

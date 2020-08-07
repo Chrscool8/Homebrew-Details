@@ -94,7 +94,7 @@ void purge_entry(app_entry* entry)
 {
 }
 
-brls::ListItem* MainPage::make_app_entry(app_entry* entry)
+brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 {
     std::string label = entry->name;
 
@@ -168,7 +168,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         key = brls::Key::X;
 
     popupItem->updateActionHint(key, "Details");
-    popupItem->registerAction("Details", key, [this, entry, popupItem]() {
+    popupItem->registerAction("Details", key, [this, entry, popupItem, is_appstore]() {
         brls::TabFrame* appView = new brls::TabFrame();
 
         brls::List* manageList = new brls::List();
@@ -195,75 +195,76 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry)
         manageList->addView(launch_item);
 
         //
+        if (!is_appstore)
+        {
+            brls::ListItem* move_item = new brls::ListItem("Move App");
+            move_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
+                std::string dest_string = get_keyboard_input(entry->full_path);
 
-        brls::ListItem* move_item = new brls::ListItem("Move App");
-        move_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
-            std::string dest_string = get_keyboard_input(entry->full_path);
-
-            if (to_lower(dest_string) == to_lower(entry->full_path))
-            {
-                print_debug("Same path\n");
-                brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
-                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
-                    dialog->close();
-                };
-                dialog->addButton("Dismiss", closeCallback);
-                dialog->setCancelable(true);
-                dialog->open();
-            }
-            else if (dest_string.length() <= 4 || (dest_string).substr(dest_string.length() - 4) != ".nro")
-            {
-                print_debug("Isn't an nro\n");
-                brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\ndoesn't end with '.nro'.");
-                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
-                    dialog->close();
-                };
-                dialog->addButton("Dismiss", closeCallback);
-                dialog->setCancelable(true);
-                dialog->open();
-            }
-            else if (fs::exists(dest_string))
-            {
-                print_debug("File already exists.\n");
-                brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\nalready exists.");
-                brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
-                    dialog->close();
-                };
-                dialog->addButton("Dismiss", closeCallback);
-                dialog->setCancelable(true);
-                dialog->open();
-            }
-            else
-            {
-                std::size_t found = dest_string.find_last_of("/");
-                if (found != std::string::npos)
+                if (to_lower(dest_string) == to_lower(entry->full_path))
                 {
-                    create_directories(dest_string.substr(0, found));
+                    print_debug("Same path\n");
+                    brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
+                    brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                        dialog->close();
+                    };
+                    dialog->addButton("Dismiss", closeCallback);
+                    dialog->setCancelable(true);
+                    dialog->open();
                 }
-
-                brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to move the following file? This action cannot be undone.\n\n" + entry->full_path + "\n\u21E9\n" + dest_string);
-                brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
-                    if (rename(entry->full_path.c_str(), dest_string.c_str()) != 0)
-                        brls::Application::notify("Issue moving file");
-                    else
+                else if (dest_string.length() <= 4 || (dest_string).substr(dest_string.length() - 4) != ".nro")
+                {
+                    print_debug("Isn't an nro\n");
+                    brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\ndoesn't end with '.nro'.");
+                    brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                        dialog->close();
+                    };
+                    dialog->addButton("Dismiss", closeCallback);
+                    dialog->setCancelable(true);
+                    dialog->open();
+                }
+                else if (fs::exists(dest_string))
+                {
+                    print_debug("File already exists.\n");
+                    brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\nalready exists.");
+                    brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                        dialog->close();
+                    };
+                    dialog->addButton("Dismiss", closeCallback);
+                    dialog->setCancelable(true);
+                    dialog->open();
+                }
+                else
+                {
+                    std::size_t found = dest_string.find_last_of("/");
+                    if (found != std::string::npos)
                     {
-                        brls::Application::notify("File successfully moved");
-                        purge_entry(entry);
+                        create_directories(dest_string.substr(0, found));
                     }
 
-                    confirm_dialog->close();
-                };
-                brls::GenericEvent::Callback noCallback = [confirm_dialog](brls::View* view) {
-                    confirm_dialog->close();
-                };
-                confirm_dialog->addButton("!!  [Yes]  !!", yesCallback);
-                confirm_dialog->addButton("No", noCallback);
-                confirm_dialog->setCancelable(false);
-                confirm_dialog->open();
-            }
-        });
-        manageList->addView(move_item);
+                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to move the following file? This action cannot be undone.\n\n" + entry->full_path + "\n\u21E9\n" + dest_string);
+                    brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
+                        if (rename(entry->full_path.c_str(), dest_string.c_str()) != 0)
+                            brls::Application::notify("Issue moving file");
+                        else
+                        {
+                            brls::Application::notify("File successfully moved");
+                            purge_entry(entry);
+                        }
 
+                        confirm_dialog->close();
+                    };
+                    brls::GenericEvent::Callback noCallback = [confirm_dialog](brls::View* view) {
+                        confirm_dialog->close();
+                    };
+                    confirm_dialog->addButton("!!  [Yes]  !!", yesCallback);
+                    confirm_dialog->addButton("No", noCallback);
+                    confirm_dialog->setCancelable(false);
+                    confirm_dialog->open();
+                }
+            });
+            manageList->addView(move_item);
+        }
         //
 
         brls::ListItem* copy_item = new brls::ListItem("Copy App");
@@ -409,7 +410,7 @@ void MainPage::build_main_tabs()
         appsList->addView(make_app_entry(current));
 
         if (current->from_appstore)
-            storeAppsList->addView(make_app_entry(current));
+            storeAppsList->addView(make_app_entry(current, true));
         else
             localAppsList->addView(make_app_entry(current));
     }
@@ -611,27 +612,6 @@ MainPage::MainPage()
             set_setting(setting_control_scheme, std::to_string(selection));
         });
         settings_list->addView(controlSelectItem);
-
-        //
-
-        settings_list->addView(new brls::Header("App Store Settings"));
-
-        brls::ListItem* lax_switch = new brls::ListItem("More Lax Search", "If you find that some of your app store apps don't show up in the category, enable this. This may allow some false positives as well (like when you have multiple versions of the same app).\n\nIf you find that it's still missing things, don't fret, I have an update incoming to make this more robust.");
-        lax_switch->setChecked(get_setting_true(setting_lax_store_compare));
-        lax_switch->updateActionHint(brls::Key::A, "Toggle");
-        lax_switch->getClickEvent()->subscribe([lax_switch](brls::View* view) {
-            if (get_setting(setting_lax_store_compare) == "true")
-            {
-                set_setting(setting_lax_store_compare, "false");
-                lax_switch->setChecked(false);
-            }
-            else
-            {
-                set_setting(setting_lax_store_compare, "true");
-                lax_switch->setChecked(true);
-            }
-        });
-        settings_list->addView(lax_switch);
 
         //
         print_debug("Misc.\n");

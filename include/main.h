@@ -20,6 +20,7 @@ struct app_entry
     std::string description;
     std::string summary;
     std::string changelog;
+    std::string manifest_path;
     bool favorite;
 };
 
