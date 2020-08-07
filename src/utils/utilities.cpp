@@ -200,9 +200,9 @@ std::string get_keyboard_input(std::string default_str)
         swkbdConfigMakePresetDefault(&kbd);
         swkbdConfigSetInitialText(&kbd, default_str.c_str());
         swkbdConfigSetStringLenMax(&kbd, str_len);
-        swkbdConfigSetHeaderText(&kbd, "Header Text");
-        swkbdConfigSetSubText(&kbd, "SubText");
-        swkbdConfigSetGuideText(&kbd, "Guide Text");
+        //swkbdConfigSetHeaderText(&kbd, "Header Text");
+        //swkbdConfigSetSubText(&kbd, "SubText");
+        //swkbdConfigSetGuideText(&kbd, "Guide Text");
         char keyboard_chars[str_len];
         Result res = swkbdShow(&kbd, keyboard_chars, str_len);
         swkbdClose(&kbd);
