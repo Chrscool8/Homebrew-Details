@@ -156,6 +156,11 @@ std::string get_resource_path(std::string str)
     return "sdmc:/config/homebrew_details/assets/" + str;
 }
 
+std::string get_config_path(std::string str)
+{
+    return "sdmc:/config/homebrew_details/" + str;
+}
+
 std::string to_megabytes(unsigned int size)
 {
     std::stringstream stream;
