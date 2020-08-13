@@ -18,6 +18,7 @@ This is an app that allows you to view details about, launch, categorize, and ma
 - Launch Apps
 - Scan your SD card for homebrew programs (.nros)
 - View details about your apps
+- Add custom notes to an app
 - Sort the files into AppStore-acquired and local app categories
 - Rename, Copy, Move, Delete an app's files
 - Reboot to a payload
