@@ -375,7 +375,37 @@ bool Application::mainLoop()
     }
 
     // Trigger gamepad events
-    // TODO: Translate axis events to dpad events here
+        // Translate axis events to dpad events
+    int count;
+    const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+
+    //Make sure we got all our expected sticks before reading from them
+    if (count >= 4)
+    {
+        // Left Stick X
+        if (axes[0] < -.5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] = GLFW_PRESS;
+        else if (axes[0] > .5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] = GLFW_PRESS;
+
+        // Left Stick Y
+        if (axes[1] < -.5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] = GLFW_PRESS;
+        else if (axes[1] > .5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] = GLFW_PRESS;
+
+        // Right Stick X
+        if (axes[2] < -.5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_LEFT] = GLFW_PRESS;
+        else if (axes[2] > .5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_RIGHT] = GLFW_PRESS;
+
+        // Right Stick Y
+        if (axes[3] < -.5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_UP] = GLFW_PRESS;
+        else if (axes[3] > .5)
+            Application::gamepad.buttons[GLFW_GAMEPAD_BUTTON_DPAD_DOWN] = GLFW_PRESS;
+    }
 
     bool anyButtonPressed               = false;
     bool repeating                      = false;
@@ -441,8 +471,10 @@ bool Application::mainLoop()
             std::this_thread::sleep_for(std::chrono::microseconds(toSleep));
         }
     }
-
-    return true;
+	
+	Application::focusLocked = false;
+    
+	return true;
 }
 
 void Application::quit()
@@ -452,6 +484,9 @@ void Application::quit()
 
 void Application::navigate(FocusDirection direction)
 {
+	if (Application::focusLocked)
+        return;
+
     View* currentFocus = Application::currentFocus;
 
     // Do nothing if there is no current focus or if it doesn't have a parent
@@ -479,6 +514,7 @@ void Application::navigate(FocusDirection direction)
     }
 
     // Otherwise give it focus
+    Application::focusLocked = true;
     Application::giveFocus(nextFocus);
 }
 
