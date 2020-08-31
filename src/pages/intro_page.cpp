@@ -8,8 +8,6 @@
 
 IntroPage::IntroPage(std::string label)
 {
-    this->setActionAvailable(brls::Key::B, false);
-
     autoscanned       = false;
     go                = false;
     asked             = false;
@@ -58,7 +56,9 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
         else
         {
             asked = true;
+
             brls::Application::pushView(new ScanningPage());
+
             go         = false;
             asked      = false;
             short_wait = 0;
@@ -103,13 +103,13 @@ void IntroPage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stas
 
     this->label->setBoundaries(
         this->x + this->width / 2 - this->label->getWidth() / 2 + 140 + 43,
-        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2,
+        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2 - 10,
         this->label->getWidth(),
         this->label->getHeight());
 
     this->button->setBoundaries(
         this->x + this->width / 2 - style->CrashFrame.buttonWidth / 2 + 140 + 43,
-        this->y + this->height / 2 + 100 - this->button->getHeight(),
+        this->y + this->height / 2 + 100 - this->button->getHeight() - 60,
         style->CrashFrame.buttonWidth,
         style->CrashFrame.buttonHeight);
     this->button->invalidate();

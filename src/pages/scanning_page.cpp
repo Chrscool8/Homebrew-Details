@@ -50,8 +50,6 @@
 
 #include "switch/services/psm.h"
 
-scanprogress scanprog;
-
 void ScanningPage::thread_scan()
 {
     print_debug("scan go\n");
@@ -79,6 +77,9 @@ ScanningPage::ScanningPage()
     scanprog.complete = false;
     scanprog.success  = false;
     scanprog.scanning = false;
+
+    scanprog.end_thread = false;
+
     print_debug(get_setting(setting_previous_num_files) + " previous files\n");
 
     if (is_number(get_setting(setting_previous_num_files)))
@@ -93,12 +94,15 @@ ScanningPage::ScanningPage()
     this->label = new brls::Label(brls::LabelStyle::DIALOG, "---");
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setParent(this);
+
+    //this->registerAction("Cancel Scan", brls::Key::X, [this, scanprog]() {
+    //    scanprog.end_thread = true;
+    //    return true;
+    //});
 }
 
 void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
 {
-    //if (progressValue == 500)
-    //    this->frame->nextStage();
     if (!go)
     {
         print_debug("Go\n");
@@ -131,6 +135,7 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
             continued               = false;
             scanprog.complete       = false;
             scanprog.prev_num_files = file_count;
+            scanprog.end_thread     = false;
             file_count              = 0;
             last_file_name          = "";
         }
@@ -172,7 +177,6 @@ ScanningPage::~ScanningPage()
     if (go && scanner->joinable())
     {
         print_debug("Joinable\n");
-        scanprog.end_thread = true;
         scanner->join();
     }
 

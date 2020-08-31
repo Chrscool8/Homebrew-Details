@@ -12,6 +12,8 @@ namespace fs = std::filesystem;
 std::atomic<int> file_count = 0;
 std::string last_file_name  = "";
 
+scanprogress scanprog;
+
 void read_store_apps()
 {
     store_file_data.clear();
@@ -163,6 +165,9 @@ void list_files(const char* basePath, bool recursive)
                 strcpy(path, basePath);
                 strcat(path, "/");
                 strcat(path, dp->d_name);
+
+                if (scanprog.end_thread)
+                    break;
 
                 if (recursive)
                     list_files(path, true);

@@ -41,22 +41,9 @@
 
 #include "switch/services/psm.h"
 
-struct scanprogress
-{
-    bool scanning;
-    double progress;
-    bool complete;
-    bool success;
-    bool end_thread;
-    int prev_num_files;
-};
-
-extern scanprogress scanprog;
-
 class ScanningPage : public brls::View
 {
   private:
-    brls::StagedAppletFrame* frame;
     brls::ProgressDisplay* progressDisp;
     brls::Label* label;
     int progressValue = 0;
