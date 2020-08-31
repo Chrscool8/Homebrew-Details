@@ -75,12 +75,12 @@ void InfoPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heigh
         if (prog.success)
         {
             label->setText("Your app has been updated!\nPlease restart to see changes.");
-            button->setLabel("Close App");
+            button->setLabel("Restart App");
         }
         else
         {
             label->setText("There was a problem updating, sorry.");
-            button->setLabel("Close App");
+            button->setLabel("Restart App");
         }
 
         label->invalidate();
@@ -98,6 +98,8 @@ void InfoPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heigh
             switch (page_type)
             {
                 case info_page_dl_done:
+                    launch_nro(get_setting(setting_nro_path), "\"" + get_setting(setting_nro_path) + "\"");
+                    romfsExit();
                     brls::Application::quit();
                     break;
                 default:
