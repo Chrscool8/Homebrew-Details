@@ -27,7 +27,7 @@ void file_load_settings()
             char line[513];
             inputFile.getline(line, 512);
             settings[index] = line;
-            print_debug(std::string(line) + "\n");
+            print_debug(std::string(line));
             index += 1;
         }
         inputFile.close();
@@ -61,7 +61,7 @@ void file_save_settings()
 void set_setting(int setting, std::string value)
 {
     settings[setting] = base64_encode(value);
-    print_debug(("Set " + std::to_string(setting) + " to " + value + "\n").c_str());
+    print_debug("Set " + std::to_string(setting) + " to " + value);
     file_save_settings();
 }
 
