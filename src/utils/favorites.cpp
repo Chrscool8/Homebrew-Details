@@ -58,12 +58,15 @@ void write_favorites()
 
 void add_favorite(std::string str)
 {
+    print_debug("add fav: " + str);
     favorites.push_back(str);
     write_favorites();
 }
 
 void remove_favorite(std::string str)
 {
+    print_debug("remove fav: " + str);
+
     favorites.erase(std::remove(favorites.begin(), favorites.end(), str), favorites.end());
     write_favorites();
 }

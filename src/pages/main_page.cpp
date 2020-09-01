@@ -99,37 +99,77 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 {
     std::string label = entry->name;
 
-    if (get_setting_true(setting_debug))
-        if (entry->favorite)
-        {
-            label = "\u2606 " + label;
-        }
-
     brls::ListItem* popupItem = new brls::ListItem(label, "", entry->full_path);
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
 
     if (get_setting_true(setting_debug))
     {
-        if (entry->favorite)
-        {
-            popupItem->setChecked(true);
-        }
-
         popupItem->updateActionHint(brls::Key::Y, "Favorite");
         popupItem->registerAction("Favorite", brls::Key::Y, [this, entry, popupItem]() {
             if (vector_contains(favorites, entry->full_path))
             {
                 remove_favorite(entry->full_path);
                 entry->favorite = false;
-                popupItem->setChecked(false);
+
+                print_debug("check: " + entry->name + " " + "v" + entry->version);
+                print_debug(std::to_string(appsList->getViewsCount()));
+
+                for (unsigned int i = 0; i < appsList->getViewsCount(); i++)
+                {
+                    print_debug(std::to_string(i));
+                    brls::ListItem* item = (brls::ListItem*)appsList->getChild(i);
+                    //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
+                    //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
+
+                    if (symbol_star() + "  " + entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+                    {
+                        print_debug("Collapse: " + item->getLabel() + " " + item->getValue());
+
+                        item->collapse(false);
+                    }
+                    else if (entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+                    {
+                        print_debug("Expand: " + item->getLabel() + " " + item->getValue());
+
+                        item->expand(false);
+                    }
+                }
+
+                //popupItem->setChecked(false);
             }
             else
             {
                 add_favorite(entry->full_path);
                 entry->favorite = true;
-                popupItem->setChecked(true);
+
+                print_debug("check: " + entry->name + " " + "v" + entry->version);
+                print_debug(std::to_string(appsList->getViewsCount()));
+
+                for (unsigned int i = 0; i < appsList->getViewsCount(); i++)
+                {
+                    print_debug(std::to_string(i));
+
+                    brls::ListItem* item = (brls::ListItem*)appsList->getChild(i);
+                    //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
+                    //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
+
+                    if (symbol_star() + "  " + entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+                    {
+                        print_debug("Collapse: " + item->getLabel() + " " + item->getValue());
+
+                        item->expand(false);
+                    }
+                    else if (entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+                    {
+                        print_debug("Expand: " + item->getLabel() + " " + item->getValue());
+
+                        item->collapse(false);
+                    }
+                }
             }
+
+            appsList->invalidate();
 
             return true;
         });
@@ -429,21 +469,68 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
     return popupItem;
 }
 
+std::vector<brls::ListItem*> to_collapse;
+
 void MainPage::build_main_tabs()
 {
-    brls::List* appsList      = new brls::List();
-    brls::List* storeAppsList = new brls::List();
-    brls::List* localAppsList = new brls::List();
+    appsList      = new brls::List();
+    storeAppsList = new brls::List();
+    localAppsList = new brls::List();
+
+    for (unsigned int i = 0; i < local_apps.size(); i++)
+    {
+        app_entry* current  = &local_apps.at(i);
+        std::string old_str = current->name;
+        current->name       = symbol_star() + "  " + current->name;
+
+        brls::ListItem* item_apps = make_app_entry(current, false);
+
+        //if (!current->favorite)
+        //    item_apps->collapse();
+
+        if (!current->favorite)
+            to_collapse.push_back(item_apps);
+
+        appsList->addView(item_apps);
+
+        if (current->from_appstore)
+        {
+            brls::ListItem* item_store = make_app_entry(current, true);
+            storeAppsList->addView(item_store);
+        }
+        else
+        {
+            brls::ListItem* item_local = make_app_entry(current, false);
+            localAppsList->addView(item_local);
+        }
+
+        current->name = old_str;
+    }
 
     for (unsigned int i = 0; i < local_apps.size(); i++)
     {
         app_entry* current = &local_apps.at(i);
-        appsList->addView(make_app_entry(current));
+
+        brls::ListItem* item_apps = make_app_entry(current, false);
+
+        //if (current->favorite)
+        //    item_apps->collapse();
+
+        if (current->favorite)
+            to_collapse.push_back(item_apps);
+
+        appsList->addView(item_apps);
 
         if (current->from_appstore)
-            storeAppsList->addView(make_app_entry(current, true));
+        {
+            brls::ListItem* item_store = make_app_entry(current, true);
+            storeAppsList->addView(item_store);
+        }
         else
-            localAppsList->addView(make_app_entry(current));
+        {
+            brls::ListItem* item_local = make_app_entry(current, false);
+            localAppsList->addView(item_local);
+        }
     }
 
     if (!local_apps.empty() && !store_apps.empty())
@@ -455,6 +542,15 @@ void MainPage::build_main_tabs()
         this->addTab(pad_string_with_spaces("App Store Apps", store_apps.size(), 9).c_str(), storeAppsList);
     if (!local_apps.empty())
         this->addTab(pad_string_with_spaces("Local Apps", local_apps.size(), 16).c_str(), localAppsList);
+}
+
+void hide_by_fav(brls::List* list)
+{
+    while (!to_collapse.empty())
+    {
+        to_collapse.at(0)->collapse(false);
+        to_collapse.erase(to_collapse.begin());
+    }
 }
 
 MainPage::MainPage()
@@ -473,6 +569,8 @@ MainPage::MainPage()
     //load_all_apps();
 
     build_main_tabs();
+
+    hide_by_fav(appsList);
 
     //rootFrame->addSeparator();
     //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));

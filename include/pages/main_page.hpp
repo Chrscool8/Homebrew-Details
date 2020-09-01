@@ -28,4 +28,8 @@ class MainPage : public brls::TabFrame
     brls::Label* battery_label;
     brls::Label* time_label;
     brls::Label* date_label;
+
+    brls::List* appsList;
+    brls::List* storeAppsList;
+    brls::List* localAppsList;
 };
