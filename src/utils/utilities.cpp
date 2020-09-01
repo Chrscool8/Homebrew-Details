@@ -93,7 +93,7 @@ void print_debug(std::string str)
 {
     if (get_setting_true(setting_debug))
     {
-        str = "[DETAILS] " + str;
+        str = "[DETAILS] " + str + "\n";
         printf(str.c_str());
     }
 }
@@ -208,13 +208,13 @@ std::string get_keyboard_input(std::string default_str)
         swkbdClose(&kbd);
         if (R_SUCCEEDED(res))
         {
-            print_debug(std::string("kbd out: ") + keyboard_chars + "\n");
+            print_debug(std::string("kbd out: ") + keyboard_chars);
             std::string str = keyboard_chars;
             return str;
         }
         else
         {
-            print_debug(std::string("kbd fail.\n"));
+            print_debug(std::string("kbd fail."));
         }
     }
 
@@ -241,7 +241,7 @@ void create_directories(std::string path)
     for (unsigned int i = 0; i < folders.size(); i++)
     {
         subpath += folders.at(i) + "/";
-        print_debug(subpath + "\n");
+        print_debug(subpath);
         if (!fs::exists(subpath))
             fs::create_directory(subpath);
     }
@@ -273,7 +273,7 @@ bool copy_file(const char* source_file, const char* target_file)
     if (!in || !out)
         return false;
 
-    print_debug("done\n");
+    print_debug("done");
     return true;
 }
 

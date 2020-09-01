@@ -183,12 +183,12 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 
     popupItem->updateActionHint(key, "Launch");
     popupItem->registerAction("Launch", key, [this, entry, popupItem]() {
-        print_debug("launch app\n");
+        print_debug("launch app");
         unsigned int r = launch_nro(entry->full_path, "\"" + entry->full_path + "\"");
-        print_debug("r: " + std::to_string(r) + "\n");
+        print_debug("r: " + std::to_string(r));
         if (R_FAILED(r))
         {
-            print_debug("Uh oh.\n");
+            print_debug("Uh oh.");
         }
         else
         {
@@ -218,12 +218,12 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
         {
             brls::ListItem* launch_item = new brls::ListItem("Launch App");
             launch_item->getClickEvent()->subscribe([this, entry](brls::View* view) {
-                print_debug("launch app\n");
+                print_debug("launch app");
                 unsigned int r = launch_nro(entry->full_path, "\"" + entry->full_path + "\"");
-                print_debug("r: " + std::to_string(r) + "\n");
+                print_debug("r: " + std::to_string(r));
                 if (R_FAILED(r))
                 {
-                    print_debug("Uh oh.\n");
+                    print_debug("Uh oh.");
                 }
                 else
                 {
@@ -246,7 +246,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 
                 if (to_lower(dest_string) == to_lower(entry->full_path))
                 {
-                    print_debug("Same path\n");
+                    print_debug("Same path");
                     brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
                     brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
                         dialog->close();
@@ -257,7 +257,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                 }
                 else if (dest_string.length() <= 4 || (dest_string).substr(dest_string.length() - 4) != ".nro")
                 {
-                    print_debug("Isn't an nro\n");
+                    print_debug("Isn't an nro");
                     brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\ndoesn't end with '.nro'.");
                     brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
                         dialog->close();
@@ -268,7 +268,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                 }
                 else if (fs::exists(dest_string))
                 {
-                    print_debug("File already exists.\n");
+                    print_debug("File already exists.");
                     brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\nalready exists.");
                     brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
                         dialog->close();
@@ -316,7 +316,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 
                 if (to_lower(dest_string) == to_lower(entry->full_path))
                 {
-                    print_debug("Same path\n");
+                    print_debug("Same path");
                     brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
                     brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
                         dialog->close();
@@ -327,7 +327,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                 }
                 else if (dest_string.length() <= 4 || (dest_string).substr(dest_string.length() - 4) != ".nro")
                 {
-                    print_debug("Isn't an nro\n");
+                    print_debug("Isn't an nro");
                     brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\ndoesn't end with '.nro'.");
                     brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
                         dialog->close();
@@ -338,7 +338,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                 }
                 else if (fs::exists(dest_string))
                 {
-                    print_debug("File already exists.\n");
+                    print_debug("File already exists.");
                     brls::Dialog* dialog                       = new brls::Dialog("Your destination,\n'" + dest_string + "'\nalready exists.");
                     brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
                         dialog->close();
@@ -561,7 +561,7 @@ MainPage::MainPage()
 
     this->setTitle(title.c_str());
     this->setIcon(get_resource_path("icon.jpg"));
-    print_debug("init rootframe\n");
+    print_debug("init rootframe");
     //this->setActionAvailable(brls::Key::B, false);
 
     //read_favorites();
@@ -581,7 +581,7 @@ MainPage::MainPage()
 
     //this->addTab("Read: "+std::to_string(batteryCharge), new brls::Rectangle(nvgRGB(120, 120, 120)));
 
-    print_debug("Check for updates.\n");
+    print_debug("Check for updates.");
     if (get_online_version_available())
     {
         this->addSeparator();
@@ -613,7 +613,7 @@ MainPage::MainPage()
         this->addTab("Update Available!", settingsList);
     }
 
-    print_debug("Toolbox.\n");
+    print_debug("Toolbox.");
     {
         this->addSeparator();
 
@@ -621,7 +621,7 @@ MainPage::MainPage()
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
         rtp_item->setValue("atmosphere/reboot_payload.bin");
         rtp_item->getClickEvent()->subscribe([](brls::View* view) {
-            print_debug("reboot_to_payload\n");
+            print_debug("reboot_to_payload");
             int result = reboot_to_payload();
             if (result == -1)
                 brls::Application::notify("Problem initializing spl");
@@ -632,7 +632,7 @@ MainPage::MainPage()
         this->addTab("Toolbox", tools_list);
     }
 
-    print_debug("Settings.\n");
+    print_debug("Settings.");
     {
         brls::List* settings_list = new brls::List();
         settings_list->addView(new brls::Header("Scan Settings"));
@@ -743,7 +743,7 @@ MainPage::MainPage()
         settings_list->addView(controlSelectItem);
 
         //
-        print_debug("Misc.\n");
+        print_debug("Misc.");
         settings_list->addView(new brls::Header("Misc. Settings"));
 
         brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes full effect on next launch.");
@@ -767,7 +767,7 @@ MainPage::MainPage()
         this->addTab("Settings", settings_list);
     }
 
-    print_debug("Debug Menu.\n");
+    print_debug("Debug Menu.");
     if (get_setting_true(setting_debug))
     {
         this->addSeparator();
@@ -794,7 +794,7 @@ MainPage::MainPage()
 
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
         rtp_item->getClickEvent()->subscribe([](brls::View* view) {
-            print_debug("reboot_to_payload\n");
+            print_debug("reboot_to_payload");
             reboot_to_payload();
         });
         debug_list->addView(rtp_item);
@@ -802,7 +802,7 @@ MainPage::MainPage()
         brls::ListItem* keyboard_item = new brls::ListItem("Keyboard Test");
         keyboard_item->setValue("Test Text");
         keyboard_item->getClickEvent()->subscribe([keyboard_item](brls::View* view) {
-            print_debug("Keyboard\n");
+            print_debug("Keyboard");
             std::string typed = get_keyboard_input(keyboard_item->getValue());
             keyboard_item->setValue(typed);
         });
@@ -811,7 +811,7 @@ MainPage::MainPage()
         this->addTab("Debug Menu", debug_list);
     }
 
-    print_debug("rm lock.\n");
+    print_debug("rm lock.");
 
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
         remove("sdmc:/config/homebrew_details/lock");

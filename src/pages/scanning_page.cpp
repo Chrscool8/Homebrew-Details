@@ -52,13 +52,13 @@
 
 void ScanningPage::thread_scan()
 {
-    print_debug("scan go\n");
+    print_debug("scan go");
 
     read_favorites();
     read_store_apps();
     load_all_apps();
 
-    print_debug("scan thread end\n");
+    print_debug("scan thread end");
 
     set_setting(setting_previous_num_files, std::to_string(file_count));
     scanprog.complete = true;
@@ -80,7 +80,7 @@ ScanningPage::ScanningPage()
 
     scanprog.end_thread = false;
 
-    print_debug(get_setting(setting_previous_num_files) + " previous files\n");
+    print_debug(get_setting(setting_previous_num_files) + " previous files");
 
     if (is_number(get_setting(setting_previous_num_files)))
         scanprog.prev_num_files = std::stoi(get_setting(setting_previous_num_files));
@@ -105,7 +105,7 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
 {
     if (!go)
     {
-        print_debug("Go\n");
+        print_debug("Go");
         go      = true;
         scanner = new std::thread(&ScanningPage::thread_scan, this);
     }
@@ -172,11 +172,11 @@ void ScanningPage::willDisappear(bool resetState)
 
 ScanningPage::~ScanningPage()
 {
-    print_debug("Scan Page End\n");
+    print_debug("Scan Page End");
 
     if (go && scanner->joinable())
     {
-        print_debug("Joinable\n");
+        print_debug("Joinable");
         scanner->join();
     }
 

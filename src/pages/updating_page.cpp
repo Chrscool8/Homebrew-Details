@@ -86,7 +86,7 @@ int progress_func(void* p, long long dltotal, long long dlnow, long long ultotal
 
 bool UpdatingPage::download_update()
 {
-    print_debug("update time\n");
+    print_debug("update time");
 
     CURL* curl_handle;
     static const char* pagefilename = "sdmc:/config/homebrew_details/hbupdate.nro";
@@ -109,7 +109,7 @@ bool UpdatingPage::download_update()
 
         std::string url = "https://github.com/Chrscool8/Homebrew-Details/releases/download/v" + get_online_version_number() + "/homebrew_details.nro";
 
-        print_debug(url + "\n");
+        print_debug(url);
 
         curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Homebrew-Details");
@@ -126,7 +126,7 @@ bool UpdatingPage::download_update()
         FILE* pagefile = fopen(pagefilename, "wb");
         if (pagefile)
         {
-            print_debug("pagefile good\n");
+            print_debug("pagefile good");
             curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
 
             prog.downloading = true;
@@ -136,19 +136,19 @@ bool UpdatingPage::download_update()
             prog.downloading = false;
             prog.complete    = true;
 
-            print_debug((std::string("res ") + std::to_string(res) + "\n").c_str());
+            print_debug(std::string("res ") + std::to_string(res));
             if (res == CURLE_OK)
             {
-                print_debug("curl update okay\n");
+                print_debug("curl update okay");
                 if (fs::exists(pagefilename))
                 {
-                    print_debug("new version downloaded\n");
+                    print_debug("new version downloaded");
 
                     app_entry check;
                     read_nacp_from_file(pagefilename, &check);
                     if (check.name == "Homebrew Details")
                     {
-                        print_debug("good nacp\n");
+                        print_debug("good nacp");
 
                         romfsExit();
                         remove(get_setting(setting_nro_path).c_str());
@@ -159,7 +159,7 @@ bool UpdatingPage::download_update()
                         return true;
                     }
                     else
-                        print_debug("bad nacp\n");
+                        print_debug("bad nacp");
                 }
             }
         }
@@ -172,10 +172,10 @@ bool UpdatingPage::download_update()
 
 void UpdatingPage::thread_counter()
 {
-    print_debug("count go\n");
+    print_debug("count go");
     bool updated = download_update();
 
-    print_debug("thread end\n");
+    print_debug("thread end");
 
     frame->nextStage();
 }
@@ -249,11 +249,11 @@ void UpdatingPage::willDisappear(bool resetState)
 
 UpdatingPage::~UpdatingPage()
 {
-    print_debug("Page End\n");
+    print_debug("Page End");
 
     if (go && counter->joinable())
     {
-        print_debug("Joinable\n");
+        print_debug("Joinable");
         prog.end_thread = true;
         counter->join();
     }

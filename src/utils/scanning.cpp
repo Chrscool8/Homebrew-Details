@@ -27,14 +27,14 @@ void read_store_apps()
             std::string folder = entry.path();
             if (fs::is_directory(folder))
             {
-                print_debug(("folder: " + folder + "\n").c_str());
+                print_debug("folder: " + folder);
                 app_entry current;
                 current.from_appstore = false;
 
                 std::string info_file = folder + "/info.json";
                 if (fs::exists(info_file))
                 {
-                    print_debug(("info_file: " + info_file + "\n").c_str());
+                    print_debug("info_file: " + info_file);
 
                     std::ifstream i(info_file);
                     nlohmann::json info_json;
@@ -51,13 +51,13 @@ void read_store_apps()
                     current.summary       = json_load_value_string(info_json, "details");
                     current.changelog     = json_load_value_string(info_json, "changelog");
 
-                    print_debug((current.name + "\n").c_str());
+                    print_debug(current.name);
                 }
 
                 std::string manifest_file = folder + "/manifest.install";
                 if (fs::exists(manifest_file))
                 {
-                    print_debug(("manifest: " + manifest_file + "\n").c_str());
+                    print_debug("manifest: " + manifest_file);
 
                     std::ifstream file(manifest_file);
                     std::string str;
@@ -82,18 +82,18 @@ void read_store_apps()
 
 void process_app_file(std::string filename)
 {
-    print_debug((filename + "\n").c_str());
+    print_debug(filename);
 
     if (filename.length() > 4)
     {
         if (filename.substr(filename.length() - 4) == ".nro")
         {
-            print_debug("read:\n");
+            print_debug("read:");
             app_entry current;
             read_nacp_from_file(filename, &current);
             read_icon_from_file(filename, &current);
             current.from_appstore = false;
-            print_debug("nacp and icon okay\n");
+            print_debug("nacp and icon okay");
 
             // Check against store apps
             int count = 0;
@@ -119,7 +119,7 @@ void process_app_file(std::string filename)
 
             current.favorite = vector_contains(favorites, current.full_path);
 
-            print_debug("done with stores\n");
+            print_debug("done with stores");
 
             if (!current.name.empty())
                 local_apps.push_back(current);
@@ -141,7 +141,7 @@ void list_files(const char* basePath, bool recursive)
     string_replace(pa, "//", "/");
     if (vector_contains(blacklist, pa))
     {
-        print_debug("Blacklist: " + pa + " = " + "sdmc:/retroarch\n");
+        print_debug("Blacklist: " + pa + " = " + "sdmc:/retroarch");
     }
     else
     {
@@ -159,7 +159,7 @@ void list_files(const char* basePath, bool recursive)
                     process_app_file(filename);
                 }
                 else
-                    print_debug("Skip: " + filename + "\n");
+                    print_debug("Skip: " + filename);
 
                 // Construct new path from our base path
                 strcpy(path, basePath);
@@ -184,25 +184,25 @@ void load_all_apps()
 
     if (get_setting_true(setting_scan_full_card))
     {
-        print_debug("Searching recursively within /\n");
+        print_debug("Searching recursively within /");
         list_files("sdmc:/", true);
     }
     else
     {
         if (get_setting_true(setting_search_subfolders))
         {
-            print_debug("Searching recursively within /switch/\n");
+            print_debug("Searching recursively within /switch/");
             list_files("sdmc:/switch", true);
         }
         else
         {
-            print_debug("Searching only within /switch/\n");
+            print_debug("Searching only within /switch/");
             list_files("sdmc:/switch", false);
         }
 
         if (get_setting_true(setting_search_root))
         {
-            print_debug("Searching only within /\n");
+            print_debug("Searching only within /");
             list_files("sdmc:/", false);
         }
     }

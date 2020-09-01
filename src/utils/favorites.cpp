@@ -22,13 +22,12 @@ void read_favorites()
             inputFile.getline(line, 512);
             favorites.push_back(base64_decode(line));
             print_debug(line);
-            print_debug("\n");
             index += 1;
         }
         inputFile.close();
     }
     else
-        print_debug("Can't find favorites file.\n");
+        print_debug("Can't find favorites file.");
 }
 
 void write_favorites()
@@ -52,7 +51,7 @@ void write_favorites()
             outputFile.close();
         }
         else
-            print_debug("Can't open favorites.\n");
+            print_debug("Can't open favorites.");
     }
 }
 

@@ -46,7 +46,7 @@ InfoPage::InfoPage(brls::StagedAppletFrame* frame, int type)
     this->button->getClickEvent()->subscribe([this, frame](View* view) {
         if (!pressed_button)
         {
-            print_debug("Clicked scan\n");
+            print_debug("Clicked scan");
             //this->frame->nextStage();
 
             //this->button->setLabel("Scanning...");
@@ -149,7 +149,7 @@ void InfoPage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stash
 
 InfoPage::~InfoPage()
 {
-    print_debug("Info Page End\n");
+    print_debug("Info Page End");
 
     delete this->label;
     delete this->button;
