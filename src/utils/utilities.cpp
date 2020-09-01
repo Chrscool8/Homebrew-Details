@@ -276,3 +276,18 @@ bool copy_file(const char* source_file, const char* target_file)
     print_debug("done\n");
     return true;
 }
+
+std::string symbol_star()
+{
+    return "\u2606";
+}
+
+std::string symbol_downarrow()
+{
+    return "\u21E9";
+}
+
+std::string symbol_rightarrow()
+{
+    return "\uE090";
+}

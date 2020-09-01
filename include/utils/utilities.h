@@ -27,3 +27,6 @@ std::vector<std::string> explode(std::string const& s, char delim);
 std::string to_lower(std::string str);
 void create_directories(std::string path);
 bool copy_file(const char* srce_file, const char* dest_file);
+std::string symbol_star();
+std::string symbol_downarrow();
+std::string symbol_rightarrow();

@@ -285,7 +285,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                         create_directories(dest_string.substr(0, found));
                     }
 
-                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to move the following file? This action cannot be undone.\n\n" + entry->full_path + "\n\u21E9\n" + dest_string);
+                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to move the following file? This action cannot be undone.\n\n" + entry->full_path + "\n" + symbol_downarrow() + "\n" + dest_string);
                     brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
                         if (rename(entry->full_path.c_str(), dest_string.c_str()) != 0)
                             brls::Application::notify("Issue moving file");
@@ -355,7 +355,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                         create_directories(dest_string.substr(0, found));
                     }
 
-                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to copy to the following file? This action cannot be undone.\n\n" + entry->full_path + "\n\u21E9\n" + dest_string);
+                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to copy to the following file? This action cannot be undone.\n\n" + entry->full_path + "\n" + symbol_downarrow() + "\n" + dest_string);
                     brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
                         if (copy_file(entry->full_path.c_str(), dest_string.c_str()))
                         {
@@ -588,7 +588,7 @@ MainPage::MainPage()
         brls::List* settingsList = new brls::List();
         settingsList->addView(new brls::Header("Update Actions", false));
 
-        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard", "v" + get_setting(setting_local_version) + "  " + " \uE090 " + "  v" + get_online_version_number());
+        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard", "v" + get_setting(setting_local_version) + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number());
         dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
             brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
             stagedFrame->setTitle("Update Wizard");
