@@ -141,7 +141,7 @@ void list_files(const char* basePath, bool recursive)
     string_replace(pa, "//", "/");
     if (vector_contains(blacklist, pa))
     {
-        print_debug("Blacklist: " + pa + " = " + "sdmc:/retroarch");
+        print_debug("Blacklist: " + pa);
     }
     else
     {
