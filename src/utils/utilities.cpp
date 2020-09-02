@@ -102,6 +102,8 @@ void string_replace(std::string& str, const std::string& from, const std::string
 {
     if (from.empty())
         return;
+    if (str.size() < from.size())
+        return;
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
     {
