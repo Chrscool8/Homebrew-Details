@@ -12,6 +12,8 @@ namespace fs = std::filesystem;
 
 void read_favorites()
 {
+    favorites.clear();
+
     std::ifstream inputFile("sdmc:/config/homebrew_details/favorites.txt");
     if (inputFile)
     {

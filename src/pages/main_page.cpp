@@ -489,20 +489,26 @@ void MainPage::build_main_tabs()
         //if (!current->favorite)
         //    item_apps->collapse();
 
+        appsList->addView(item_apps);
+
         if (!current->favorite)
             to_collapse.push_back(item_apps);
-
-        appsList->addView(item_apps);
 
         if (current->from_appstore)
         {
             brls::ListItem* item_store = make_app_entry(current, true);
             storeAppsList->addView(item_store);
+
+            if (!current->favorite)
+                to_collapse.push_back(item_store);
         }
         else
         {
             brls::ListItem* item_local = make_app_entry(current, false);
             localAppsList->addView(item_local);
+
+            if (!current->favorite)
+                to_collapse.push_back(item_local);
         }
 
         current->name = old_str;
@@ -517,20 +523,26 @@ void MainPage::build_main_tabs()
         //if (current->favorite)
         //    item_apps->collapse();
 
+        appsList->addView(item_apps);
+
         if (current->favorite)
             to_collapse.push_back(item_apps);
-
-        appsList->addView(item_apps);
 
         if (current->from_appstore)
         {
             brls::ListItem* item_store = make_app_entry(current, true);
             storeAppsList->addView(item_store);
+
+            if (current->favorite)
+                to_collapse.push_back(item_store);
         }
         else
         {
             brls::ListItem* item_local = make_app_entry(current, false);
             localAppsList->addView(item_local);
+
+            if (current->favorite)
+                to_collapse.push_back(item_local);
         }
     }
 
