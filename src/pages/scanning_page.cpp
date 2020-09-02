@@ -59,6 +59,7 @@ void ScanningPage::thread_scan()
     read_favorites();
     read_blacklist();
     load_notes();
+
     read_store_apps();
     load_all_apps();
 
