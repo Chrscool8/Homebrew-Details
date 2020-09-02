@@ -98,13 +98,17 @@ int main(int argc, char* argv[])
 
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
     {
-        brls::Application::pushView(new IssuePage());
         print_debug("Issue Page");
+        brls::AppletFrame* frame = new brls::AppletFrame(false, false);
+        frame->setContentView(new IssuePage());
+        brls::Application::pushView(frame);
     }
     else
     {
-        brls::Application::pushView(new IntroPage("Begin Scan"));
         print_debug("Intro Page");
+        brls::AppletFrame* frame = new brls::AppletFrame(false, false);
+        frame->setContentView(new IntroPage("Begin Scan"));
+        brls::Application::pushView(frame);
     }
 
     // Run the app
