@@ -1,6 +1,7 @@
 #include <utils/favorites.h>
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
+#include <utils/notes.h>
 #include <utils/reboot_to_payload.h>
 #include <utils/scanning.h>
 #include <utils/settings.h>
@@ -55,6 +56,7 @@ void ScanningPage::thread_scan()
     print_debug("scan go");
 
     read_favorites();
+    load_notes();
     read_store_apps();
     load_all_apps();
 

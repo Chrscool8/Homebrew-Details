@@ -562,11 +562,6 @@ MainPage::MainPage()
     this->setTitle(title.c_str());
     this->setIcon(get_resource_path("icon.jpg"));
     print_debug("init rootframe");
-    //this->setActionAvailable(brls::Key::B, false);
-
-    //read_favorites();
-    //read_store_apps();
-    //load_all_apps();
 
     build_main_tabs();
 

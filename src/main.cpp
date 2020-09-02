@@ -84,7 +84,6 @@ int main(int argc, char* argv[])
     file_load_settings();
     init_settings();
     set_setting(setting_nro_path, argv[0]);
-    load_notes();
 
     copy_resources();
 
