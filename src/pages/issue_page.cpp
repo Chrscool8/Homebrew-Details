@@ -20,9 +20,6 @@ IssuePage::IssuePage()
         if (!go)
         {
             printf("Clicked scan\n");
-
-            //this->button->setLabel("Scanning...");
-            //this->button->invalidate();
             go = true;
         }
     });
@@ -87,13 +84,13 @@ void IssuePage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stas
 
     this->label->setBoundaries(
         this->x + this->width / 2 - this->label->getWidth() / 2 + 140 + 43,
-        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2 - 30-10,
+        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2 - 30 - 10,
         this->label->getWidth(),
         this->label->getHeight());
 
     this->button->setBoundaries(
         this->x + this->width / 2 - style->CrashFrame.buttonWidth / 2 + 140 + 52,
-        this->y + this->height / 2 + 100 - this->button->getHeight()-60,
+        this->y + this->height / 2 + 100 - this->button->getHeight() - 60,
         style->CrashFrame.buttonWidth,
         style->CrashFrame.buttonHeight);
     this->button->invalidate();
