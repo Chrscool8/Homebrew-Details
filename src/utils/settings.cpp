@@ -39,8 +39,8 @@ void file_load_settings()
 void file_save_settings()
 {
     create_directories(config_path);
-
     remove((config_path + "config.txt").c_str());
+
     std::ofstream outputFile(config_path + "config.txt");
     if (outputFile)
     {
