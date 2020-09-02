@@ -1,3 +1,4 @@
+#include <utils/blacklist.h>
 #include <utils/favorites.h>
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
@@ -56,6 +57,7 @@ void ScanningPage::thread_scan()
     print_debug("scan go");
 
     read_favorites();
+    read_blacklist();
     load_notes();
     read_store_apps();
     load_all_apps();

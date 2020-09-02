@@ -32,4 +32,5 @@ class MainPage : public brls::TabFrame
     brls::List* storeAppsList;
     brls::List* localAppsList;
 
+    std::vector<std::string> bl_vec;
 };

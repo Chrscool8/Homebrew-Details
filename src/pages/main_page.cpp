@@ -1,4 +1,5 @@
 #include <main.h>
+#include <utils/blacklist.h>
 #include <utils/favorites.h>
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
@@ -729,6 +730,56 @@ MainPage::MainPage()
         }
 
         //
+
+        settings_list->addView(new brls::Header("Blacklist Settings"));
+        bl_vec.clear();
+        bl_vec.push_back("Add new entry...");
+        for (unsigned int ii = 0; ii < blacklist.size(); ii++)
+            bl_vec.push_back(blacklist.at(ii));
+
+        brls::ListItem* bl_edit_item = new brls::ListItem("Edit Blacklist");
+        bl_edit_item->registerAction("Edit", brls::Key::A, [&]() {
+            brls::TabFrame* appView = new brls::TabFrame();
+            appView->sidebar->setWidth(1000);
+            appView->addTab("Add new folder", nullptr);
+            appView->sidebar->getChild(0)->registerAction("OK", brls::Key::A, [appView]() {
+                std::string input = get_keyboard_input("sdmc:/switch/ignore_this");
+                if (!input.empty())
+                    add_blacklist(input);
+
+                return appView->onCancel();
+            });
+
+            if (!blacklist.empty())
+                appView->addSeparator();
+
+            for (unsigned int iii = 0; iii < blacklist.size(); iii++)
+            {
+                const char* item_name = blacklist.at(iii).c_str();
+                appView->addTab(item_name, nullptr);
+                appView->sidebar->getChild(iii + 2)->registerAction("Delete Entry", brls::Key::X, [appView, item_name]() {
+                    remove_blacklist(item_name);
+                    return appView->onCancel();
+                });
+                appView->sidebar->getChild(iii + 2)->registerAction("Edit Entry", brls::Key::A, [appView, item_name]() {
+                    std::string prev_string = item_name;
+                    remove_blacklist(prev_string);
+
+                    std::string input = get_keyboard_input(prev_string);
+                    if (!input.empty())
+                        add_blacklist(input);
+
+                    return appView->onCancel();
+                });
+            }
+
+            brls::PopupFrame::open("Blacklisted Folders", appView, "", "");
+            return true;
+        });
+        settings_list->addView(bl_edit_item);
+
+        //
+
         settings_list->addView(new brls::Header("Control Settings"));
 
         brls::SelectListItem* controlSelectItem = new brls::SelectListItem("Control Settings", { "A: Details; X: Launch", "A: Launch; X: Details" }, std::stoi(get_setting(setting_control_scheme)), "Takes full effect on next launch.");

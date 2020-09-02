@@ -1,4 +1,5 @@
 #include <main.h>
+#include <utils/blacklist.h>
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
 #include <utils/notes.h>
