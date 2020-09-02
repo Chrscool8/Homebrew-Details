@@ -81,7 +81,6 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-
     file_load_settings();
     init_settings();
     set_setting(setting_nro_path, argv[0]);
