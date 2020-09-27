@@ -104,22 +104,26 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
 
-    if (get_setting_true(setting_debug))
-    {
-        popupItem->updateActionHint(brls::Key::Y, "Favorite");
-        popupItem->registerAction("Favorite", brls::Key::Y, [this, entry, popupItem]() {
-            if (vector_contains(favorites, entry->full_path))
+    popupItem->updateActionHint(brls::Key::Y, "Favorite");
+    popupItem->registerAction("Favorite", brls::Key::Y, [this, entry, popupItem]() {
+        if (vector_contains(favorites, entry->full_path))
+        {
+            remove_favorite(entry->full_path);
+            entry->favorite = false;
+
+            print_debug("check: " + entry->name + " " + "v" + entry->version);
+            print_debug(std::to_string(appsList->getViewsCount()));
+
+            brls::List* list_type[3] = { appsList,
+                localAppsList,
+                storeAppsList };
+
+            for (unsigned int list_iter = 0; list_iter < 3; list_iter++)
             {
-                remove_favorite(entry->full_path);
-                entry->favorite = false;
-
-                print_debug("check: " + entry->name + " " + "v" + entry->version);
-                print_debug(std::to_string(appsList->getViewsCount()));
-
-                for (unsigned int i = 0; i < appsList->getViewsCount(); i++)
+                for (unsigned int i = 0; i < list_type[list_iter]->getViewsCount(); i++)
                 {
-                    print_debug(std::to_string(i));
-                    brls::ListItem* item = (brls::ListItem*)appsList->getChild(i);
+                    //print_debug(std::to_string(i));
+                    brls::ListItem* item = (brls::ListItem*)list_type[list_iter]->getChild(i);
                     //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
                     //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
 
@@ -136,22 +140,29 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                         item->expand(false);
                     }
                 }
-
-                //popupItem->setChecked(false);
             }
-            else
+
+            //popupItem->setChecked(false);
+        }
+        else
+        {
+            add_favorite(entry->full_path);
+            entry->favorite = true;
+
+            print_debug("check: " + entry->name + " " + "v" + entry->version);
+            print_debug(std::to_string(appsList->getViewsCount()));
+
+            brls::List* list_type[3] = { appsList,
+                localAppsList,
+                storeAppsList };
+
+            for (unsigned int list_iter = 0; list_iter < 3; list_iter++)
             {
-                add_favorite(entry->full_path);
-                entry->favorite = true;
-
-                print_debug("check: " + entry->name + " " + "v" + entry->version);
-                print_debug(std::to_string(appsList->getViewsCount()));
-
-                for (unsigned int i = 0; i < appsList->getViewsCount(); i++)
+                for (unsigned int i = 0; i < list_type[list_iter]->getViewsCount(); i++)
                 {
-                    print_debug(std::to_string(i));
+                    //print_debug(std::to_string(i));
 
-                    brls::ListItem* item = (brls::ListItem*)appsList->getChild(i);
+                    brls::ListItem* item = (brls::ListItem*)list_type[list_iter]->getChild(i);
                     //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
                     //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
 
@@ -169,12 +180,16 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                     }
                 }
             }
+        }
 
-            appsList->invalidate();
+        this->onCancel();
 
-            return true;
-        });
-    }
+        appsList->invalidate();
+        localAppsList->invalidate();
+        storeAppsList->invalidate();
+
+        return true;
+    });
 
     brls::Key key = brls::Key::A;
     if (get_setting(setting_control_scheme) == "0")
@@ -865,6 +880,9 @@ MainPage::MainPage()
             keyboard_item->setValue(typed);
         });
         debug_list->addView(keyboard_item);
+
+        add_list_entry("Number of Favorites", std::to_string(favorites.size()), "", debug_list);
+        add_list_entry("Number of Blacklisted Folders", std::to_string(blacklist.size()), "", debug_list);
 
         this->addTab("Debug Menu", debug_list);
     }

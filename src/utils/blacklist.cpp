@@ -37,12 +37,15 @@ void write_blacklist()
         std::ofstream outputFile("sdmc:/config/homebrew_details/blacklist.txt");
         if (outputFile)
         {
-            int index = 0;
+            unsigned int index = 0;
             while (index < blacklist.size())
             {
-                outputFile << (base64_encode(blacklist.at(index))).c_str();
-                if (index != blacklist.size() - 1)
-                    outputFile << std::endl;
+                if (!blacklist.at(index).empty())
+                {
+                    outputFile << (base64_encode(blacklist.at(index))).c_str();
+                    if (index != blacklist.size() - 1)
+                        outputFile << std::endl;
+                }
                 index += 1;
             }
             outputFile.close();

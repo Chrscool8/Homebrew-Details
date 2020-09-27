@@ -17,14 +17,13 @@ void read_favorites()
     std::ifstream inputFile("sdmc:/config/homebrew_details/favorites.txt");
     if (inputFile)
     {
-        int index = 0;
         while (inputFile)
         {
             char line[513];
             inputFile.getline(line, 512);
-            favorites.push_back(base64_decode(line));
+            if (strlen(line) != 0)
+                favorites.push_back(base64_decode(line));
             print_debug(line);
-            index += 1;
         }
         inputFile.close();
     }
@@ -45,9 +44,12 @@ void write_favorites()
             unsigned int index = 0;
             while (index < favorites.size())
             {
-                outputFile << (base64_encode(favorites.at(index))).c_str();
-                if (index != favorites.size() - 1)
-                    outputFile << std::endl;
+                if (!favorites.at(index).empty())
+                {
+                    outputFile << (base64_encode(favorites.at(index))).c_str();
+                    if (index != favorites.size() - 1)
+                        outputFile << std::endl;
+                }
                 index += 1;
             }
             outputFile.close();
