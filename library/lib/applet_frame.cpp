@@ -91,13 +91,16 @@ void AppletFrame::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned he
         nvgTextBounds(vg, x, y, this->subTitleLeft.c_str(), nullptr, bounds);
 
         // Sub title separator
-        nvgFillColor(vg, a(ctx->theme->descriptionColor)); // we purposely don't apply opacity
-        nvgBeginPath(vg);
-        nvgRect(vg, x + style->PopupFrame.subTitleLeftPadding + (bounds[2] - bounds[0]) + style->PopupFrame.subTitleSpacing,
-            y + style->PopupFrame.subTitleSeparatorTopPadding,
-            1,
-            style->PopupFrame.subTitleSeparatorHeight);
-        nvgFill(vg);
+        if (!subTitleLeft.empty() && !subTitleRight.empty())
+        {
+            nvgFillColor(vg, a(ctx->theme->descriptionColor)); // we purposely don't apply opacity
+            nvgBeginPath(vg);
+            nvgRect(vg, x + style->PopupFrame.subTitleLeftPadding + (bounds[2] - bounds[0]) + style->PopupFrame.subTitleSpacing,
+                y + style->PopupFrame.subTitleSeparatorTopPadding,
+                1,
+                style->PopupFrame.subTitleSeparatorHeight);
+            nvgFill(vg);
+        }
 
         // Sub title text 2
         nvgBeginPath(vg);

@@ -59,9 +59,8 @@ class TableRow
 class Table : public View
 {
   private:
-    std::vector<TableRow*> rows;
-
   public:
+    std::vector<TableRow*> rows;
     ~Table();
 
     void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, Style* style, FrameContext* ctx) override;
