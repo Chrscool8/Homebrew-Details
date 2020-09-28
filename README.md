@@ -27,7 +27,8 @@ This is an app that allows you to view details about, launch, categorize, and ma
 - Status info in the main page header (Date, time, battery level, charging status)
 - Customizable Controls
 - Use an installable forwarder nsp to access directly from the home menu
-- Pin/Favorite Apps to the top of the list (Available now in debug mode)
+- Pin/Favorite Apps to the top of the list
+- Blacklist folders from search
 
 **What will it be?**<br>
 Hopefully, an all-around manager for all your apps. Some people have already expressed that they'd like it to be a full hbmenu replacement. With app launching, it's just about there already. Coming soon is blacklisting folders in the scan, checking for and updating app store apps, and more.
@@ -47,7 +48,7 @@ Comments, criticism, and suggestions are welcomed and encouraged. I'd love to ma
 **Thank you for your time, I hope you enjoy it!**
 
 ![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922311500-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
-![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000154800-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.93/2020092802540800-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
 ![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922391100-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
 ![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.73/2020071922391900-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
 ![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000160000-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
