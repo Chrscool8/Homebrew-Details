@@ -641,6 +641,8 @@ MainPage::MainPage()
         this->addSeparator();
 
         brls::List* tools_list   = new brls::List();
+
+        tools_list->addView(new brls::Header("Actionables"));
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
         rtp_item->setValue("atmosphere/reboot_payload.bin");
         rtp_item->getClickEvent()->subscribe([](brls::View* view) {
@@ -652,6 +654,16 @@ MainPage::MainPage()
                 brls::Application::notify("Failed to open atmosphere/ reboot_payload.bin!");
         });
         tools_list->addView(rtp_item);
+
+        tools_list->addView(new brls::Header("Information"));
+
+        brls::ListItem* nsp_item = new brls::ListItem("How to Install to Home Menu...");
+        //nsp_item->setValue("atmosphere/reboot_payload.bin");
+        nsp_item->getClickEvent()->subscribe([](brls::View* view) {
+            print_debug("reboot_to_payload");
+        });
+        tools_list->addView(nsp_item);
+
         this->addTab("Toolbox", tools_list);
     }
 

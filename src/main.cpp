@@ -43,14 +43,18 @@ std::vector<app_entry> local_apps;
 std::vector<app_entry> store_apps;
 std::vector<app_entry> store_file_data;
 
-std::string asset_path = "sdmc:/config/homebrew_details/assets/";
+std::string asset_path   = "sdmc:/config/homebrew_details/assets/";
+std::string config__path = "sdmc:/config/homebrew_details/";
 
-void export_resource(std::string src)
+void export_resource(std::string folder, std::string src)
 {
-    if (!fs::exists(asset_path + src))
+    folder += "/";
+    create_directories(config__path + folder);
+
+    if (!fs::exists(config__path + folder + src))
     {
         std::ifstream srcfile(("romfs:/" + src).c_str(), std::ios::binary);
-        std::ofstream dstfile(asset_path + src, std::ios::binary);
+        std::ofstream dstfile(config__path + folder + src, std::ios::binary);
 
         dstfile << srcfile.rdbuf();
     }
@@ -58,14 +62,15 @@ void export_resource(std::string src)
 
 void copy_resources()
 {
-    create_directories(asset_path);
+    export_resource("assets", "arrows.jpg");
+    export_resource("assets", "arrows_small.jpg");
+    export_resource("assets", "download.jpg");
+    export_resource("assets", "icon.jpg");
+    export_resource("assets", "warning.jpg");
+    export_resource("assets", "warning_arrows.jpg");
 
-    export_resource("arrows.jpg");
-    export_resource("arrows_small.jpg");
-    export_resource("download.jpg");
-    export_resource("icon.jpg");
-    export_resource("warning.jpg");
-    export_resource("warning_arrows.jpg");
+    export_resource("forwarders", "HomebrewDetailsForwarder.nsp");
+    export_resource("forwarders", "HomebrewDetailsForwarderAlt.nsp");
 }
 
 int main(int argc, char* argv[])
