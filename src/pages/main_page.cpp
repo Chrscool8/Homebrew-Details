@@ -640,7 +640,7 @@ MainPage::MainPage()
     {
         this->addSeparator();
 
-        brls::List* tools_list   = new brls::List();
+        brls::List* tools_list = new brls::List();
 
         tools_list->addView(new brls::Header("Actionables"));
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
@@ -658,9 +658,13 @@ MainPage::MainPage()
         tools_list->addView(new brls::Header("Information"));
 
         brls::ListItem* nsp_item = new brls::ListItem("How to Install to Home Menu...");
-        //nsp_item->setValue("atmosphere/reboot_payload.bin");
         nsp_item->getClickEvent()->subscribe([](brls::View* view) {
-            print_debug("reboot_to_payload");
+            brls::TabFrame* appView = new brls::TabFrame();
+            appView->sidebar->setWidth(1000);
+            appView->setHeight(400);
+            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, "\nUsing your favorite nsp installer, install the forwarder that is currently in:\n- sdmc:/config/homebrew_details/forwarder/HomebrewDetails_MultiForwarder.nsp\n\nIt will launch this application from any of the following locations:\n- sdmc:/switch/homebrew_details.nro\n- sdmc:/switch/homebrew_details/homebrew_details.nro\n- sdmc:/switch/homebrew-details/homebrew_details.nro", true));
+            appView->setIcon(get_resource_path("arrows.jpg"));
+            brls::PopupFrame::open("How to Install to Home Menu", appView, "", "");
         });
         tools_list->addView(nsp_item);
 

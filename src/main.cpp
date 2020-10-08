@@ -69,13 +69,15 @@ void copy_resources()
     export_resource("assets", "warning.jpg");
     export_resource("assets", "warning_arrows.jpg");
 
-    export_resource("forwarders", "HomebrewDetailsForwarder.nsp");
-    export_resource("forwarders", "HomebrewDetailsForwarderAlt.nsp");
+    export_resource("forwarder", "HomebrewDetails_MultiForwarder.nsp");
 }
 
 int main(int argc, char* argv[])
 {
     printf(argv[0]);
+
+    std::string target = argv[0];
+    envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
 
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
