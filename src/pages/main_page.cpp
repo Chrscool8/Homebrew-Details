@@ -832,6 +832,23 @@ MainPage::MainPage()
         settings_list->addView(controlSelectItem);
 
         //
+
+        settings_list->addView(new brls::Header("App Settings"));
+
+        brls::SelectListItem* exitToItem = new brls::SelectListItem("Exit To", { "sdmc:/hbmenu.nro", get_setting(setting_nro_path) });
+        exitToItem->setValue(get_setting(setting_exit_to));
+        exitToItem->getValueSelectedEvent()->subscribe([](size_t selection) {
+            if (selection == 0)
+                set_setting(setting_exit_to, "sdmc:/hbmenu.nro");
+            else if (selection == 1)
+                set_setting(setting_exit_to, get_setting(setting_nro_path));
+
+            std::string target = get_setting(setting_exit_to);
+            envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
+        });
+        settings_list->addView(exitToItem);
+
+        //
         print_debug("Misc.");
         settings_list->addView(new brls::Header("Misc. Settings"));
 

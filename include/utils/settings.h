@@ -21,6 +21,7 @@ enum setting
     setting_control_scheme,
     setting_scan_settings_changed,
     setting_previous_num_files,
+    setting_exit_to,
     settings_num
 };
 

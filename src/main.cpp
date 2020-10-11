@@ -76,9 +76,6 @@ int main(int argc, char* argv[])
 {
     printf(argv[0]);
 
-    std::string target = argv[0];
-    envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
-
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
     std::string title = "Homebrew Details v" APP_VERSION;
@@ -99,6 +96,9 @@ int main(int argc, char* argv[])
 
     init_online_info();
     check_for_updates();
+
+    std::string target = get_setting(setting_exit_to);
+    envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
 
     psmInitialize();
 

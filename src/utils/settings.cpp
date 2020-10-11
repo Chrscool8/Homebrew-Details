@@ -126,4 +126,9 @@ void init_settings()
     {
         set_setting(setting_previous_num_files, "1");
     }
+
+    if (get_setting(setting_exit_to) == "")
+    {
+        set_setting(setting_exit_to, "sdmc:/hbmenu.nro");
+    }
 }
