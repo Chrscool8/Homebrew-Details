@@ -26,17 +26,17 @@ InfoPage::InfoPage(brls::StagedAppletFrame* frame, int type)
     {
         case info_page_dl_intro:
             button_label = "Begin Download";
-            icon         = get_resource_path("download.jpg");
+            icon         = get_resource_path("download.png");
             title        = std::string(" Update Wizard Engaged.\nv ") + get_setting(setting_local_version) + " " + " " + symbol_rightarrow() + " " + " v " + get_online_version_number();
             break;
         case info_page_dl_done:
             button_label = "Proceed!";
-            icon         = get_resource_path("download.jpg");
+            icon         = get_resource_path("download.png");
             title        = "Done";
             break;
         default:
             button_label = "Info";
-            icon         = get_resource_path("icon.jpg");
+            icon         = get_resource_path("icon.png");
             title        = "Info";
             break;
     }

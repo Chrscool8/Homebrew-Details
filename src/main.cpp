@@ -62,12 +62,14 @@ void export_resource(std::string folder, std::string src)
 
 void copy_resources()
 {
-    export_resource("assets", "arrows.jpg");
-    export_resource("assets", "arrows_small.jpg");
-    export_resource("assets", "download.jpg");
-    export_resource("assets", "icon.jpg");
-    export_resource("assets", "warning.jpg");
-    export_resource("assets", "warning_arrows.jpg");
+    export_resource("assets", "arrows.png");
+    export_resource("assets", "arrows_small.png");
+    export_resource("assets", "download.png");
+    export_resource("assets", "icon.png");
+    export_resource("assets", "warning.png");
+    export_resource("assets", "warning_arrows.png");
+    export_resource("assets", "style_list.png");
+    export_resource("assets", "style_flow.png");
 
     export_resource("forwarder", "HomebrewDetails_MultiForwarder.nsp");
 }
