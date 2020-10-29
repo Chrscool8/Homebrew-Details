@@ -78,6 +78,8 @@ ScanningPage::ScanningPage()
     short_wait = 0;
     continued  = false;
 
+    file_count = 0;
+
     scanprog.progress = 0;
     scanprog.complete = false;
     scanprog.success  = false;
