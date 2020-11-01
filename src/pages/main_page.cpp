@@ -14,6 +14,7 @@
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
 #include <pages/main_page.hpp>
+#include <pages/test_grid_page.hpp>
 #include <pages/updating_page.hpp>
 //
 
@@ -945,6 +946,17 @@ MainPage::MainPage()
 
         add_list_entry("Number of Favorites", std::to_string(favorites.size()), "", debug_list);
         add_list_entry("Number of Blacklisted Folders", std::to_string(blacklist.size()), "", debug_list);
+
+        brls::ListItem* test_grid_item = new brls::ListItem("Grid Layout Test");
+        test_grid_item->getClickEvent()->subscribe([](brls::View* view) {
+            brls::AppletFrame* fr = new brls::AppletFrame(true, true);
+            fr->setIcon(get_resource_path("icon.png"));
+            fr->setTitle("Choose your Menu Style");
+            //fr->setFooterText("This can be changed later");
+            fr->setContentView(new CustomLayoutTab());
+            brls::Application::pushView(fr);
+        });
+        debug_list->addView(test_grid_item);
 
         this->addTab("Debug Menu", debug_list);
     }
