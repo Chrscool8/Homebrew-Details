@@ -30,6 +30,9 @@
 #include <string>
 #include <vector>
 
+namespace i18n = brls::i18n; // for loadTranslations() and getStr()
+using namespace i18n::literals; // for _i18n
+
 #ifndef APP_VERSION
 #error APP_VERSION define missing
 #endif
@@ -79,6 +82,8 @@ int main(int argc, char* argv[])
     printf(argv[0]);
 
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
+
+    i18n::loadTranslations();
 
     std::string title = "Homebrew Details v" APP_VERSION;
     if (!brls::Application::init(title.c_str()))
