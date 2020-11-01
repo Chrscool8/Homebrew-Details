@@ -23,12 +23,13 @@
 #include <borealis/application.hpp>
 #include <borealis/dropdown.hpp>
 #include <borealis/header.hpp>
+#include <borealis/i18n.hpp>
 #include <borealis/list.hpp>
 #include <borealis/logger.hpp>
 #include <borealis/swkbd.hpp>
 #include <borealis/table.hpp>
 
-// TODO: Scrollbar
+using namespace brls::i18n::literals;
 
 namespace brls
 {
@@ -122,7 +123,7 @@ ListItem::ListItem(std::string label, std::string description, std::string subLa
         this->descriptionView->setParent(this);
     }
 
-    this->registerAction("OK", Key::A, [this] { return this->onClick(); });
+    this->registerAction("brls/hints/ok"_i18n, Key::A, [this] { return this->onClick(); });
 }
 
 void ListItem::setThumbnail(Image* image)
@@ -443,6 +444,11 @@ std::string ListItem::getLabel()
     return this->label;
 }
 
+void ListItem::setLabel(std::string label)
+{
+    this->label = label;
+}
+
 ListItem::~ListItem()
 {
     if (this->descriptionView)
@@ -523,7 +529,7 @@ bool IntegerInputListItem::onClick()
 ListItemGroupSpacing::ListItemGroupSpacing(bool separator)
     : Rectangle(nvgRGBA(0, 0, 0, 0))
 {
-    ThemeValues* theme = Application::getThemeValues();
+    Theme* theme = Application::getTheme();
 
     if (separator)
         this->setColor(theme->listItemSeparatorColor);
@@ -557,6 +563,11 @@ void SelectListItem::setSelectedValue(unsigned value)
         this->selectedValue = value;
         this->setValue(this->values[value], false, false);
     }
+}
+
+unsigned SelectListItem::getSelectedValue()
+{
+    return this->selectedValue;
 }
 
 ValueSelectedEvent* SelectListItem::getValueSelectedEvent()

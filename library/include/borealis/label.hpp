@@ -31,14 +31,16 @@ enum class LabelStyle
     SMALL,
     DESCRIPTION,
     CRASH,
-    BUTTON_PLAIN,
-    BUTTON_PLAIN_DISABLED,
+    BUTTON_PRIMARY,
+    BUTTON_PRIMARY_DISABLED,
     BUTTON_BORDERLESS,
     LIST_ITEM,
     NOTIFICATION,
     DIALOG,
     BUTTON_DIALOG,
-    HINT
+    HINT,
+    BUTTON_BORDERED,
+    BUTTON_REGULAR
 };
 
 // A Label, multiline or with a ticker
@@ -89,7 +91,7 @@ class Label : public View
      * Returns the effective label color
      * = custom or the style default
      */
-    NVGcolor getColor(ThemeValues* theme);
+    NVGcolor getColor(Theme* theme);
 
     /**
      * Sets the font id
