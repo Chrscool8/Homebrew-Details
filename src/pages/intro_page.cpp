@@ -59,7 +59,7 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
 
             brls::AppletFrame* frame_scanning = new brls::AppletFrame(true, true);
             frame_scanning->setIcon(get_resource_path("icon.png"));
-            frame_scanning->setTitle("Scanning your filesystem");
+            frame_scanning->setTitle("Scanning for Apps");
             frame_scanning->setContentView(new ScanningPage());
             brls::Application::pushView(frame_scanning);
 
