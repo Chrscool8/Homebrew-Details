@@ -406,6 +406,35 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
                         brls::Application::notify("Issue removing file");
                     else
                     {
+                        std::string _folder = folder_of_file(entry->full_path);
+                        print_debug("_folder " + _folder);
+
+                        const char* basePath = _folder.c_str();
+
+                        struct dirent* dp;
+                        DIR* dir = opendir(basePath);
+
+                        int num_files = 0;
+                        while ((dp = readdir(dir)) != NULL)
+                        {
+                            print_debug("content: " + std::string(basePath) + std::string(dp->d_name));
+                            num_files += 1;
+                        }
+
+                        closedir(dir);
+
+                        print_debug("num things: " + std::to_string(num_files));
+
+                        if (num_files == 0)
+                        {
+                            int res = rmdir(_folder.c_str());
+                            print_debug("res " + std::to_string(res));
+
+                            print_debug("No other files, removing " + _folder);
+                        }
+                        else
+                            print_debug("Other files, not removing " + _folder);
+
                         brls::Application::notify("File successfully deleted");
                         purge_entry(entry);
                     }
