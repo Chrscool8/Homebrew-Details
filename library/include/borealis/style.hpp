@@ -163,6 +163,9 @@ class Style
         float shadowFeather;
         float shadowOpacity;
         float shadowOffset;
+
+        unsigned borderedBorderThickness;
+        unsigned regularBorderThickness;
     } Button;
 
     // TableRow
@@ -313,11 +316,12 @@ class Style
         float shadowOpacity;
         float shadowOffset;
     } Dialog;
+};
 
-    // As close to HOS as possible
-    static Style horizon();
-
-    // TODO: Make a condensed style
+class HorizonStyle : public Style
+{
+  public:
+    HorizonStyle();
 };
 
 } // namespace brls

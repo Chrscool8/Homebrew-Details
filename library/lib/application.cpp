@@ -28,11 +28,11 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include <glad.h>
+#include <glad/glad.h>
 
 #define GLM_FORCE_PURE
 #define GLM_ENABLE_EXPERIMENTAL
-#include <nanovg.h>
+#include <nanovg/nanovg.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -41,7 +41,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #define NANOVG_GL3_IMPLEMENTATION
-#include <nanovg_gl.h>
+#include <nanovg/nanovg_gl.h>
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -62,6 +62,8 @@ constexpr uint32_t WINDOW_HEIGHT = 720;
 
 // glfw code from the glfw hybrid app by fincs
 // https://github.com/fincs/hybrid_app
+
+using namespace brls::i18n::literals;
 
 namespace brls
 {
@@ -132,12 +134,7 @@ static void windowKeyCallback(GLFWwindow* window, int key, int scancode, int act
     }
 }
 
-bool Application::init(std::string title)
-{
-    return Application::init(title, Style::horizon(), Theme::horizon());
-}
-
-bool Application::init(std::string title, Style style, Theme theme)
+bool Application::init(std::string title, Style* style, LibraryViewsThemeVariantsWrapper* themeVariantsWrapper)
 {
     // Init rng
     std::srand(std::time(nullptr));
@@ -147,14 +144,20 @@ bool Application::init(std::string title, Style style, Theme theme)
     Application::notificationManager = new NotificationManager();
 
     // Init static variables
-    Application::currentStyle = style;
     Application::currentFocus = nullptr;
     Application::oldGamepad   = {};
     Application::gamepad      = {};
     Application::title        = title;
 
-    // Init theme to defaults
-    Application::setTheme(theme);
+    // Init theme and style
+    if (!themeVariantsWrapper)
+        themeVariantsWrapper = new LibraryViewsThemeVariantsWrapper(new HorizonLightTheme(), new HorizonDarkTheme());
+
+    if (!style)
+        style = new HorizonStyle();
+
+    Application::currentThemeVariantsWrapper = themeVariantsWrapper;
+    Application::currentStyle                = style;
 
     // Init glfw
     glfwSetErrorCallback(errorCallback);
@@ -260,7 +263,7 @@ bool Application::init(std::string title, Style style, Theme theme)
         Application::fontStash.regular = Application::loadFont("regular", BOREALIS_ASSET("inter/Inter-Switch.ttf"));
 
     if (Application::fontStash.regular == -1)
-        brls::Logger::error("Couldn't load regular font, no text will be displayed!");
+        brls::Logger::warning("Couldn't load regular font, no text will be displayed!");
 
     if (access(BOREALIS_ASSET("Wingdings.ttf"), F_OK) != -1)
         Application::fontStash.sharedSymbols = Application::loadFont("sharedSymbols", BOREALIS_ASSET("Wingdings.ttf"));
@@ -278,7 +281,7 @@ bool Application::init(std::string title, Style style, Theme theme)
     }
     else
     {
-        Logger::error("Shared symbols font not found");
+        Logger::warning("Shared symbols font not found");
     }
 
     // Set Material as fallback
@@ -289,7 +292,7 @@ bool Application::init(std::string title, Style style, Theme theme)
     }
     else
     {
-        Logger::error("Material font not found");
+        Logger::warning("Material font not found");
     }
 
     // Load theme
@@ -298,15 +301,15 @@ bool Application::init(std::string title, Style style, Theme theme)
     setsysGetColorSetId(&nxTheme);
 
     if (nxTheme == ColorSetId_Dark)
-        Application::currentThemeVariant = ThemeVariant_DARK;
+        Application::currentThemeVariant = ThemeVariant::DARK;
     else
-        Application::currentThemeVariant = ThemeVariant_LIGHT;
+        Application::currentThemeVariant = ThemeVariant::LIGHT;
 #else
     char* themeEnv = getenv("BOREALIS_THEME");
     if (themeEnv != nullptr && !strcasecmp(themeEnv, "DARK"))
-        Application::currentThemeVariant = ThemeVariant_DARK;
+        Application::currentThemeVariant = ThemeVariant::DARK;
     else
-        Application::currentThemeVariant = ThemeVariant_LIGHT;
+        Application::currentThemeVariant = ThemeVariant::LIGHT;
 #endif
 
     // Init window size
@@ -460,7 +463,7 @@ void Application::navigate(FocusDirection direction)
         return;
 
     // Get next view to focus by traversing the views tree upwards
-    View* nextFocus = currentFocus->getParent()->getNextFocus(direction, currentFocus->getParentUserData());
+    View* nextFocus = currentFocus->getParent()->getNextFocus(direction, currentFocus);
 
     while (!nextFocus) // stop when we find a view to focus
     {
@@ -468,7 +471,7 @@ void Application::navigate(FocusDirection direction)
             break;
 
         currentFocus = currentFocus->getParent();
-        nextFocus    = currentFocus->getParent()->getNextFocus(direction, currentFocus->getParentUserData());
+        nextFocus    = currentFocus->getParent()->getNextFocus(direction, currentFocus);
     }
 
     // No view to focus at the end of the traversal: wiggle and return
@@ -563,7 +566,7 @@ void Application::frame()
     frameContext.pixelRatio = (float)Application::windowWidth / (float)Application::windowHeight;
     frameContext.vg         = Application::vg;
     frameContext.fontStash  = &Application::fontStash;
-    frameContext.theme      = Application::getThemeValues();
+    frameContext.theme      = Application::getTheme();
 
     // GL Clear
     glClearColor(
@@ -633,19 +636,22 @@ void Application::exit()
 
     delete Application::taskManager;
     delete Application::notificationManager;
+
+    delete Application::currentThemeVariantsWrapper;
+    delete Application::currentStyle;
 }
 
 void Application::setDisplayFramerate(bool enabled)
 {
     if (!Application::framerateCounter && enabled)
     {
-        Logger::info("Enabling framerate counter");
+        Logger::debug("Enabling framerate counter");
         Application::framerateCounter = new FramerateCounter();
         Application::resizeFramerateCounter();
     }
     else if (Application::framerateCounter && !enabled)
     {
-        Logger::info("Disabling framerate counter");
+        Logger::debug("Disabling framerate counter");
         delete Application::framerateCounter;
         Application::framerateCounter = nullptr;
     }
@@ -784,7 +790,7 @@ void Application::pushView(View* view, ViewAnimation animation)
     bool fadeOut = last && !last->isTranslucent() && !view->isTranslucent(); // play the fade out animation?
     bool wait    = animation == ViewAnimation::FADE; // wait for the old view animation to be done before showing the new one?
 
-    view->registerAction("Exit", Key::PLUS, [] { Application::quit(); return true; });
+    view->registerAction("brls/hints/exit"_i18n, Key::PLUS, [] { Application::quit(); return true; });
     view->registerAction(
         "FPS", Key::MINUS, [] { Application::toggleFramerateDisplay(); return true; }, true);
 
@@ -878,22 +884,17 @@ void Application::clear()
 
 Style* Application::getStyle()
 {
-    return &Application::currentStyle;
+    return Application::currentStyle;
 }
 
-void Application::setTheme(Theme theme)
+Theme* Application::getTheme()
 {
-    Application::currentTheme = theme;
+    return Application::currentThemeVariantsWrapper->getTheme(Application::currentThemeVariant);
 }
 
-ThemeValues* Application::getThemeValues()
+LibraryViewsThemeVariantsWrapper* Application::getThemeVariantsWrapper()
 {
-    return &Application::currentTheme.colors[Application::currentThemeVariant];
-}
-
-ThemeValues* Application::getThemeValuesForVariant(ThemeVariant variant)
-{
-    return &Application::currentTheme.colors[variant];
+    return Application::currentThemeVariantsWrapper;
 }
 
 ThemeVariant Application::getThemeVariant()
