@@ -11,6 +11,7 @@
 
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
+#include <pages/layout_select_page.hpp>
 #include <pages/main_page.hpp>
 #include <pages/scanning_page.hpp>
 //
@@ -137,7 +138,9 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
         {
             continued = true;
             scanner->join();
-            brls::Application::pushView(new MainPage());
+
+            show_framed(new LayoutSelectPage())->setTitle("Choose a layout style");
+
             go                      = false;
             continued               = false;
             scanprog.complete       = false;

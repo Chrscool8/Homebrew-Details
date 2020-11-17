@@ -5,6 +5,7 @@
 #include <utils/utilities.h>
 
 #include <algorithm>
+#include <borealis.hpp>
 #include <nlohmann/json.hpp>
 #include <pages/main_page.hpp>
 #include <string>
@@ -297,5 +298,13 @@ std::string symbol_rightarrow()
 std::string folder_of_file(std::string filename)
 {
     size_t found = filename.find_last_of("/\\");
-    return (filename.substr(0, found));// + "/");
+    return (filename.substr(0, found)); // + "/");
+}
+
+brls::AppletFrame* show_framed(brls::View* view)
+{
+    brls::AppletFrame* frame = new brls::AppletFrame(false, false);
+    frame->setContentView(view);
+    brls::Application::pushView(frame);
+    return frame;
 }

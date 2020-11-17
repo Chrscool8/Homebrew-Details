@@ -13,8 +13,8 @@
 #include <pages/info_page.hpp>
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
+#include <pages/layout_select_page.hpp>
 #include <pages/main_page.hpp>
-#include <pages/test_grid_page.hpp>
 #include <pages/updating_page.hpp>
 //
 
@@ -89,7 +89,9 @@ brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_in
         item->updateActionHint(brls::Key::A, "Show Extended Info");
     }
 
-    add_to->addView(item);
+    if (add_to != NULL)
+        add_to->addView(item);
+
     return item;
 }
 
@@ -105,7 +107,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
 
-    popupItem->updateActionHint(brls::Key::Y, "Favorite");
+    /*popupItem->updateActionHint(brls::Key::Y, "Favorite");
     popupItem->registerAction("Favorite", brls::Key::Y, [this, entry, popupItem]() {
         if (vector_contains(favorites, entry->full_path))
         {
@@ -191,7 +193,7 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 
         return true;
     });
-
+    */
     brls::Key key = brls::Key::A;
     if (get_setting(setting_control_scheme) == "0")
         key = brls::Key::X;
@@ -515,10 +517,10 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
     return popupItem;
 }
 
-std::vector<brls::ListItem*> to_collapse;
-
 void MainPage::build_main_tabs()
 {
+    std::vector<brls::ListItem*> to_collapse;
+
     appsList      = new brls::List();
     storeAppsList = new brls::List();
     localAppsList = new brls::List();
@@ -596,20 +598,27 @@ void MainPage::build_main_tabs()
         this->addTab(pad_string_with_spaces("All Apps", store_apps.size() + local_apps.size(), 20).c_str(), appsList);
         this->addSeparator();
     }
+
     if (!store_apps.empty())
         this->addTab(pad_string_with_spaces("App Store Apps", store_apps.size(), 9).c_str(), storeAppsList);
     if (!local_apps.empty())
         this->addTab(pad_string_with_spaces("Local Apps", local_apps.size(), 16).c_str(), localAppsList);
-}
 
-void hide_by_fav(brls::List* list)
-{
     while (!to_collapse.empty())
     {
         to_collapse.at(0)->collapse(false);
         to_collapse.erase(to_collapse.begin());
     }
 }
+
+//void hide_by_fav(brls::List* list)
+//{
+//    while (!to_collapse.empty())
+//    {
+//        to_collapse.at(0)->collapse(false);
+//        to_collapse.erase(to_collapse.begin());
+//    }
+//}
 
 MainPage::MainPage()
 {
@@ -623,7 +632,7 @@ MainPage::MainPage()
 
     build_main_tabs();
 
-    hide_by_fav(appsList);
+    //hide_by_fav(appsList);
 
     //rootFrame->addSeparator();
     //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));
@@ -647,7 +656,6 @@ MainPage::MainPage()
             stagedFrame->setTitle("Update Wizard");
             stagedFrame->setIcon(get_resource_path("icon.png"));
             stagedFrame->setActionAvailable(brls::Key::B, false);
-            //stagedFrame->updateActionHint(brls::Key::B, "");
 
             stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
             stagedFrame->addStage(new UpdatingPage(stagedFrame));
@@ -953,20 +961,68 @@ MainPage::MainPage()
             fr->setIcon(get_resource_path("icon.png"));
             fr->setTitle("Choose your Menu Style");
             //fr->setFooterText("This can be changed later");
-            fr->setContentView(new CustomLayoutTab());
+            fr->setContentView(new LayoutSelectPage());
             brls::Application::pushView(fr);
         });
         debug_list->addView(test_grid_item);
 
+        brls::ListItem* test_list_item = new brls::ListItem("List Test");
+        test_list_item->getClickEvent()->subscribe([this](brls::View* view) {
+            brls::List* that_list = new brls::List();
+            for (unsigned int i = 0; i < local_apps.size(); i++)
+            {
+                app_entry* current        = &local_apps.at(i);
+                brls::ListItem* item_apps = make_app_entry(current, false);
+                that_list->addView(item_apps);
+            }
+
+            brls::AppletFrame* fr = new brls::AppletFrame(true, true);
+            fr->setIcon(get_resource_path("icon.png"));
+            fr->setTitle("Choose your Menu Style");
+            fr->setFooterText("This can be changed later");
+            fr->setContentView(appsList);
+            brls::Application::pushView(fr);
+        });
+        debug_list->addView(test_list_item);
+
         this->addTab("Debug Menu", debug_list);
     }
 
-    print_debug("rm lock.");
+    if (get_online_version_available())
+    {
+        this->registerAction("Update Info", brls::Key::L, [&]() {
+            brls::TabFrame* appView = new brls::TabFrame();
+            appView->sidebar->setWidth(1000);
+            std::string vers = " v" + get_setting(setting_local_version) + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
 
-    if (fs::exists("sdmc:/config/homebrew_details/lock"))
-        remove("sdmc:/config/homebrew_details/lock");
+            appView->sidebar->addView(new brls::Header("Update Actions", false));
+            brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
+            dialogItem->getClickEvent()->subscribe([&](brls::View* view) {
+                brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
+                stagedFrame->setTitle("Update Wizard");
+                stagedFrame->setIcon(get_resource_path("icon.png"));
+                stagedFrame->setActionAvailable(brls::Key::B, false);
 
-    set_setting(setting_scan_settings_changed, "false");
+                stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
+                stagedFrame->addStage(new UpdatingPage(stagedFrame));
+                stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_done));
+
+                brls::Application::pushView(stagedFrame);
+            });
+
+            appView->sidebar->addView(dialogItem);
+            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, " \n ", true));
+            appView->sidebar->addView(new brls::Header("New Version Details", false));
+            appView->sidebar->addView(add_list_entry("Online Version", "v" + get_online_version_number(), "", NULL, 40));
+            appView->sidebar->addView(add_list_entry("Title", get_online_version_name(), "", NULL, 40));
+            appView->sidebar->addView(add_list_entry("Description", get_online_version_description(), "", NULL, 40));
+            appView->sidebar->addView(add_list_entry("Date", get_online_version_date(), "", NULL, 40));
+
+            appView->setIcon(get_resource_path("download.png"));
+            brls::PopupFrame::open("Update Info", appView, vers, "");
+            return true;
+        });
+    }
 
     ///////////////////////
 

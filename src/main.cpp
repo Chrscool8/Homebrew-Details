@@ -73,6 +73,7 @@ void copy_resources()
     export_resource("assets", "warning_arrows.png");
     export_resource("assets", "style_list.png");
     export_resource("assets", "style_flow.png");
+    export_resource("assets", "style_beta.png");
 
     export_resource("forwarder", "HomebrewDetails_MultiForwarder.nsp");
 }
@@ -112,16 +113,12 @@ int main(int argc, char* argv[])
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
     {
         print_debug("Issue Page");
-        brls::AppletFrame* frame = new brls::AppletFrame(false, false);
-        frame->setContentView(new IssuePage());
-        brls::Application::pushView(frame);
+        show_framed(new IssuePage());
     }
     else
     {
         print_debug("Intro Page");
-        brls::AppletFrame* frame = new brls::AppletFrame(false, false);
-        frame->setContentView(new IntroPage("Begin Scan"));
-        brls::Application::pushView(frame);
+        show_framed(new IntroPage("Begin Scan"));
     }
 
     // Run the app

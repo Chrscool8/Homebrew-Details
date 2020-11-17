@@ -1,6 +1,7 @@
 #pragma once
 #include <main.h>
 
+#include <borealis.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
 
@@ -31,3 +32,4 @@ std::string symbol_star();
 std::string symbol_downarrow();
 std::string symbol_rightarrow();
 std::string folder_of_file(std::string filename);
+brls::AppletFrame* show_framed(brls::View* view);

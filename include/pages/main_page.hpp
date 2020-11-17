@@ -13,8 +13,8 @@ enum info_page_type
 class MainPage : public brls::TabFrame
 {
   public:
-    brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length);
     brls::ListItem* make_app_entry(app_entry* entry, bool is_appstore = false);
+    brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length);
 
     void build_main_tabs();
 
