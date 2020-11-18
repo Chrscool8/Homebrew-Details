@@ -2,6 +2,7 @@
 #include <utils/blacklist.h>
 #include <utils/favorites.h>
 #include <utils/launching.h>
+#include <utils/modules.h>
 #include <utils/nacp_utils.h>
 #include <utils/notes.h>
 #include <utils/reboot_to_payload.h>
@@ -988,83 +989,50 @@ MainPage::MainPage()
         this->addTab("Debug Menu", debug_list);
     }
 
-    if (get_online_version_available())
-    {
-        this->registerAction("Update Info", brls::Key::L, [&]() {
-            brls::TabFrame* appView = new brls::TabFrame();
-            appView->sidebar->setWidth(1000);
-            std::string vers = " v" + get_setting(setting_local_version) + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
+    //if (get_online_version_available())
+    //{
+    //    this->registerAction("Update Info", brls::Key::L, [&]() {
+    //        brls::TabFrame* appView = new brls::TabFrame();
+    //        appView->sidebar->setWidth(1000);
+    //        std::string vers = " v" + get_setting(setting_local_version) + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
 
-            appView->sidebar->addView(new brls::Header("Update Actions", false));
-            brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
-            dialogItem->getClickEvent()->subscribe([&](brls::View* view) {
-                brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
-                stagedFrame->setTitle("Update Wizard");
-                stagedFrame->setIcon(get_resource_path("icon.png"));
-                stagedFrame->setActionAvailable(brls::Key::B, false);
+    //        appView->sidebar->addView(new brls::Header("Update Actions", false));
+    //        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
+    //        dialogItem->getClickEvent()->subscribe([&](brls::View* view) {
+    //            brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
+    //            stagedFrame->setTitle("Update Wizard");
+    //            stagedFrame->setIcon(get_resource_path("icon.png"));
+    //            stagedFrame->setActionAvailable(brls::Key::B, false);
 
-                stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
-                stagedFrame->addStage(new UpdatingPage(stagedFrame));
-                stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_done));
+    //            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
+    //            stagedFrame->addStage(new UpdatingPage(stagedFrame));
+    //            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_done));
 
-                brls::Application::pushView(stagedFrame);
-            });
+    //            brls::Application::pushView(stagedFrame);
+    //        });
 
-            appView->sidebar->addView(dialogItem);
-            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, " \n ", true));
-            appView->sidebar->addView(new brls::Header("New Version Details", false));
-            appView->sidebar->addView(add_list_entry("Online Version", "v" + get_online_version_number(), "", NULL, 40));
-            appView->sidebar->addView(add_list_entry("Title", get_online_version_name(), "", NULL, 40));
-            appView->sidebar->addView(add_list_entry("Description", get_online_version_description(), "", NULL, 40));
-            appView->sidebar->addView(add_list_entry("Date", get_online_version_date(), "", NULL, 40));
+    //        appView->sidebar->addView(dialogItem);
+    //        appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, " \n ", true));
+    //        appView->sidebar->addView(new brls::Header("New Version Details", false));
+    //        appView->sidebar->addView(add_list_entry("Online Version", "v" + get_online_version_number(), "", NULL, 40));
+    //        appView->sidebar->addView(add_list_entry("Title", get_online_version_name(), "", NULL, 40));
+    //        appView->sidebar->addView(add_list_entry("Description", get_online_version_description(), "", NULL, 40));
+    //        appView->sidebar->addView(add_list_entry("Date", get_online_version_date(), "", NULL, 40));
 
-            appView->setIcon(get_resource_path("download.png"));
-            brls::PopupFrame::open("Update Info", appView, vers, "");
-            return true;
-        });
-    }
+    //        appView->setIcon(get_resource_path("download.png"));
+    //        brls::PopupFrame::open("Update Info", appView, vers, "");
+    //        return true;
+    //    });
+    //}
 
-    ///////////////////////
-
-    this->battery_label = new brls::Label(brls::LabelStyle::DIALOG, "TestLabel", false);
-    this->battery_label->setHorizontalAlign(NVG_ALIGN_RIGHT);
-    this->battery_label->setParent(this);
-
-    this->time_label = new brls::Label(brls::LabelStyle::DIALOG, "TestLabel", false);
-    this->time_label->setHorizontalAlign(NVG_ALIGN_LEFT);
-    this->time_label->setParent(this);
-
-    this->date_label = new brls::Label(brls::LabelStyle::DIALOG, "TestLabel", false);
-    this->date_label->setHorizontalAlign(NVG_ALIGN_LEFT);
-    this->date_label->setParent(this);
 }
 
 MainPage::~MainPage()
 {
-    delete time_label;
-    delete battery_label;
-    delete date_label;
 }
 
 void MainPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
 {
     TabFrame::draw(vg, x, y, width, height, style, ctx);
-
-    this->battery_label->setFontSize(18);
-    this->battery_label->setText("Battery" + get_battery_status() + ": " + std::to_string(get_battery_percent()) + "%");
-    this->battery_label->setBoundaries(x + this->width - this->battery_label->getWidth() - 50, y + style->AppletFrame.headerHeightRegular * .5 + 14 + 4, this->battery_label->getWidth(), this->battery_label->getHeight());
-    this->battery_label->invalidate(true);
-    this->battery_label->frame(ctx);
-
-    this->time_label->setFontSize(18);
-    this->time_label->setText(get_time());
-    this->time_label->setBoundaries(x + this->width - this->time_label->getWidth() - 50, y + style->AppletFrame.headerHeightRegular * .5 - 14 + 4, this->time_label->getWidth(), this->time_label->getHeight());
-    this->time_label->invalidate(true);
-    this->time_label->frame(ctx);
-
-    this->date_label->setFontSize(18);
-    this->date_label->setText(get_date() + "   |");
-    this->date_label->setBoundaries(x + this->width - this->date_label->getWidth() - 145, y + style->AppletFrame.headerHeightRegular * .5 - 14 + 4, this->date_label->getWidth(), this->date_label->getHeight());
-    this->date_label->invalidate(true);
-    this->date_label->frame(ctx);
+    draw_status(this, x, y, width, height, style, ctx);
 }
