@@ -62,7 +62,10 @@ void ScanningPage::thread_scan()
     load_notes();
 
     read_store_apps();
+
+    print_debug("------ PRE LOAD");
     load_all_apps();
+    print_debug("------ POST LOAD");
 
     print_debug("scan thread end");
 
@@ -103,7 +106,8 @@ ScanningPage::ScanningPage()
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setParent(this);
 
-    //this->registerAction("Cancel Scan", brls::Key::X, [this, scanprog]() {
+    //this->updateActionHint(brls::Key::X, "Cancel Scan");
+    //this->registerAction("Cancel Scan", brls::Key::X, [scanprog]() {
     //    scanprog.end_thread = true;
     //    return true;
     //});
@@ -139,15 +143,17 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
             continued = true;
             scanner->join();
 
+            //brls::Application::popView();
+            print_debug("----------- Launch Layout Page");
             show_framed(new LayoutSelectPage())->setTitle("Choose a layout style");
 
-            go                      = false;
-            continued               = false;
-            scanprog.complete       = false;
+            //go                      = false;
+            //continued               = false;
+            //scanprog.complete       = false;
             scanprog.prev_num_files = file_count;
-            scanprog.end_thread     = false;
-            file_count              = 0;
-            last_file_name          = "";
+            //scanprog.end_thread     = false;
+            //file_count              = 0;
+            //last_file_name          = "";
         }
     }
 }
@@ -183,6 +189,8 @@ void ScanningPage::willDisappear(bool resetState)
 ScanningPage::~ScanningPage()
 {
     print_debug("Scan Page End");
+
+    scanprog.end_thread = true;
 
     if (go && scanner->joinable())
     {
