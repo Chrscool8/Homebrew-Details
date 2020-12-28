@@ -5,6 +5,7 @@
 #include <utils/modules.h>
 #include <utils/nacp_utils.h>
 #include <utils/notes.h>
+#include <utils/panels.h>
 #include <utils/reboot_to_payload.h>
 #include <utils/scanning.h>
 #include <utils/settings.h>
@@ -60,42 +61,6 @@
 
 namespace fs = std::filesystem;
 
-brls::ListItem* MainPage::add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length = 21)
-{
-    brls::ListItem* item = new brls::ListItem(title);
-
-    if (short_info.length() > (unsigned int)clip_length)
-    {
-        if (long_info.empty())
-            long_info = "Full " + title + ":\n\n" + short_info;
-        string_replace(short_info, "\\n", " ");
-        short_info = short_info.substr(0, clip_length) + "[...]";
-    }
-
-    string_replace(long_info, "\\n", "\n");
-
-    item->setValue(short_info);
-
-    if (!long_info.empty())
-    {
-        item->getClickEvent()->subscribe([long_info](brls::View* view) {
-            brls::Dialog* dialog                       = new brls::Dialog(long_info);
-            brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
-                dialog->close();
-            };
-            dialog->addButton("Dismiss", closeCallback);
-            dialog->setCancelable(true);
-            dialog->open();
-        });
-        item->updateActionHint(brls::Key::A, "Show Extended Info");
-    }
-
-    if (add_to != NULL)
-        add_to->addView(item);
-
-    return item;
-}
-
 void purge_entry(app_entry* entry)
 {
 }
@@ -108,93 +73,93 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
     popupItem->setValue("v" + entry->version);
     popupItem->setThumbnail(entry->icon, entry->icon_size);
 
-    /*popupItem->updateActionHint(brls::Key::Y, "Favorite");
-    popupItem->registerAction("Favorite", brls::Key::Y, [this, entry, popupItem]() {
-        if (vector_contains(favorites, entry->full_path))
-        {
-            remove_favorite(entry->full_path);
-            entry->favorite = false;
+    //popupItem->updateActionHint(brls::Key::Y, "Favorite");
+    //popupItem->registerAction("Favorite", brls::Key::Y, [this, entry, popupItem]() {
+    //    if (vector_contains(favorites, entry->full_path))
+    //    {
+    //        remove_favorite(entry->full_path);
+    //        entry->favorite = false;
 
-            print_debug("check: " + entry->name + " " + "v" + entry->version);
-            print_debug(std::to_string(appsList->getViewsCount()));
+    //        print_debug("check: " + entry->name + " " + "v" + entry->version);
+    //        print_debug(std::to_string(appsList->getViewsCount()));
 
-            brls::List* list_type[3] = { appsList,
-                localAppsList,
-                storeAppsList };
+    //        brls::List* list_type[3] = { appsList,
+    //            localAppsList,
+    //            storeAppsList };
 
-            for (unsigned int list_iter = 0; list_iter < 3; list_iter++)
-            {
-                for (unsigned int i = 0; i < list_type[list_iter]->getViewsCount(); i++)
-                {
-                    //print_debug(std::to_string(i));
-                    brls::ListItem* item = (brls::ListItem*)list_type[list_iter]->getChild(i);
-                    //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
-                    //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
+    //        for (unsigned int list_iter = 0; list_iter < 3; list_iter++)
+    //        {
+    //            for (unsigned int i = 0; i < list_type[list_iter]->getViewsCount(); i++)
+    //            {
+    //                //print_debug(std::to_string(i));
+    //                brls::ListItem* item = (brls::ListItem*)list_type[list_iter]->getChild(i);
+    //                //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
+    //                //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
 
-                    if (symbol_star() + "  " + entry->name == item->getLabel() && "v" + entry->version == item->getValue())
-                    {
-                        print_debug("Collapse: " + item->getLabel() + " " + item->getValue());
+    //                if (symbol_star() + "  " + entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+    //                {
+    //                    print_debug("Collapse: " + item->getLabel() + " " + item->getValue());
 
-                        item->collapse(false);
-                    }
-                    else if (entry->name == item->getLabel() && "v" + entry->version == item->getValue())
-                    {
-                        print_debug("Expand: " + item->getLabel() + " " + item->getValue());
+    //                    item->collapse(false);
+    //                }
+    //                else if (entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+    //                {
+    //                    print_debug("Expand: " + item->getLabel() + " " + item->getValue());
 
-                        item->expand(false);
-                    }
-                }
-            }
+    //                    item->expand(false);
+    //                }
+    //            }
+    //        }
 
-            //popupItem->setChecked(false);
-        }
-        else
-        {
-            add_favorite(entry->full_path);
-            entry->favorite = true;
+    //        //popupItem->setChecked(false);
+    //    }
+    //    else
+    //    {
+    //        add_favorite(entry->full_path);
+    //        entry->favorite = true;
 
-            print_debug("check: " + entry->name + " " + "v" + entry->version);
-            print_debug(std::to_string(appsList->getViewsCount()));
+    //        print_debug("check: " + entry->name + " " + "v" + entry->version);
+    //        print_debug(std::to_string(appsList->getViewsCount()));
 
-            brls::List* list_type[3] = { appsList,
-                localAppsList,
-                storeAppsList };
+    //        brls::List* list_type[3] = { appsList,
+    //            localAppsList,
+    //            storeAppsList };
 
-            for (unsigned int list_iter = 0; list_iter < 3; list_iter++)
-            {
-                for (unsigned int i = 0; i < list_type[list_iter]->getViewsCount(); i++)
-                {
-                    //print_debug(std::to_string(i));
+    //        for (unsigned int list_iter = 0; list_iter < 3; list_iter++)
+    //        {
+    //            for (unsigned int i = 0; i < list_type[list_iter]->getViewsCount(); i++)
+    //            {
+    //                //print_debug(std::to_string(i));
 
-                    brls::ListItem* item = (brls::ListItem*)list_type[list_iter]->getChild(i);
-                    //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
-                    //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
+    //                brls::ListItem* item = (brls::ListItem*)list_type[list_iter]->getChild(i);
+    //                //print_debug("item+: " + item->getLabel() + ";" + item->getValue());
+    //                //print_debug("item*: " + symbol_star() + "  " + entry->name + ";" + "v" + entry->version);
 
-                    if (symbol_star() + "  " + entry->name == item->getLabel() && "v" + entry->version == item->getValue())
-                    {
-                        print_debug("Collapse: " + item->getLabel() + " " + item->getValue());
+    //                if (symbol_star() + "  " + entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+    //                {
+    //                    print_debug("Collapse: " + item->getLabel() + " " + item->getValue());
 
-                        item->expand(false);
-                    }
-                    else if (entry->name == item->getLabel() && "v" + entry->version == item->getValue())
-                    {
-                        print_debug("Expand: " + item->getLabel() + " " + item->getValue());
+    //                    item->expand(false);
+    //                }
+    //                else if (entry->name == item->getLabel() && "v" + entry->version == item->getValue())
+    //                {
+    //                    print_debug("Expand: " + item->getLabel() + " " + item->getValue());
 
-                        item->collapse(false);
-                    }
-                }
-            }
-        }
+    //                    item->collapse(false);
+    //                }
+    //            }
+    //        }
+    //    }
 
-        this->onCancel();
+    //    this->onCancel();
 
-        appsList->invalidate();
-        localAppsList->invalidate();
-        storeAppsList->invalidate();
+    //    appsList->invalidate();
+    //    localAppsList->invalidate();
+    //    storeAppsList->invalidate();
 
-        return true;
-    });
-    */
+    //    return true;
+    //});
+
     brls::Key key = brls::Key::A;
     if (get_setting(setting_control_scheme) == "0")
         key = brls::Key::X;
@@ -458,26 +423,28 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 
         appView->addTab("Manage", manageList);
 
+        int entry_width = 21;
+
         brls::List* appInfoList = new brls::List();
         appInfoList->addView(new brls::Header(".NRO File Info", false));
-        add_list_entry("Name", entry->name, "", appInfoList);
-        add_list_entry("Filename", entry->file_name, "Full Path:\n\n" + entry->full_path, appInfoList);
-        add_list_entry("Author", entry->author, "", appInfoList);
-        add_list_entry("Version", entry->version, "", appInfoList);
-        add_list_entry("Size", to_megabytes(entry->size) + " MB", "Exact Size:\n\n" + std::to_string(entry->size) + " bytes", appInfoList);
-        add_list_entry("Icon Size", std::to_string(entry->icon_size), "", appInfoList);
+        add_list_entry("Name", entry->name, "", appInfoList, entry_width);
+        add_list_entry("Filename", entry->file_name, "Full Path:\n\n" + entry->full_path, appInfoList, entry_width);
+        add_list_entry("Author", entry->author, "", appInfoList, entry_width);
+        add_list_entry("Version", entry->version, "", appInfoList, entry_width);
+        add_list_entry("Size", to_megabytes(entry->size) + " MB", "Exact Size:\n\n" + std::to_string(entry->size) + " bytes", appInfoList, entry_width);
+        add_list_entry("Icon Size", std::to_string(entry->icon_size), "", appInfoList, entry_width);
         appView->addTab("File Info", appInfoList);
 
         brls::List* appStoreInfoList = new brls::List();
         appStoreInfoList->addView(new brls::Header("App Store Info", false));
 
-        add_list_entry("From Appstore", (entry->from_appstore ? "Yes" : "No"), "", appStoreInfoList);
-        add_list_entry("URL", entry->url, "", appStoreInfoList);
-        add_list_entry("Category", entry->category, "", appStoreInfoList);
-        add_list_entry("License", entry->license, "", appStoreInfoList);
-        add_list_entry("Description", entry->description, "", appStoreInfoList);
-        add_list_entry("Summary", entry->summary, "", appStoreInfoList);
-        add_list_entry("Changelog", entry->changelog, "", appStoreInfoList);
+        add_list_entry("From Appstore", (entry->from_appstore ? "Yes" : "No"), "", appStoreInfoList, entry_width);
+        add_list_entry("URL", entry->url, "", appStoreInfoList, entry_width);
+        add_list_entry("Category", entry->category, "", appStoreInfoList, entry_width);
+        add_list_entry("License", entry->license, "", appStoreInfoList, entry_width);
+        add_list_entry("Description", entry->description, "", appStoreInfoList, entry_width);
+        add_list_entry("Summary", entry->summary, "", appStoreInfoList, entry_width);
+        add_list_entry("Changelog", entry->changelog, "", appStoreInfoList, entry_width);
 
         appView->addTab("App Store Info", appStoreInfoList);
 
@@ -647,32 +614,12 @@ MainPage::MainPage()
     print_debug("Check for updates.");
     if (get_online_version_available())
     {
-        this->addSeparator();
-        brls::List* settingsList = new brls::List();
-        settingsList->addView(new brls::Header("Update Actions", false));
+        brls::Application::notify("Update Available!\nPress L for more info.");
 
-        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard", "v" + get_setting(setting_local_version) + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number());
-        dialogItem->getClickEvent()->subscribe([this](brls::View* view) {
-            brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
-            stagedFrame->setTitle("Update Wizard");
-            stagedFrame->setIcon(get_resource_path("icon.png"));
-            stagedFrame->setActionAvailable(brls::Key::B, false);
-
-            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
-            stagedFrame->addStage(new UpdatingPage(stagedFrame));
-            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_done));
-
-            brls::Application::pushView(stagedFrame);
+        this->registerAction("Update Info", brls::Key::L, [&]() {
+            show_update_panel();
+            return true;
         });
-        settingsList->addView(dialogItem);
-
-        settingsList->addView(new brls::Header("New Version Details", false));
-        add_list_entry("Online Version", "v" + get_online_version_number(), "", settingsList, 40);
-        add_list_entry("Title", get_online_version_name(), "", settingsList, 40);
-        add_list_entry("Description", get_online_version_description(), "", settingsList, 40);
-        add_list_entry("Date", get_online_version_date(), "", settingsList, 40);
-
-        this->addTab("Update Available!", settingsList);
     }
 
     print_debug("Toolbox.");
@@ -919,9 +866,11 @@ MainPage::MainPage()
         brls::List* debug_list = new brls::List();
         debug_list->addView(new brls::Header("Super Secret Dev Menu Unlocked!", false));
 
+        int entry_width = 21;
+
         std::uint32_t batteryCharge = 0;
         psmGetBatteryChargePercentage(&batteryCharge);
-        add_list_entry("Battery Percent", std::to_string(batteryCharge) + "%", "", debug_list);
+        add_list_entry("Battery Percent", std::to_string(batteryCharge) + "%", "", debug_list, entry_width);
 
         ChargerType chargerType;
         std::string chargerTypes[3] = { std::string("None"), std::string("Charging"), std::string("USB") };
@@ -930,12 +879,12 @@ MainPage::MainPage()
         if ((int)chargerType >= 0 && (int)chargerType < 3)
             chargeStatus = chargerTypes[chargerType];
 
-        add_list_entry("Charging Status", chargeStatus, "", debug_list);
-        add_list_entry("Local Version", std::string("v") + get_setting(setting_local_version), "", debug_list);
-        add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list);
-        add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list);
-        add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list);
-        add_list_entry("Free Space", get_free_space(), "", debug_list);
+        add_list_entry("Charging Status", chargeStatus, "", debug_list, entry_width);
+        add_list_entry("Local Version", std::string("v") + get_setting(setting_local_version), "", debug_list, entry_width);
+        add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list, entry_width);
+        add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list, entry_width);
+        add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list, entry_width);
+        add_list_entry("Free Space", get_free_space(), "", debug_list, entry_width);
 
         brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload");
         rtp_item->getClickEvent()->subscribe([](brls::View* view) {
@@ -953,8 +902,8 @@ MainPage::MainPage()
         });
         debug_list->addView(keyboard_item);
 
-        add_list_entry("Number of Favorites", std::to_string(favorites.size()), "", debug_list);
-        add_list_entry("Number of Blacklisted Folders", std::to_string(blacklist.size()), "", debug_list);
+        add_list_entry("Number of Favorites", std::to_string(favorites.size()), "", debug_list, entry_width);
+        add_list_entry("Number of Blacklisted Folders", std::to_string(blacklist.size()), "", debug_list, entry_width);
 
         brls::ListItem* test_grid_item = new brls::ListItem("Grid Layout Test");
         test_grid_item->getClickEvent()->subscribe([](brls::View* view) {
@@ -988,43 +937,6 @@ MainPage::MainPage()
 
         this->addTab("Debug Menu", debug_list);
     }
-
-    //if (get_online_version_available())
-    //{
-    //    this->registerAction("Update Info", brls::Key::L, [&]() {
-    //        brls::TabFrame* appView = new brls::TabFrame();
-    //        appView->sidebar->setWidth(1000);
-    //        std::string vers = " v" + get_setting(setting_local_version) + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
-
-    //        appView->sidebar->addView(new brls::Header("Update Actions", false));
-    //        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
-    //        dialogItem->getClickEvent()->subscribe([&](brls::View* view) {
-    //            brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
-    //            stagedFrame->setTitle("Update Wizard");
-    //            stagedFrame->setIcon(get_resource_path("icon.png"));
-    //            stagedFrame->setActionAvailable(brls::Key::B, false);
-
-    //            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
-    //            stagedFrame->addStage(new UpdatingPage(stagedFrame));
-    //            stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_done));
-
-    //            brls::Application::pushView(stagedFrame);
-    //        });
-
-    //        appView->sidebar->addView(dialogItem);
-    //        appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, " \n ", true));
-    //        appView->sidebar->addView(new brls::Header("New Version Details", false));
-    //        appView->sidebar->addView(add_list_entry("Online Version", "v" + get_online_version_number(), "", NULL, 40));
-    //        appView->sidebar->addView(add_list_entry("Title", get_online_version_name(), "", NULL, 40));
-    //        appView->sidebar->addView(add_list_entry("Description", get_online_version_description(), "", NULL, 40));
-    //        appView->sidebar->addView(add_list_entry("Date", get_online_version_date(), "", NULL, 40));
-
-    //        appView->setIcon(get_resource_path("download.png"));
-    //        brls::PopupFrame::open("Update Info", appView, vers, "");
-    //        return true;
-    //    });
-    //}
-
 }
 
 MainPage::~MainPage()

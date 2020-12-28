@@ -33,3 +33,4 @@ std::string symbol_downarrow();
 std::string symbol_rightarrow();
 std::string folder_of_file(std::string filename);
 brls::AppletFrame* show_framed(brls::View* view);
+brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length);

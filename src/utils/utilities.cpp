@@ -308,3 +308,39 @@ brls::AppletFrame* show_framed(brls::View* view)
     brls::Application::pushView(frame);
     return frame;
 }
+
+brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length)
+{
+    brls::ListItem* item = new brls::ListItem(title);
+
+    if (short_info.length() > (unsigned int)clip_length)
+    {
+        if (long_info.empty())
+            long_info = "Full " + title + ":\n\n" + short_info;
+        string_replace(short_info, "\\n", " ");
+        short_info = short_info.substr(0, clip_length) + "[...]";
+    }
+
+    string_replace(long_info, "\\n", "\n");
+
+    item->setValue(short_info);
+
+    if (!long_info.empty())
+    {
+        item->getClickEvent()->subscribe([long_info](brls::View* view) {
+            brls::Dialog* dialog                       = new brls::Dialog(long_info);
+            brls::GenericEvent::Callback closeCallback = [dialog](brls::View* view) {
+                dialog->close();
+            };
+            dialog->addButton("Dismiss", closeCallback);
+            dialog->setCancelable(true);
+            dialog->open();
+        });
+        item->updateActionHint(brls::Key::A, "Show Extended Info");
+    }
+
+    if (add_to != NULL)
+        add_to->addView(item);
+
+    return item;
+}

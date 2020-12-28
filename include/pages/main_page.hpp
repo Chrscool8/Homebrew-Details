@@ -14,7 +14,6 @@ class MainPage : public brls::TabFrame
 {
   public:
     brls::ListItem* make_app_entry(app_entry* entry, bool is_appstore = false);
-    brls::ListItem* add_list_entry(std::string title, std::string short_info, std::string long_info, brls::List* add_to, int clip_length);
 
     void build_main_tabs();
 
@@ -29,4 +28,6 @@ class MainPage : public brls::TabFrame
     brls::List* localAppsList;
 
     std::vector<std::string> bl_vec;
+
+    bool update_notified = false;
 };
