@@ -11,3 +11,4 @@ builddir
 library
 *.sh
 include/curl/
+include/nlohmann/
