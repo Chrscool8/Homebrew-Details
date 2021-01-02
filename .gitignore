@@ -12,3 +12,4 @@ library
 *.sh
 include/curl/
 include/nlohmann/
+include/xxHash/
