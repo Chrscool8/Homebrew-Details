@@ -74,6 +74,7 @@ void copy_resources()
     export_resource("assets", "style_list.png");
     export_resource("assets", "style_flow.png");
     export_resource("assets", "style_beta.png");
+    export_resource("assets", "unknown.png");
 
     export_resource("forwarder", "HomebrewDetails_MultiForwarder.nsp");
 }
