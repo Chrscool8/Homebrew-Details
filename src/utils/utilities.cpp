@@ -14,6 +14,14 @@
 
 std::string months[] = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 
+int json_load_value_int(nlohmann::json json, std::string key)
+{
+    if (json.contains(key))
+        return json[key].get<int>();
+    else
+        return -1;
+}
+
 std::string json_load_value_string(nlohmann::json json, std::string key)
 {
     if (json.contains(key))

@@ -10,6 +10,7 @@ bool is_number(const std::string& s);
 bool compare_by_name(const app_entry& a, const app_entry& b);
 std::string pad_string_with_spaces(std::string initial, int ending, unsigned int padding_amount);
 void print_debug(std::string str);
+int json_load_value_int(nlohmann::json json, std::string key);
 std::string json_load_value_string(nlohmann::json json, std::string key);
 std::string parse_version(std::string version);
 void string_replace(std::string& str, const std::string& from, const std::string& to);
