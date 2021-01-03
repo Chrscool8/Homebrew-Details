@@ -306,7 +306,7 @@ std::string symbol_rightarrow()
 std::string folder_of_file(std::string filename)
 {
     size_t found = filename.find_last_of("/\\");
-    return (filename.substr(0, found)); // + "/");
+    return (filename.substr(0, found));
 }
 
 std::string immediate_folder_of_file(std::string filename)
