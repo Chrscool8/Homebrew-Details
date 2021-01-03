@@ -19,6 +19,7 @@ std::string get_battery_status();
 std::string digits_string(int value, int digitsCount);
 std::string get_time();
 std::string get_date();
+std::string get_cache_path(std::string str);
 std::string get_resource_path(std::string str);
 std::string get_config_path(std::string str);
 std::string to_megabytes(unsigned int size);

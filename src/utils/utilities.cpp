@@ -162,6 +162,11 @@ std::string get_date()
     return (months[tm.tm_mon] + " " + digits_string(tm.tm_mday, 2) + ", " + std::to_string(1900 + tm.tm_year));
 }
 
+std::string get_cache_path(std::string str)
+{
+    return "sdmc:/config/homebrew_details/cache/" + str;
+}
+
 std::string get_resource_path(std::string str)
 {
     return "sdmc:/config/homebrew_details/assets/" + str;
