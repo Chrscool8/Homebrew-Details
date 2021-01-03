@@ -61,11 +61,25 @@ void ScanningPage::thread_scan()
     read_blacklist();
     load_notes();
 
-    read_store_apps();
+    if (std::filesystem::exists("sdmc:/config/homebrew_details/apps_info.json"))
+    {
+        std::ifstream i("sdmc:/config/homebrew_details/apps_info.json");
+        apps_info_json.clear();
+        i >> apps_info_json;
+    }
+    else
+    {
+        new_load_all_apps();
+        new_read_store_apps();
+    }
 
-    print_debug("------ PRE LOAD");
-    load_all_apps();
-    print_debug("------ POST LOAD");
+    //sleep(10);
+
+    //read_store_apps();
+
+    //print_debug("------ PRE LOAD");
+    //load_all_apps();
+    //print_debug("------ POST LOAD");
 
     print_debug("scan thread end");
 
@@ -138,22 +152,18 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
             this->label->frame(ctx);
         }
 
+        this->progressDisp->frame(ctx);
+        this->label->frame(ctx);
+
         if (!continued && scanprog.complete)
         {
             continued = true;
             scanner->join();
 
-            //brls::Application::popView();
             print_debug("----------- Launch Layout Page");
             show_framed(new LayoutSelectPage())->setTitle("Choose a layout style");
 
-            //go                      = false;
-            //continued               = false;
-            //scanprog.complete       = false;
             scanprog.prev_num_files = file_count;
-            //scanprog.end_thread     = false;
-            //file_count              = 0;
-            //last_file_name          = "";
         }
     }
 }

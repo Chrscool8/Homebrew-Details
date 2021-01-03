@@ -89,6 +89,27 @@ bool compare_by_name(const app_entry& a, const app_entry& b)
     }
 }
 
+bool compare_json_by_name(nlohmann::json a, nlohmann::json b)
+{
+    if (!(a.contains("name") && b.contains("name")))
+        return 0;
+
+    std::string _a = json_load_value_string(a, "name");
+    transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
+    std::string _b = json_load_value_string(b, "name");
+    transform(_b.begin(), _b.end(), _b.begin(), ::tolower);
+
+    if (_a != _b)
+        return (_a.compare(_b) < 0);
+    else
+    {
+        if (!(a.contains("version") && b.contains("version")))
+            return 0;
+        else
+            return (json_load_value_string(a, "version")).compare(json_load_value_string(b, "version")) < 0;
+    }
+}
+
 std::string pad_string_with_spaces(std::string initial, int ending, unsigned int padding_amount)
 {
     std::string str = "(" + std::to_string(ending) + ")";
@@ -252,14 +273,17 @@ std::vector<std::string> explode(std::string const& s, char delim)
 
 void create_directories(std::string path)
 {
-    std::vector<std::string> folders = explode(path, '/');
-    std::string subpath              = "";
-    for (unsigned int i = 0; i < folders.size(); i++)
+    if (!fs::exists(path))
     {
-        subpath += folders.at(i) + "/";
-        print_debug(subpath);
-        if (!fs::exists(subpath))
-            fs::create_directory(subpath);
+        std::vector<std::string> folders = explode(path, '/');
+        std::string subpath              = "";
+        for (unsigned int i = 0; i < folders.size(); i++)
+        {
+            subpath += folders.at(i) + "/";
+            print_debug(subpath);
+            if (!fs::exists(subpath))
+                fs::create_directory(subpath);
+        }
     }
 }
 

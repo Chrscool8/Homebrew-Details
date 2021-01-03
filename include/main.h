@@ -32,3 +32,6 @@ extern std::vector<app_entry> store_apps;
 extern std::vector<app_entry> store_file_data;
 extern std::string asset_path;
 extern std::string config__path;
+
+extern nlohmann::json apps_info_json;
+extern nlohmann::json store_info_json;

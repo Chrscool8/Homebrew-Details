@@ -39,6 +39,9 @@ using namespace i18n::literals; // for _i18n
 
 namespace fs = std::filesystem;
 
+nlohmann::json apps_info_json;
+nlohmann::json store_info_json;
+
 ////
 std::vector<std::string> favorites;
 std::vector<std::string> blacklist;

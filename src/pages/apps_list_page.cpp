@@ -14,11 +14,24 @@
 #include <pages/main_page.hpp>
 #include <pages/updating_page.hpp>
 
-brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
+brls::ListItem* new_new_make_app_entry(nlohmann::json app_json)
 {
-    brls::ListItem* this_entry = new brls::ListItem(entry->name, "", entry->full_path);
-    this_entry->setValue("v" + entry->version);
-    this_entry->setThumbnail(entry->icon, entry->icon_size);
+    std::string full_path = json_load_value_string(app_json, "full_path");
+
+    if (!fs::exists(full_path))
+        full_path = "FILE MISSING";
+
+    brls::ListItem* this_entry = new brls::ListItem(json_load_value_string(app_json, "name"), "", full_path);
+    this_entry->setValue("v" + json_load_value_string(app_json, "version"));
+
+    std::string icon_path = get_resource_path("unknown.png");
+
+    std::string encoded_icon_path = get_cache_path(base64_encode(json_load_value_string(app_json, "name") + json_load_value_string(app_json, "version")) + ".jpg");
+
+    if (fs::exists(encoded_icon_path))
+        icon_path = encoded_icon_path;
+
+    this_entry->setThumbnail(icon_path);
 
     brls::Key key = brls::Key::A;
     if (get_setting(setting_control_scheme) == "0")
@@ -27,9 +40,9 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
         key = brls::Key::A;
 
     this_entry->updateActionHint(key, "Launch");
-    this_entry->registerAction("Launch", key, [entry]() {
+    this_entry->registerAction("Launch", key, [full_path]() {
         print_debug("launch app");
-        unsigned int r = launch_nro(entry->full_path, "\"" + entry->full_path + "\"");
+        unsigned int r = launch_nro(full_path, "\"" + full_path + "\"");
         print_debug("r: " + std::to_string(r));
         if (R_FAILED(r))
         {
@@ -50,7 +63,7 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
         key = brls::Key::X;
 
     this_entry->updateActionHint(key, "Details");
-    this_entry->registerAction("Details", key, [entry, this_entry, is_appstore]() {
+    this_entry->registerAction("Details", key, [full_path, app_json, icon_path]() {
         brls::TabFrame* appView = new brls::TabFrame();
 
         brls::List* manageList = new brls::List();
@@ -58,9 +71,9 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
 
         {
             brls::ListItem* launch_item = new brls::ListItem("Launch App");
-            launch_item->getClickEvent()->subscribe([entry](brls::View* view) {
+            launch_item->getClickEvent()->subscribe([full_path](brls::View* view) {
                 print_debug("launch app");
-                unsigned int r = launch_nro(entry->full_path, "\"" + entry->full_path + "\"");
+                unsigned int r = launch_nro(full_path, "\"" + full_path + "\"");
                 print_debug("r: " + std::to_string(r));
                 if (R_FAILED(r))
                 {
@@ -68,10 +81,6 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
                 }
                 else
                 {
-                    local_apps.clear();
-                    store_apps.clear();
-                    store_file_data.clear();
-                    romfsExit();
                     brls::Application::quit();
                 }
             });
@@ -79,13 +88,13 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
         }
 
         //
-        if (!is_appstore)
+        if (json_load_value_string(app_json, "is_appstore") == "true")
         {
             brls::ListItem* move_item = new brls::ListItem("Move App");
-            move_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
-                std::string dest_string = get_keyboard_input(entry->full_path);
+            move_item->getClickEvent()->subscribe([full_path](brls::View* view) {
+                std::string dest_string = get_keyboard_input(full_path);
 
-                if (to_lower(dest_string) == to_lower(entry->full_path))
+                if (to_lower(dest_string) == to_lower(full_path))
                 {
                     print_debug("Same path");
                     brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
@@ -126,9 +135,9 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
                         create_directories(dest_string.substr(0, found));
                     }
 
-                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to move the following file? This action cannot be undone.\n\n" + entry->full_path + "\n" + symbol_downarrow() + "\n" + dest_string);
-                    brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
-                        if (rename(entry->full_path.c_str(), dest_string.c_str()) != 0)
+                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to move the following file? This action cannot be undone.\n\n" + full_path + "\n" + symbol_downarrow() + "\n" + dest_string);
+                    brls::GenericEvent::Callback yesCallback = [full_path, dest_string, confirm_dialog](brls::View* view) {
+                        if (rename(full_path.c_str(), dest_string.c_str()) != 0)
                             brls::Application::notify("Issue moving file");
                         else
                         {
@@ -149,13 +158,15 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
             });
             manageList->addView(move_item);
         }
+
         //
+
         {
             brls::ListItem* copy_item = new brls::ListItem("Copy App");
-            copy_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
-                std::string dest_string = get_keyboard_input(entry->full_path);
+            copy_item->getClickEvent()->subscribe([full_path](brls::View* view) {
+                std::string dest_string = get_keyboard_input(full_path);
 
-                if (to_lower(dest_string) == to_lower(entry->full_path))
+                if (to_lower(dest_string) == to_lower(full_path))
                 {
                     print_debug("Same path");
                     brls::Dialog* dialog                       = new brls::Dialog("Source and destination are the same.");
@@ -196,9 +207,9 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
                         create_directories(dest_string.substr(0, found));
                     }
 
-                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to copy to the following file? This action cannot be undone.\n\n" + entry->full_path + "\n" + symbol_downarrow() + "\n" + dest_string);
-                    brls::GenericEvent::Callback yesCallback = [confirm_dialog, entry, appView, dest_string](brls::View* view) {
-                        if (copy_file(entry->full_path.c_str(), dest_string.c_str()))
+                    brls::Dialog* confirm_dialog             = new brls::Dialog("Are you sure you want to copy to the following file? This action cannot be undone.\n\n" + full_path + "\n" + symbol_downarrow() + "\n" + dest_string);
+                    brls::GenericEvent::Callback yesCallback = [full_path, dest_string, confirm_dialog](brls::View* view) {
+                        if (copy_file(full_path.c_str(), dest_string.c_str()))
                         {
                             brls::Application::notify("File successfully copied");
                             //purge_entry(entry);
@@ -221,17 +232,19 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
             });
             manageList->addView(copy_item);
         }
+
         //
+
         {
             brls::ListItem* delete_item = new brls::ListItem("Delete App");
-            delete_item->getClickEvent()->subscribe([entry, appView](brls::View* view) {
-                brls::Dialog* dialog                     = new brls::Dialog("Are you sure you want to delete the following file? This action cannot be undone.\n\n" + entry->full_path);
-                brls::GenericEvent::Callback yesCallback = [dialog, entry, appView](brls::View* view) {
-                    if (remove(entry->full_path.c_str()) != 0)
+            delete_item->getClickEvent()->subscribe([full_path](brls::View* view) {
+                brls::Dialog* dialog                     = new brls::Dialog("Are you sure you want to delete the following file? This action cannot be undone.\n\n" + full_path);
+                brls::GenericEvent::Callback yesCallback = [full_path, dialog](brls::View* view) {
+                    if (remove(full_path.c_str()) != 0)
                         brls::Application::notify("Issue removing file");
                     else
                     {
-                        std::string _folder = folder_of_file(entry->full_path);
+                        std::string _folder = folder_of_file(full_path);
                         print_debug("_folder " + _folder);
 
                         const char* basePath = _folder.c_str();
@@ -281,42 +294,42 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
 
         brls::List* appInfoList = new brls::List();
         appInfoList->addView(new brls::Header(".NRO File Info", false));
-        add_list_entry("Name", entry->name, "", appInfoList, 21);
-        add_list_entry("Filename", entry->file_name, "Full Path:\n\n" + entry->full_path, appInfoList, 21);
-        add_list_entry("Author", entry->author, "", appInfoList, 21);
-        add_list_entry("Version", entry->version, "", appInfoList, 21);
-        add_list_entry("Size", to_megabytes(entry->size) + " MB", "Exact Size:\n\n" + std::to_string(entry->size) + " bytes", appInfoList, 21);
-        add_list_entry("Icon Size", std::to_string(entry->icon_size), "", appInfoList, 21);
+        add_list_entry("Name", json_load_value_string(app_json, "name"), "", appInfoList, 21);
+        add_list_entry("Filename", json_load_value_string(app_json, "file_name"), std::string("Full Path:\n\n") + full_path, appInfoList, 21);
+        add_list_entry("Author", json_load_value_string(app_json, "author"), "", appInfoList, 21);
+        add_list_entry("Version", json_load_value_string(app_json, "version"), "", appInfoList, 21);
+        add_list_entry("Size", to_megabytes(json_load_value_int(app_json, "size")) + " MB", "Exact Size:\n\n" + std::to_string(json_load_value_int(app_json, "size")) + " bytes", appInfoList, 21);
+        //add_list_entry("Icon Size", std::to_string(json_load_value_int(app_json, "icon_size")), "", appInfoList, 21);
         appView->addTab("File Info", appInfoList);
 
         brls::List* appStoreInfoList = new brls::List();
         appStoreInfoList->addView(new brls::Header("App Store Info", false));
 
-        add_list_entry("From Appstore", (entry->from_appstore ? "Yes" : "No"), "", appStoreInfoList, 21);
-        add_list_entry("URL", entry->url, "", appStoreInfoList, 21);
-        add_list_entry("Category", entry->category, "", appStoreInfoList, 21);
-        add_list_entry("License", entry->license, "", appStoreInfoList, 21);
-        add_list_entry("Description", entry->description, "", appStoreInfoList, 21);
-        add_list_entry("Summary", entry->summary, "", appStoreInfoList, 21);
-        add_list_entry("Changelog", entry->changelog, "", appStoreInfoList, 21);
+        add_list_entry("From Appstore", json_load_value_string(app_json, "is_appstore"), "", appStoreInfoList, 21);
 
+        add_list_entry("URL", json_load_value_string(app_json, "url"), "", appStoreInfoList, 21);
+        add_list_entry("Category", json_load_value_string(app_json, "category"), "", appStoreInfoList, 21);
+        add_list_entry("License", json_load_value_string(app_json, "license"), "", appStoreInfoList, 21);
+        add_list_entry("Description", json_load_value_string(app_json, "description"), "", appStoreInfoList, 21);
+        add_list_entry("Summary", json_load_value_string(app_json, "summary"), "", appStoreInfoList, 21);
+        add_list_entry("Changelog", json_load_value_string(app_json, "changelog"), "", appStoreInfoList, 21);
         appView->addTab("App Store Info", appStoreInfoList);
 
         {
             brls::List* notesList      = new brls::List();
             brls::ListItem* notes_item = new brls::ListItem("Edit Notes");
-            brls::Label* desc          = new brls::Label(brls::LabelStyle::DESCRIPTION, notes_get_value(entry->file_name), true);
+            brls::Label* desc          = new brls::Label(brls::LabelStyle::DESCRIPTION, notes_get_value(json_load_value_string(app_json, "file_name")), true);
             brls::Label* note_header   = new brls::Label(brls::LabelStyle::REGULAR, "Notes:", false);
             note_header->setVerticalAlign(NVGalign::NVG_ALIGN_TOP);
 
-            if (notes_get_value(entry->file_name).empty())
+            if (notes_get_value(json_load_value_string(app_json, "file_name")).empty())
                 note_header->collapse(true);
             else
                 note_header->expand(true);
 
-            notes_item->getClickEvent()->subscribe([entry, appView, desc, note_header](brls::View* view) {
-                std::string dest_string = get_keyboard_input(notes_get_value(entry->file_name));
-                notes_set_value(entry->file_name, dest_string);
+            notes_item->getClickEvent()->subscribe([app_json, desc, note_header](brls::View* view) {
+                std::string dest_string = get_keyboard_input(notes_get_value(json_load_value_string(app_json, "file_name")));
+                notes_set_value(json_load_value_string(app_json, "file_name"), dest_string);
                 desc->setText(dest_string);
 
                 if (dest_string.empty())
@@ -331,7 +344,7 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
             appView->addTab("Notes", notesList);
         }
 
-        brls::PopupFrame::open(entry->name, entry->icon, entry->icon_size, appView, "Author: " + entry->author, "Version: " + entry->version);
+        brls::PopupFrame::open(json_load_value_string(app_json, "name"), icon_path, appView, std::string("Author: ") + json_load_value_string(app_json, "author"), std::string("Version: ") + json_load_value_string(app_json, "version"));
 
         return true;
     });
@@ -339,34 +352,60 @@ brls::ListItem* new_make_app_entry(app_entry* entry, bool is_appstore)
     return this_entry;
 }
 
+std::vector<nlohmann::json> app_json_to_list(nlohmann::json json, std::string sort_by)
+{
+    std::vector<nlohmann::json> list;
+
+    for (auto it = json.begin(); it != json.end(); ++it)
+        list.push_back(it.value());
+
+    sort(list.begin(), list.end(), compare_json_by_name);
+
+    return list;
+}
+
 AppsListPage::AppsListPage()
     : AppletFrame(false, false)
 {
-    brls::List* this_list = new brls::List();
-
-    if (local_apps.empty())
-        this_list->addView(new brls::ListItem("No Apps Found."));
-
-    for (unsigned int i = 0; i < local_apps.size(); i++)
-    {
-        app_entry* current = &local_apps.at(i);
-        this_list->addView(new_make_app_entry(current, false));
-    }
-
-    this->setIcon(get_resource_path("icon.png"));
-
     std::string title = "Homebrew Details v" + get_setting(setting_local_version);
     if (get_setting_true(setting_debug))
         title += " [Debug Mode]";
     this->setTitle(title.c_str());
 
+    this->setIcon(get_resource_path("icon.png"));
+
+    brls::List* this_list = new brls::List();
+
+    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, "name");
+
+    for (unsigned int i = 0; i < apps_list.size(); i++)
+        this_list->addView(new_new_make_app_entry(apps_list.at(i)));
+
+    //
+    if (apps_list.empty())
+        this_list->addView(new brls::ListItem("No Apps Found."));
+
     this->setContentView(this_list);
+
+    //sort panel
+    this->registerAction("Sorting Options", brls::Key::MINUS, []() {
+        brls::TabFrame* appView = new brls::TabFrame();
+        appView->sidebar->setWidth(1000);
+        appView->sidebar->addView(new brls::Header("Sort Type", false));
+        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
+        appView->sidebar->addView(dialogItem);
+
+        appView->setIcon(get_resource_path("download.png"));
+        brls::PopupFrame::open("Sorting", appView, "", "");
+
+        return true;
+    });
 
     if (get_online_version_available())
     {
         brls::Application::notify("Update Available!\nPress L for more info.");
 
-        this->registerAction("Update Info", brls::Key::L, [&]() {
+        this->registerAction("Update Info", brls::Key::L, []() {
             show_update_panel();
             return true;
         });
