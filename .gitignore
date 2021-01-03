@@ -13,3 +13,7 @@ library
 include/curl/
 include/nlohmann/
 include/xxHash/
+*.sln
+*.vcxproj
+*.filters
+*.user
