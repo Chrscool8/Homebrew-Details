@@ -45,9 +45,9 @@ nlohmann::json store_info_json;
 ////
 std::vector<std::string> favorites;
 std::vector<std::string> blacklist;
-std::vector<app_entry> local_apps;
-std::vector<app_entry> store_apps;
-std::vector<app_entry> store_file_data;
+//std::vector<app_entry> local_apps;
+//std::vector<app_entry> store_apps;
+//std::vector<app_entry> store_file_data;
 
 std::string asset_path   = "sdmc:/config/homebrew_details/assets/";
 std::string config__path = "sdmc:/config/homebrew_details/";

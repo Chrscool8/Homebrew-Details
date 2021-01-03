@@ -27,9 +27,9 @@ struct app_entry
 
 extern std::vector<std::string> favorites;
 extern std::vector<std::string> blacklist;
-extern std::vector<app_entry> local_apps;
-extern std::vector<app_entry> store_apps;
-extern std::vector<app_entry> store_file_data;
+//extern std::vector<app_entry> local_apps;
+//extern std::vector<app_entry> store_apps;
+//extern std::vector<app_entry> store_file_data;
 extern std::string asset_path;
 extern std::string config__path;
 

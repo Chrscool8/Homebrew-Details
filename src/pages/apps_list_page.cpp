@@ -352,14 +352,52 @@ brls::ListItem* new_new_make_app_entry(nlohmann::json app_json)
     return this_entry;
 }
 
-std::vector<nlohmann::json> app_json_to_list(nlohmann::json json, std::string sort_by)
+auto choose_return(std::string sort_by)
+{
+    return compare_json_by_name;
+}
+
+struct AppComparator
+{
+    explicit AppComparator(std::string sort_)
+        : sort(sort_)
+    {
+    }
+
+    std::string sort;
+
+    bool operator()(nlohmann::json a, nlohmann::json b) const
+    {
+        if (!(a.contains(sort) && b.contains(sort)))
+            return 0;
+
+        std::string _a = json_load_value_string(a, sort);
+        transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
+        std::string _b = json_load_value_string(b, sort);
+        transform(_b.begin(), _b.end(), _b.begin(), ::tolower);
+
+        print_debug("Comparing " + _a + " and " + _b + " by " + sort + " and the result is " + std::to_string(_a.compare(_b)));
+
+         if (_a != _b)
+            return (_a.compare(_b) < 0);
+        else
+        {
+            if (!(a.contains("version") && b.contains("version")))
+                return 0;
+            else
+                return (json_load_value_string(a, "version")).compare(json_load_value_string(b, "version")) < 0;
+        }
+    }
+};
+
+std::vector<nlohmann::json> app_json_to_list(nlohmann::json json, std::string sort_by, std::string sort_by_secondary)
 {
     std::vector<nlohmann::json> list;
 
     for (auto it = json.begin(); it != json.end(); ++it)
         list.push_back(it.value());
 
-    sort(list.begin(), list.end(), compare_json_by_name);
+    sort(list.begin(), list.end(), AppComparator("name"));
 
     return list;
 }
@@ -376,7 +414,7 @@ AppsListPage::AppsListPage()
 
     brls::List* this_list = new brls::List();
 
-    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, "name");
+    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, "name", "version");
 
     for (unsigned int i = 0; i < apps_list.size(); i++)
         this_list->addView(new_new_make_app_entry(apps_list.at(i)));
