@@ -25,7 +25,12 @@ int json_load_value_int(nlohmann::json json, std::string key)
 std::string json_load_value_string(nlohmann::json json, std::string key)
 {
     if (json.contains(key))
-        return json[key].get<std::string>();
+    {
+        if (json[key].is_string())
+            return json[key].get<std::string>();
+        else
+            return std::to_string(json[key].get<int>());
+    }
     else
         return "---";
 }

@@ -22,6 +22,8 @@ enum setting
     setting_scan_settings_changed,
     setting_previous_num_files,
     setting_exit_to,
+    setting_sort_type,
+    setting_sort_type_2,
     settings_num
 };
 

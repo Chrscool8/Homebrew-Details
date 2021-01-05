@@ -21,8 +21,9 @@ brls::ListItem* new_new_make_app_entry(nlohmann::json app_json)
     if (!fs::exists(full_path))
         full_path = "FILE MISSING";
 
-    brls::ListItem* this_entry = new brls::ListItem(json_load_value_string(app_json, "name"), "", full_path);
-    this_entry->setValue("v" + json_load_value_string(app_json, "version"));
+    brls::ListItem* this_entry = new brls::ListItem(json_load_value_string(app_json, "name") + "  -  " + "v" + json_load_value_string(app_json, "version"), "", full_path);
+
+    this_entry->setValue(json_load_value_string(app_json, get_setting(setting_sort_type)));
 
     std::string icon_path = get_resource_path("unknown.png");
 
@@ -359,33 +360,43 @@ auto choose_return(std::string sort_by)
 
 struct AppComparator
 {
-    explicit AppComparator(std::string sort_)
-        : sort(sort_)
+    explicit AppComparator(std::string sort_main_, std::string sort_sub_)
     {
+        sort_main = sort_main_;
+        sort_sub  = sort_sub_;
     }
 
-    std::string sort;
+    std::string sort_main;
+    std::string sort_sub;
 
     bool operator()(nlohmann::json a, nlohmann::json b) const
     {
-        if (!(a.contains(sort) && b.contains(sort)))
-            return 0;
-
-        std::string _a = json_load_value_string(a, sort);
+        std::string _a = json_load_value_string(a, sort_main);
         transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
-        std::string _b = json_load_value_string(b, sort);
+        std::string _b = json_load_value_string(b, sort_main);
         transform(_b.begin(), _b.end(), _b.begin(), ::tolower);
 
-        print_debug("Comparing " + _a + " and " + _b + " by " + sort + " and the result is " + std::to_string(_a.compare(_b)));
+        //print_debug("Comparing " + _a + " and " + _b + " by " + sort_main + " and the result is " + std::to_string(_a.compare(_b) < 0));
 
-         if (_a != _b)
+        if (_a != _b)
+        {
             return (_a.compare(_b) < 0);
+        }
         else
         {
-            if (!(a.contains("version") && b.contains("version")))
-                return 0;
+            std::string _c = json_load_value_string(a, sort_sub);
+            transform(_c.begin(), _c.end(), _c.begin(), ::tolower);
+            std::string _d = json_load_value_string(b, sort_sub);
+            transform(_d.begin(), _d.end(), _d.begin(), ::tolower);
+
+            if (_c != _d)
+            {
+                return (json_load_value_string(a, sort_sub)).compare(json_load_value_string(b, sort_sub)) < 0;
+            }
             else
+            {
                 return (json_load_value_string(a, "version")).compare(json_load_value_string(b, "version")) < 0;
+            }
         }
     }
 };
@@ -397,9 +408,27 @@ std::vector<nlohmann::json> app_json_to_list(nlohmann::json json, std::string so
     for (auto it = json.begin(); it != json.end(); ++it)
         list.push_back(it.value());
 
-    sort(list.begin(), list.end(), AppComparator("name"));
+    sort(list.begin(), list.end(), AppComparator(sort_by, sort_by_secondary));
 
     return list;
+}
+
+brls::ListItem* create_sort_choice(std::string label, std::string sort_name, std::string secondary_sort)
+{
+    brls::ListItem* dialogItem = new brls::ListItem(label);
+    dialogItem->setChecked(get_setting(setting_sort_type) == sort_name);
+    dialogItem->getClickEvent()->subscribe([dialogItem, sort_name, secondary_sort](brls::View* view) {
+        set_setting(setting_sort_type, sort_name);
+        set_setting(setting_sort_type_2, secondary_sort);
+
+        brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
+        for (unsigned int i = 0; i < list->getViewsCount(); i++)
+            ((brls::ListItem*)(list->getChild(i)))->setChecked(false);
+        dialogItem->setChecked(true);
+
+        return true;
+    });
+    return dialogItem;
 }
 
 AppsListPage::AppsListPage()
@@ -414,7 +443,9 @@ AppsListPage::AppsListPage()
 
     brls::List* this_list = new brls::List();
 
-    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, "name", "version");
+    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, get_setting(setting_sort_type), get_setting(setting_sort_type_2));
+
+    this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + get_setting(setting_sort_type) + " then " + get_setting(setting_sort_type_2)));
 
     for (unsigned int i = 0; i < apps_list.size(); i++)
         this_list->addView(new_new_make_app_entry(apps_list.at(i)));
@@ -426,12 +457,17 @@ AppsListPage::AppsListPage()
     this->setContentView(this_list);
 
     //sort panel
-    this->registerAction("Sorting Options", brls::Key::MINUS, []() {
+    this->registerAction("Sorting Options", brls::Key::R, []() {
         brls::TabFrame* appView = new brls::TabFrame();
         appView->sidebar->setWidth(1000);
+        appView->sidebar->setHeight(400);
         appView->sidebar->addView(new brls::Header("Sort Type", false));
-        brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
-        appView->sidebar->addView(dialogItem);
+
+        appView->sidebar->addView(create_sort_choice("By Name", "name", "version"));
+        appView->sidebar->addView(create_sort_choice("By Full Path", "full_path", "name"));
+        appView->sidebar->addView(create_sort_choice("By Author", "author", "name"));
+        appView->sidebar->addView(create_sort_choice("By Size", "size", "name"));
+        appView->sidebar->addView(create_sort_choice("By Category", "category", "name"));
 
         appView->setIcon(get_resource_path("download.png"));
         brls::PopupFrame::open("Sorting", appView, "", "");

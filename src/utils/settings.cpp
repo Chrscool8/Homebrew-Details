@@ -131,4 +131,14 @@ void init_settings()
     {
         set_setting(setting_exit_to, "sdmc:/hbmenu.nro");
     }
+
+    if (get_setting(setting_sort_type) == "")
+    {
+        set_setting(setting_sort_type, "name");
+    }
+
+    if (get_setting(setting_sort_type_2) == "")
+    {
+        set_setting(setting_sort_type_2, "version");
+    }
 }
