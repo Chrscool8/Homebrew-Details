@@ -457,7 +457,7 @@ AppsListPage::AppsListPage()
     this->setContentView(this_list);
 
     //sort panel
-    this->registerAction("Sorting Options", brls::Key::R, []() {
+    this->registerAction("Sorting Options", brls::Key::L, []() {
         brls::TabFrame* appView = new brls::TabFrame();
         appView->sidebar->setWidth(1000);
         appView->sidebar->setHeight(400);
@@ -479,7 +479,7 @@ AppsListPage::AppsListPage()
     {
         brls::Application::notify("Update Available!\nPress L for more info.");
 
-        this->registerAction("Update Info", brls::Key::L, []() {
+        this->registerAction("Update Info", brls::Key::R, []() {
             show_update_panel();
             return true;
         });
