@@ -571,15 +571,6 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 //    }
 //}
 
-//void hide_by_fav(brls::List* list)
-//{
-//    while (!to_collapse.empty())
-//    {
-//        to_collapse.at(0)->collapse(false);
-//        to_collapse.erase(to_collapse.begin());
-//    }
-//}
-
 MainPage::MainPage()
 {
     std::string title = "Homebrew Details v" + get_setting(setting_local_version);
@@ -589,19 +580,6 @@ MainPage::MainPage()
     this->setTitle(title.c_str());
     this->setIcon(get_resource_path("icon.png"));
     print_debug("init rootframe");
-
-    //build_main_tabs();
-
-    //hide_by_fav(appsList);
-
-    //rootFrame->addSeparator();
-    //rootFrame->addTab("Applications", new brls::Rectangle(nvgRGB(120, 120, 120)));
-    //rootFrame->addTab("Emulators", new brls::Rectangle(nvgRGB(120, 120, 120)));
-    //rootFrame->addTab("Games", new brls::Rectangle(nvgRGB(120, 120, 120)));
-    //rootFrame->addTab("Tools", new brls::Rectangle(nvgRGB(120, 120, 120)));
-    //rootFrame->addTab("Misc.", new brls::Rectangle(nvgRGB(120, 120, 120)));
-
-    //this->addTab("Read: "+std::to_string(batteryCharge), new brls::Rectangle(nvgRGB(120, 120, 120)));
 
     print_debug("Check for updates.");
     if (get_online_version_available())
