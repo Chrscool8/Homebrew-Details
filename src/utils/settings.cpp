@@ -141,4 +141,9 @@ void init_settings()
     {
         set_setting(setting_sort_type_2, "version");
     }
+
+    if (get_setting(setting_sort_direction) == "")
+    {
+        set_setting(setting_sort_direction, "ascending");
+    }
 }

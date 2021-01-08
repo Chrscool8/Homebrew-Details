@@ -24,6 +24,7 @@ enum setting
     setting_exit_to,
     setting_sort_type,
     setting_sort_type_2,
+    setting_sort_direction,
     settings_num
 };
 

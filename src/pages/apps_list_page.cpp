@@ -353,11 +353,6 @@ brls::ListItem* new_new_make_app_entry(nlohmann::json app_json)
     return this_entry;
 }
 
-auto choose_return(std::string sort_by)
-{
-    return compare_json_by_name;
-}
-
 struct AppComparator
 {
     explicit AppComparator(std::string sort_main_, std::string sort_sub_)
@@ -371,6 +366,13 @@ struct AppComparator
 
     bool operator()(nlohmann::json a, nlohmann::json b) const
     {
+        if (get_setting(setting_sort_direction) == "descending")
+        {
+            nlohmann::json c = a;
+            a                = b;
+            b                = c;
+        }
+
         std::string _a = json_load_value_string(a, sort_main);
         transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
         std::string _b = json_load_value_string(b, sort_main);
@@ -413,7 +415,7 @@ std::vector<nlohmann::json> app_json_to_list(nlohmann::json json, std::string so
     return list;
 }
 
-brls::ListItem* create_sort_choice(std::string label, std::string sort_name, std::string secondary_sort)
+brls::ListItem* create_sort_type_choice(std::string label, std::string sort_name, std::string secondary_sort)
 {
     brls::ListItem* dialogItem = new brls::ListItem(label);
     dialogItem->setChecked(get_setting(setting_sort_type) == sort_name);
@@ -445,7 +447,7 @@ AppsListPage::AppsListPage()
 
     std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, get_setting(setting_sort_type), get_setting(setting_sort_type_2));
 
-    this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + get_setting(setting_sort_type) + " then " + get_setting(setting_sort_type_2)));
+    this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + get_setting(setting_sort_type) + " then " + get_setting(setting_sort_type_2) + ", " + get_setting(setting_sort_direction)));
 
     for (unsigned int i = 0; i < apps_list.size(); i++)
         this_list->addView(new_new_make_app_entry(apps_list.at(i)));
@@ -457,20 +459,56 @@ AppsListPage::AppsListPage()
     this->setContentView(this_list);
 
     //sort panel
+
     this->registerAction("Sorting Options", brls::Key::L, []() {
         brls::TabFrame* appView = new brls::TabFrame();
-        appView->sidebar->setWidth(1000);
-        appView->sidebar->setHeight(400);
-        appView->sidebar->addView(new brls::Header("Sort Type", false));
 
-        appView->sidebar->addView(create_sort_choice("By Name", "name", "version"));
-        appView->sidebar->addView(create_sort_choice("By Full Path", "full_path", "name"));
-        appView->sidebar->addView(create_sort_choice("By Author", "author", "name"));
-        appView->sidebar->addView(create_sort_choice("By Size", "size", "name"));
-        appView->sidebar->addView(create_sort_choice("By Category", "category", "name"));
+        brls::List* list = new brls::List();
+        list->addView(create_sort_type_choice("By Name", "name", "version"));
+        list->addView(create_sort_type_choice("By Full Path", "full_path", "name"));
+        list->addView(create_sort_type_choice("By Author", "author", "name"));
+        list->addView(create_sort_type_choice("By Size", "size", "name"));
+        list->addView(create_sort_type_choice("By Category", "category", "name"));
+        appView->addTab("Sort Type", list);
+
+        //
+
+        list                       = new brls::List();
+        brls::ListItem* dialogItem = new brls::ListItem("ascending");
+        dialogItem->setChecked(get_setting(setting_sort_direction) != "ascending");
+        dialogItem->getClickEvent()->subscribe([dialogItem](brls::View* view) {
+            set_setting(setting_sort_direction, "ascending");
+
+            brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
+            ((brls::ListItem*)(list->getChild(1)))->setChecked(false);
+
+            dialogItem->setChecked(true);
+
+            return true;
+        });
+        list->addView(dialogItem);
+        //
+
+        dialogItem = new brls::ListItem("descending");
+        dialogItem->setChecked(get_setting(setting_sort_direction) == "descending");
+        dialogItem->getClickEvent()->subscribe([dialogItem](brls::View* view) {
+            set_setting(setting_sort_direction, "descending");
+
+            brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
+            ((brls::ListItem*)(list->getChild(0)))->setChecked(false);
+
+            dialogItem->setChecked(true);
+
+            return true;
+        });
+        list->addView(dialogItem);
+
+        appView->addTab("Sort Direction", list);
+
+        //
 
         appView->setIcon(get_resource_path("download.png"));
-        brls::PopupFrame::open("Sorting", appView, "", "");
+        brls::PopupFrame::open("Sorting Options", appView, "", "");
 
         return true;
     });
