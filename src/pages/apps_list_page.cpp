@@ -9,12 +9,13 @@
 #include <utils/utilities.h>
 
 #include <borealis.hpp>
+#include <nlohmann/json.hpp>
 #include <pages/apps_list_page.hpp>
 #include <pages/info_page.hpp>
 #include <pages/main_page.hpp>
 #include <pages/updating_page.hpp>
 
-brls::ListItem* new_new_make_app_entry(nlohmann::json app_json)
+brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 {
     std::string full_path = json_load_value_string(app_json, "full_path");
 
@@ -23,7 +24,8 @@ brls::ListItem* new_new_make_app_entry(nlohmann::json app_json)
 
     brls::ListItem* this_entry = new brls::ListItem(json_load_value_string(app_json, "name") + "  -  " + "v" + json_load_value_string(app_json, "version"), "", full_path);
 
-    this_entry->setValue(json_load_value_string(app_json, get_setting(setting_sort_type)));
+    //this_entry->setValue(json_load_value_string(app_json, get_setting(setting_sort_type)));
+    this_entry->setValue(json_load_value_string(app_json, "author"));
 
     std::string icon_path = get_resource_path("unknown.png");
 
@@ -350,6 +352,19 @@ brls::ListItem* new_new_make_app_entry(nlohmann::json app_json)
         return true;
     });
 
+    //
+
+    this_entry->getFocusEvent()->subscribe([this, this_entry](brls::View* view) {
+        if (needs_refresh)
+        {
+
+            //this_entry->onFocusLost();
+            //brls::Application::giveFocus(nullptr);
+            //refresh_list();
+        }
+        return true;
+    });
+
     return this_entry;
 }
 
@@ -415,13 +430,17 @@ std::vector<nlohmann::json> app_json_to_list(nlohmann::json json, std::string so
     return list;
 }
 
-brls::ListItem* create_sort_type_choice(std::string label, std::string sort_name, std::string secondary_sort)
+brls::ListItem* AppsListPage::create_sort_type_choice(std::string label, std::string sort_name, std::string secondary_sort)
 {
     brls::ListItem* dialogItem = new brls::ListItem(label);
     dialogItem->setChecked(get_setting(setting_sort_type) == sort_name);
-    dialogItem->getClickEvent()->subscribe([dialogItem, sort_name, secondary_sort](brls::View* view) {
+    dialogItem->getClickEvent()->subscribe([this, dialogItem, sort_name, secondary_sort](brls::View* view) {
         set_setting(setting_sort_type, sort_name);
         set_setting(setting_sort_type_2, secondary_sort);
+
+        needs_refresh = true;
+        brls::Application::popView();
+        refresh_list();
 
         brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
         for (unsigned int i = 0; i < list->getViewsCount(); i++)
@@ -431,6 +450,40 @@ brls::ListItem* create_sort_type_choice(std::string label, std::string sort_name
         return true;
     });
     return dialogItem;
+}
+
+brls::List* AppsListPage::build_app_list()
+{
+    brls::List* this_list = new brls::List();
+
+    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, get_setting(setting_sort_type), get_setting(setting_sort_type_2));
+
+    this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + get_setting(setting_sort_type) + " then " + get_setting(setting_sort_type_2) + ", " + get_setting(setting_sort_direction)));
+
+    for (unsigned int i = 0; i < apps_list.size(); i++)
+        this_list->addView(new_new_make_app_entry(apps_list.at(i)));
+
+    if (apps_list.empty())
+        this_list->addView(new brls::ListItem("No Apps Found."));
+
+    return this_list;
+}
+
+void AppsListPage::refresh_list()
+{
+    print_debug("Refreshing App List");
+
+    needs_refresh = false;
+
+    brls::Application::giveFocus(nullptr);
+    this->setContentView(new brls::ListItem(""));
+
+    main_list->clear();
+    main_list = build_app_list();
+    print_debug("!!1!!");
+    this->setContentView(main_list);
+    print_debug("!!2!!");
+    brls::Application::giveFocus(main_list->getChild(1));
 }
 
 AppsListPage::AppsListPage()
@@ -443,24 +496,17 @@ AppsListPage::AppsListPage()
 
     this->setIcon(get_resource_path("icon.png"));
 
-    brls::List* this_list = new brls::List();
+    main_list = build_app_list();
+    this->setContentView(main_list);
 
-    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, get_setting(setting_sort_type), get_setting(setting_sort_type_2));
+    this->registerAction("Refresh", brls::Key::Y, [this]() {
+        refresh_list();
 
-    this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + get_setting(setting_sort_type) + " then " + get_setting(setting_sort_type_2) + ", " + get_setting(setting_sort_direction)));
-
-    for (unsigned int i = 0; i < apps_list.size(); i++)
-        this_list->addView(new_new_make_app_entry(apps_list.at(i)));
-
-    //
-    if (apps_list.empty())
-        this_list->addView(new brls::ListItem("No Apps Found."));
-
-    this->setContentView(this_list);
+        return true;
+    });
 
     //sort panel
-
-    this->registerAction("Sorting Options", brls::Key::L, []() {
+    this->registerAction("Sorting Options", brls::Key::L, [this]() {
         brls::TabFrame* appView = new brls::TabFrame();
 
         brls::List* list = new brls::List();
@@ -475,14 +521,17 @@ AppsListPage::AppsListPage()
 
         list                       = new brls::List();
         brls::ListItem* dialogItem = new brls::ListItem("ascending");
-        dialogItem->setChecked(get_setting(setting_sort_direction) != "ascending");
-        dialogItem->getClickEvent()->subscribe([dialogItem](brls::View* view) {
+        dialogItem->setChecked(get_setting(setting_sort_direction) != "descending");
+        dialogItem->getClickEvent()->subscribe([this, dialogItem](brls::View* view) {
             set_setting(setting_sort_direction, "ascending");
 
             brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
             ((brls::ListItem*)(list->getChild(1)))->setChecked(false);
 
             dialogItem->setChecked(true);
+            needs_refresh = true;
+            brls::Application::popView();
+            refresh_list();
 
             return true;
         });
@@ -491,13 +540,16 @@ AppsListPage::AppsListPage()
 
         dialogItem = new brls::ListItem("descending");
         dialogItem->setChecked(get_setting(setting_sort_direction) == "descending");
-        dialogItem->getClickEvent()->subscribe([dialogItem](brls::View* view) {
+        dialogItem->getClickEvent()->subscribe([this, dialogItem](brls::View* view) {
             set_setting(setting_sort_direction, "descending");
 
             brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
             ((brls::ListItem*)(list->getChild(0)))->setChecked(false);
 
             dialogItem->setChecked(true);
+            needs_refresh = true;
+            brls::Application::popView();
+            refresh_list();
 
             return true;
         });
