@@ -25,6 +25,7 @@ enum setting
     setting_sort_type,
     setting_sort_type_2,
     setting_sort_direction,
+    setting_sort_group,
     settings_num
 };
 

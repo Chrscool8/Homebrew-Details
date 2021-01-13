@@ -388,31 +388,56 @@ struct AppComparator
             b                = c;
         }
 
-        std::string _a = json_load_value_string(a, sort_main);
-        transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
-        std::string _b = json_load_value_string(b, sort_main);
-        transform(_b.begin(), _b.end(), _b.begin(), ::tolower);
-
         //print_debug("Comparing " + _a + " and " + _b + " by " + sort_main + " and the result is " + std::to_string(_a.compare(_b) < 0));
 
-        if (_a != _b)
+        std::string _e = json_load_value_string(a, get_setting(setting_sort_group));
+        transform(_e.begin(), _e.end(), _e.begin(), ::tolower);
+        if (_e == "---")
+            _e = "zzzzzzzzzzzzzz";
+        std::string _f = json_load_value_string(b, get_setting(setting_sort_group));
+        transform(_f.begin(), _f.end(), _f.begin(), ::tolower);
+        if (_f == "---")
+            _f = "zzzzzzzzzzzzzz";
+
+        if (_e != _f)
         {
-            return (_a.compare(_b) < 0);
+            return (_e.compare(_f) < 0);
         }
         else
         {
-            std::string _c = json_load_value_string(a, sort_sub);
-            transform(_c.begin(), _c.end(), _c.begin(), ::tolower);
-            std::string _d = json_load_value_string(b, sort_sub);
-            transform(_d.begin(), _d.end(), _d.begin(), ::tolower);
 
-            if (_c != _d)
+            std::string _a = json_load_value_string(a, sort_main);
+            transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
+            if (_a == "---")
+                _a = "zzzzzzzzzzzzzz";
+            std::string _b = json_load_value_string(b, sort_main);
+            transform(_b.begin(), _b.end(), _b.begin(), ::tolower);
+            if (_b == "---")
+                _b = "zzzzzzzzzzzzzz";
+
+            if (_a != _b)
             {
-                return (json_load_value_string(a, sort_sub)).compare(json_load_value_string(b, sort_sub)) < 0;
+                return (_a.compare(_b) < 0);
             }
             else
             {
-                return (json_load_value_string(a, "version")).compare(json_load_value_string(b, "version")) < 0;
+                std::string _c = json_load_value_string(a, sort_sub);
+                transform(_c.begin(), _c.end(), _c.begin(), ::tolower);
+                if (_c == "---")
+                    _c = "zzzzzzzzzzzzzz";
+                std::string _d = json_load_value_string(b, sort_sub);
+                transform(_d.begin(), _d.end(), _d.begin(), ::tolower);
+                if (_d == "---")
+                    _d = "zzzzzzzzzzzzzz";
+
+                if (_c != _d)
+                {
+                    return (_c).compare(_d) < 0;
+                }
+                else
+                {
+                    return (json_load_value_string(a, "version")).compare(json_load_value_string(b, "version")) < 0;
+                }
             }
         }
     }
@@ -452,6 +477,27 @@ brls::ListItem* AppsListPage::create_sort_type_choice(std::string label, std::st
     return dialogItem;
 }
 
+brls::ListItem* AppsListPage::create_sort_group_choice(std::string label, std::string sort_group)
+{
+    brls::ListItem* dialogItem = new brls::ListItem(label);
+    dialogItem->setChecked(get_setting(setting_sort_group) == sort_group);
+    dialogItem->getClickEvent()->subscribe([this, dialogItem, sort_group](brls::View* view) {
+        set_setting(setting_sort_group, sort_group);
+
+        needs_refresh = true;
+        brls::Application::popView();
+        refresh_list();
+
+        brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
+        for (unsigned int i = 0; i < list->getViewsCount(); i++)
+            ((brls::ListItem*)(list->getChild(i)))->setChecked(false);
+        dialogItem->setChecked(true);
+
+        return true;
+    });
+    return dialogItem;
+}
+
 brls::List* AppsListPage::build_app_list()
 {
     brls::List* this_list = new brls::List();
@@ -461,7 +507,34 @@ brls::List* AppsListPage::build_app_list()
     this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + get_setting(setting_sort_type) + " then " + get_setting(setting_sort_type_2) + ", " + get_setting(setting_sort_direction)));
 
     for (unsigned int i = 0; i < apps_list.size(); i++)
-        this_list->addView(new_new_make_app_entry(apps_list.at(i)));
+    {
+        nlohmann::json entry = apps_list.at(i);
+
+        if (get_setting(setting_sort_group) != "")
+        {
+            if (apps_list.size() > 1)
+            {
+                std::string header_name = upper_first_letter(get_setting(setting_sort_group)) + ": " + upper_first_letter(json_load_value_string(entry, get_setting(setting_sort_group)));
+
+                if (i == 0)
+                {
+                    this_list->addView(new brls::Header(header_name));
+                }
+                else
+                {
+                    nlohmann::json entry_prev = apps_list.at(i - 1);
+
+                    std::string str1 = json_load_value_string(entry, get_setting(setting_sort_group));
+                    std::string str2 = json_load_value_string(entry_prev, get_setting(setting_sort_group));
+
+                    if (str1 != str2)
+                        this_list->addView(new brls::Header(header_name));
+                }
+            }
+        }
+
+        this_list->addView(new_new_make_app_entry(entry));
+    }
 
     if (apps_list.empty())
         this_list->addView(new brls::ListItem("No Apps Found."));
@@ -480,10 +553,11 @@ void AppsListPage::refresh_list()
 
     main_list->clear();
     main_list = build_app_list();
-    print_debug("!!1!!");
     this->setContentView(main_list);
-    print_debug("!!2!!");
-    brls::Application::giveFocus(main_list->getChild(1));
+    if (get_setting(setting_sort_group) != "")
+        brls::Application::giveFocus(main_list->getChild(2));
+    else
+        brls::Application::giveFocus(main_list->getChild(1));
 }
 
 AppsListPage::AppsListPage()
@@ -520,7 +594,7 @@ AppsListPage::AppsListPage()
         //
 
         list                       = new brls::List();
-        brls::ListItem* dialogItem = new brls::ListItem("ascending");
+        brls::ListItem* dialogItem = new brls::ListItem("Ascending");
         dialogItem->setChecked(get_setting(setting_sort_direction) != "descending");
         dialogItem->getClickEvent()->subscribe([this, dialogItem](brls::View* view) {
             set_setting(setting_sort_direction, "ascending");
@@ -538,7 +612,7 @@ AppsListPage::AppsListPage()
         list->addView(dialogItem);
         //
 
-        dialogItem = new brls::ListItem("descending");
+        dialogItem = new brls::ListItem("Descending");
         dialogItem->setChecked(get_setting(setting_sort_direction) == "descending");
         dialogItem->getClickEvent()->subscribe([this, dialogItem](brls::View* view) {
             set_setting(setting_sort_direction, "descending");
@@ -556,6 +630,15 @@ AppsListPage::AppsListPage()
         list->addView(dialogItem);
 
         appView->addTab("Sort Direction", list);
+
+        //
+
+        list = new brls::List();
+        list->addView(create_sort_group_choice("None", ""));
+        list->addView(create_sort_group_choice("By Author", "author"));
+        list->addView(create_sort_group_choice("By Category", "category"));
+
+        appView->addTab("Grouping", list);
 
         //
 

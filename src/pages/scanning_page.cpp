@@ -9,6 +9,7 @@
 #include <utils/update.h>
 #include <utils/utilities.h>
 
+#include <pages/apps_list_page.hpp>
 #include <pages/intro_page.hpp>
 #include <pages/issue_page.hpp>
 #include <pages/layout_select_page.hpp>
@@ -160,8 +161,17 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
             continued = true;
             scanner->join();
 
-            print_debug("----------- Launch Layout Page");
-            show_framed(new LayoutSelectPage())->setTitle("Choose a layout style");
+            //print_debug("----------- Launch Layout Page");
+            //show_framed(new LayoutSelectPage())->setTitle("Choose a layout style");
+
+            print_debug("rm lock.");
+
+            if (fs::exists("sdmc:/config/homebrew_details/lock"))
+                remove("sdmc:/config/homebrew_details/lock");
+
+            set_setting(setting_scan_settings_changed, "false");
+
+            brls::Application::pushView(new AppsListPage());
 
             scanprog.prev_num_files = file_count;
         }

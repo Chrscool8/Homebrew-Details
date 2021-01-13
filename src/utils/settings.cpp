@@ -146,4 +146,9 @@ void init_settings()
     {
         set_setting(setting_sort_direction, "ascending");
     }
+
+    if (get_setting(setting_sort_group) == "")
+    {
+        set_setting(setting_sort_group, "");
+    }
 }

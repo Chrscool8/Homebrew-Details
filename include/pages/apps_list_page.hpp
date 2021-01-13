@@ -11,6 +11,7 @@ class AppsListPage : public brls::AppletFrame
 
     brls::ListItem* new_new_make_app_entry(nlohmann::json app_json);
     brls::ListItem* create_sort_type_choice(std::string label, std::string sort_name, std::string secondary_sort);
+    brls::ListItem* create_sort_group_choice(std::string label, std::string sort_name);
     brls::List* build_app_list();
     void refresh_list();
 

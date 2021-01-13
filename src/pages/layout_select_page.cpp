@@ -46,12 +46,7 @@ LayoutSelectPage::LayoutSelectPage()
         brls::FocusDirection::LEFT,
         this->secondButton);
 
-    print_debug("rm lock.");
 
-    if (fs::exists("sdmc:/config/homebrew_details/lock"))
-        remove("sdmc:/config/homebrew_details/lock");
-
-    set_setting(setting_scan_settings_changed, "false");
 }
 
 #define BUTTON_WIDTH 300
