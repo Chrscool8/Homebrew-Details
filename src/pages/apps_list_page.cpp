@@ -637,6 +637,7 @@ AppsListPage::AppsListPage()
         list->addView(create_sort_group_choice("None", ""));
         list->addView(create_sort_group_choice("By Author", "author"));
         list->addView(create_sort_group_choice("By Category", "category"));
+        list->addView(create_sort_group_choice("From Appstore", "is_appstore"));
 
         appView->addTab("Grouping", list);
 
