@@ -392,3 +392,9 @@ brls::ListItem* add_list_entry(std::string title, std::string short_info, std::s
 
     return item;
 }
+
+std::string upper_first_letter(std::string str)
+{
+    str[0] = toupper(str[0]);
+    return str;
+}
