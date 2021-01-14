@@ -255,7 +255,4 @@ UpdatingPage::~UpdatingPage()
         prog.end_thread = true;
         counter->join();
     }
-
-    delete this->progressDisp;
-    delete this->label;
 }
