@@ -21,13 +21,6 @@ IntroPage::IntroPage(std::string label)
         {
             printf("Clicked scan\n");
 
-            std::ofstream outputFile("sdmc:/config/homebrew_details/lock");
-            if (outputFile)
-            {
-                outputFile << "lock";
-                outputFile.close();
-            }
-
             //this->button->setLabel("Scanning...");
             //this->button->invalidate();
             go = true;

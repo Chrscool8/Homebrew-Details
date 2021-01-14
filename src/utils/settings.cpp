@@ -151,4 +151,11 @@ void init_settings()
     {
         set_setting(setting_sort_group, "");
     }
+
+    if (get_setting(setting_last_seen_version) == "" || (APP_VERSION != get_setting(setting_last_seen_version)))
+    {
+        set_setting(setting_last_seen_version, std::string(APP_VERSION));
+        print_debug("DIFFERING VERSION!!");
+        set_setting(setting_invalidate_cache, "true");
+    }
 }

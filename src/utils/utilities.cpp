@@ -203,6 +203,11 @@ std::string get_config_path(std::string str)
     return "sdmc:/config/homebrew_details/" + str;
 }
 
+std::string get_apps_cache_file()
+{
+    return "sdmc:/config/homebrew_details/apps_info.json";
+}
+
 std::string to_megabytes(unsigned int size)
 {
     std::stringstream stream;

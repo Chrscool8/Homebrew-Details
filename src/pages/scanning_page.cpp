@@ -62,9 +62,16 @@ void ScanningPage::thread_scan()
     read_blacklist();
     load_notes();
 
-    if (std::filesystem::exists("sdmc:/config/homebrew_details/apps_info.json"))
+    if (get_setting_true(setting_invalidate_cache))
     {
-        std::ifstream i("sdmc:/config/homebrew_details/apps_info.json");
+        set_setting(setting_invalidate_cache, "");
+        remove(get_apps_cache_file().c_str());
+        set_setting(setting_scan_settings_changed, "false");
+    }
+
+    if (std::filesystem::exists(get_apps_cache_file()))
+    {
+        std::ifstream i(get_apps_cache_file());
         apps_info_json.clear();
         i >> apps_info_json;
     }
@@ -74,14 +81,6 @@ void ScanningPage::thread_scan()
         new_read_store_apps();
     }
 
-    //sleep(10);
-
-    //read_store_apps();
-
-    //print_debug("------ PRE LOAD");
-    //load_all_apps();
-    //print_debug("------ POST LOAD");
-
     print_debug("scan thread end");
 
     set_setting(setting_previous_num_files, std::to_string(file_count));
@@ -90,6 +89,15 @@ void ScanningPage::thread_scan()
 
 ScanningPage::ScanningPage()
 {
+    std::ofstream outputFile("sdmc:/config/homebrew_details/lock");
+    if (outputFile)
+    {
+        outputFile << "lock";
+        outputFile.close();
+    }
+
+    //
+
     finished_download = false;
 
     go         = false;
@@ -171,6 +179,7 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
 
             set_setting(setting_scan_settings_changed, "false");
 
+            //brls::Application::popView();
             brls::Application::pushView(new AppsListPage());
 
             scanprog.prev_num_files = file_count;

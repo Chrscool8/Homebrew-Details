@@ -22,6 +22,7 @@ std::string get_date();
 std::string get_cache_path(std::string str);
 std::string get_resource_path(std::string str);
 std::string get_config_path(std::string str);
+std::string get_apps_cache_file();
 std::string to_megabytes(unsigned int size);
 std::string to_gigabytes(uint64_t size);
 std::string get_free_space();
