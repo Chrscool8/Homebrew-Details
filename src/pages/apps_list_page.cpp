@@ -582,113 +582,114 @@ AppsListPage::AppsListPage()
     this->registerAction("Settings", brls::Key::Y, [this]() {
         brls::TabFrame* appView = new brls::TabFrame();
 
-        print_debug("Settings.");
-
-        brls::List* settings_list = new brls::List();
-        //settings_list->addView(new brls::Header("Scan Settings"));
-
-        brls::ListItem* autoscan_switch = new brls::ListItem("Autoscan", "", "Begin scanning as soon as the app is launched.");
-        autoscan_switch->setChecked((get_setting_true(setting_autoscan)));
-        autoscan_switch->updateActionHint(brls::Key::A, "Toggle");
-        autoscan_switch->getClickEvent()->subscribe([autoscan_switch](brls::View* view) {
-            if (get_setting(setting_autoscan) == "true")
-            {
-                set_setting(setting_autoscan, "false");
-                autoscan_switch->setChecked(false);
-            }
-            else
-            {
-                set_setting(setting_autoscan, "true");
-                autoscan_switch->setChecked(true);
-            }
-        });
-        settings_list->addView(autoscan_switch);
-
-        brls::ListItem* item_scan_switch = new brls::ListItem("Scan /switch/");
-        item_scan_switch->setChecked(true);
-        brls::ListItem* item_scan_switch_subs = new brls::ListItem("Scan /switch/'s subfolders");
-        item_scan_switch_subs->setChecked((get_setting_true(setting_search_subfolders)));
-        item_scan_switch_subs->updateActionHint(brls::Key::A, "Toggle");
-        item_scan_switch_subs->getClickEvent()->subscribe([item_scan_switch_subs](brls::View* view) {
-            if (get_setting(setting_search_subfolders) == "true")
-            {
-                set_setting(setting_search_subfolders, "false");
-                item_scan_switch_subs->setChecked(false);
-            }
-            else
-            {
-                set_setting(setting_search_subfolders, "true");
-                item_scan_switch_subs->setChecked(true);
-            }
-
-            set_setting(setting_scan_settings_changed, "true");
-        });
-
-        brls::ListItem* item_scan_root = new brls::ListItem("Scan / (not subfolders)");
-        item_scan_root->setChecked((get_setting_true(setting_search_root)));
-        item_scan_root->updateActionHint(brls::Key::A, "Toggle");
-        item_scan_root->getClickEvent()->subscribe([item_scan_root](brls::View* view) {
-            if (get_setting(setting_search_root) == "true")
-            {
-                set_setting(setting_search_root, "false");
-                item_scan_root->setChecked(false);
-            }
-            else
-            {
-                set_setting(setting_search_root, "true");
-                item_scan_root->setChecked(true);
-            }
-
-            set_setting(setting_scan_settings_changed, "true");
-        });
-
-        brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Scan Range", { "Scan Whole SD Card (Slow!)", "Only scan some folders" });
-
-        layerSelectItem->getValueSelectedEvent()->subscribe([item_scan_switch, item_scan_switch_subs, item_scan_root](size_t selection) {
-            switch (selection)
-            {
-                case 1:
-                    set_setting(setting_scan_full_card, "false");
-                    item_scan_switch->expand(true);
-                    item_scan_switch_subs->expand(true);
-                    item_scan_root->expand(true);
-                    break;
-                case 0:
-                    set_setting(setting_scan_full_card, "true");
-                    item_scan_switch->collapse(true);
-                    item_scan_switch_subs->collapse(true);
-                    item_scan_root->collapse(true);
-                    break;
-            }
-
-            set_setting(setting_scan_settings_changed, "true");
-        });
-        settings_list->addView(layerSelectItem);
-        settings_list->addView(item_scan_switch);
-        settings_list->addView(item_scan_switch_subs);
-        settings_list->addView(item_scan_root);
-
-        if (get_setting(setting_scan_full_card) == "false")
         {
-            layerSelectItem->setSelectedValue(1);
-            item_scan_switch->expand(true);
-            item_scan_switch_subs->expand(true);
-            item_scan_root->expand(true);
-        }
-        else
-        {
-            layerSelectItem->setSelectedValue(0);
-            item_scan_switch->collapse(true);
-            item_scan_switch_subs->collapse(true);
-            item_scan_root->collapse(true);
-        }
+            print_debug("Settings.");
 
-        appView->addTab("Scanning", settings_list);
+            brls::List* settings_list_scan = new brls::List();
+            settings_list_scan->addView(new brls::Header("Scan Settings"));
 
+            brls::ListItem* autoscan_switch = new brls::ListItem("Autoscan", "", "Begin scanning as soon as the app is launched.");
+            autoscan_switch->setChecked((get_setting_true(setting_autoscan)));
+            autoscan_switch->updateActionHint(brls::Key::A, "Toggle");
+            autoscan_switch->getClickEvent()->subscribe([autoscan_switch](brls::View* view) {
+                if (get_setting(setting_autoscan) == "true")
+                {
+                    set_setting(setting_autoscan, "false");
+                    autoscan_switch->setChecked(false);
+                }
+                else
+                {
+                    set_setting(setting_autoscan, "true");
+                    autoscan_switch->setChecked(true);
+                }
+            });
+            settings_list_scan->addView(autoscan_switch);
+
+            brls::ListItem* item_scan_switch = new brls::ListItem("Scan /switch/");
+            item_scan_switch->setChecked(true);
+            brls::ListItem* item_scan_switch_subs = new brls::ListItem("Scan /switch/'s subfolders");
+            item_scan_switch_subs->setChecked((get_setting_true(setting_search_subfolders)));
+            item_scan_switch_subs->updateActionHint(brls::Key::A, "Toggle");
+            item_scan_switch_subs->getClickEvent()->subscribe([item_scan_switch_subs](brls::View* view) {
+                if (get_setting(setting_search_subfolders) == "true")
+                {
+                    set_setting(setting_search_subfolders, "false");
+                    item_scan_switch_subs->setChecked(false);
+                }
+                else
+                {
+                    set_setting(setting_search_subfolders, "true");
+                    item_scan_switch_subs->setChecked(true);
+                }
+
+                set_setting(setting_scan_settings_changed, "true");
+            });
+
+            brls::ListItem* item_scan_root = new brls::ListItem("Scan / (not subfolders)");
+            item_scan_root->setChecked((get_setting_true(setting_search_root)));
+            item_scan_root->updateActionHint(brls::Key::A, "Toggle");
+            item_scan_root->getClickEvent()->subscribe([item_scan_root](brls::View* view) {
+                if (get_setting(setting_search_root) == "true")
+                {
+                    set_setting(setting_search_root, "false");
+                    item_scan_root->setChecked(false);
+                }
+                else
+                {
+                    set_setting(setting_search_root, "true");
+                    item_scan_root->setChecked(true);
+                }
+
+                set_setting(setting_scan_settings_changed, "true");
+            });
+
+            brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Scan Range", { "Scan Whole SD Card (Slow!)", "Only scan some folders" });
+
+            layerSelectItem->getValueSelectedEvent()->subscribe([item_scan_switch, item_scan_switch_subs, item_scan_root](size_t selection) {
+                switch (selection)
+                {
+                    case 1:
+                        set_setting(setting_scan_full_card, "false");
+                        item_scan_switch->expand(true);
+                        item_scan_switch_subs->expand(true);
+                        item_scan_root->expand(true);
+                        break;
+                    case 0:
+                        set_setting(setting_scan_full_card, "true");
+                        item_scan_switch->collapse(true);
+                        item_scan_switch_subs->collapse(true);
+                        item_scan_root->collapse(true);
+                        break;
+                }
+
+                set_setting(setting_scan_settings_changed, "true");
+            });
+            settings_list_scan->addView(layerSelectItem);
+            settings_list_scan->addView(item_scan_switch);
+            settings_list_scan->addView(item_scan_switch_subs);
+            settings_list_scan->addView(item_scan_root);
+
+            if (get_setting(setting_scan_full_card) == "false")
+            {
+                layerSelectItem->setSelectedValue(1);
+                item_scan_switch->expand(true);
+                item_scan_switch_subs->expand(true);
+                item_scan_root->expand(true);
+            }
+            else
+            {
+                layerSelectItem->setSelectedValue(0);
+                item_scan_switch->collapse(true);
+                item_scan_switch_subs->collapse(true);
+                item_scan_root->collapse(true);
+            }
+
+            appView->addTab("Scanning", settings_list_scan);
+        }
         //
         {
-            brls::List* settings_list2 = new brls::List();
-            //->addView(new brls::Header("Blacklist Settings"));
+            brls::List* settings_list_blacklist = new brls::List();
+            settings_list_blacklist->addView(new brls::Header("Blacklist Settings"));
 
             std::vector<std::string> bl_vec;
             bl_vec.push_back("Add new entry...");
@@ -734,7 +735,7 @@ AppsListPage::AppsListPage()
                 brls::PopupFrame::open("Blacklisted Folders", appView, "", "");
                 return true;
             });
-            settings_list2->addView(bl_edit_item);
+            settings_list_blacklist->addView(bl_edit_item);
 
             brls::Table* table = new brls::Table();
             //table->addRow(brls::TableRowType::HEADER, "Blacklisted Folders");
@@ -744,29 +745,29 @@ AppsListPage::AppsListPage()
                 table->addRow(brls::TableRowType::BODY, item_name);
             }
 
-            settings_list2->addView(table);
+            settings_list_blacklist->addView(table);
 
-            appView->addTab("Blacklist", settings_list2);
+            appView->addTab("Blacklist", settings_list_blacklist);
         }
 
         //
         {
-            brls::List* settings_list3 = new brls::List();
+            brls::List* settings_list_controls = new brls::List();
             //settings_list->addView(new brls::Header("Control Settings"));
 
             brls::SelectListItem* controlSelectItem = new brls::SelectListItem("Control Settings", { "A: Details; X: Launch", "A: Launch; X: Details" }, std::stoi(get_setting(setting_control_scheme)), "Takes full effect on next launch.");
             controlSelectItem->getValueSelectedEvent()->subscribe([](size_t selection) {
                 set_setting(setting_control_scheme, std::to_string(selection));
             });
-            settings_list3->addView(controlSelectItem);
+            settings_list_controls->addView(controlSelectItem);
 
-            appView->addTab("Controls", settings_list3);
+            appView->addTab("Controls", settings_list_controls);
         }
         //
 
         {
-            brls::List* settings_list4 = new brls::List();
-            settings_list4->addView(new brls::Header("App Settings"));
+            brls::List* settings_list_app = new brls::List();
+            settings_list_app->addView(new brls::Header("App Settings"));
 
             brls::SelectListItem* exitToItem = new brls::SelectListItem("Exit To", { "sdmc:/hbmenu.nro", get_setting(setting_nro_path) });
             exitToItem->setValue(get_setting(setting_exit_to));
@@ -779,10 +780,10 @@ AppsListPage::AppsListPage()
                 std::string target = get_setting(setting_exit_to);
                 envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
             });
-            settings_list4->addView(exitToItem);
+            settings_list_app->addView(exitToItem);
 
             print_debug("Misc.");
-            settings_list4->addView(new brls::Header("Misc. Settings"));
+            settings_list_app->addView(new brls::Header("Misc. Settings"));
 
             brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes full effect on next launch.");
             debug_switch->setChecked(get_setting_true(setting_debug));
@@ -799,8 +800,8 @@ AppsListPage::AppsListPage()
                     debug_switch->setChecked(true);
                 }
             });
-            settings_list4->addView(debug_switch);
-            appView->addTab("Misc", settings_list4);
+            settings_list_app->addView(debug_switch);
+            appView->addTab("Misc", settings_list_app);
         }
         //
 
