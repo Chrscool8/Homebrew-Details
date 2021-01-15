@@ -10,7 +10,7 @@
 std::string notes_path = get_config_path("notes.json");
 nlohmann::json notes_json;
 
-void load_notes()
+void read_notes()
 {
     if (std::filesystem::exists(notes_path))
     {

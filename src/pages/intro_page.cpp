@@ -15,7 +15,12 @@ IntroPage::IntroPage()
     short_wait        = 0;
     autoscan_cooldown = 0;
 
-    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel("Begin Scan")->setImage(get_resource_path("arrows_small.png"));
+    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setImage(get_resource_path("arrows_small.png"));
+    if (!std::filesystem::exists(get_apps_cache_file()))
+        this->button->setLabel("Begin Scan");
+    else
+        this->button->setLabel("Load Cache");
+
     this->button->setParent(this);
     this->button->getClickEvent()->subscribe([this](View* view) {
         if (!go)
@@ -35,6 +40,13 @@ IntroPage::IntroPage()
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);
+
+    this->registerAction("Clear Cache", brls::Key::MINUS, [this]() {
+        set_setting(setting_invalidate_cache, "true");
+        this->button->setLabel("Begin Scan");
+        this->button->invalidate();
+        return true;
+    });
 
     this->registerAction("Settings", brls::Key::Y, [this]() {
         show_settings_panel();
