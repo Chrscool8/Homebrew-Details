@@ -73,3 +73,8 @@ void remove_favorite(std::string str)
     favorites.erase(std::remove(favorites.begin(), favorites.end(), str), favorites.end());
     write_favorites();
 }
+
+bool is_favorite(std::string str)
+{
+    return vector_contains(favorites, str);
+}

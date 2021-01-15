@@ -1,6 +1,7 @@
 #include <dirent.h>
 #include <main.h>
 #include <utils/blacklist.h>
+#include <utils/favorites.h>
 #include <utils/launching.h>
 #include <utils/modules.h>
 #include <utils/notes.h>
@@ -20,10 +21,16 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 {
     std::string full_path = json_load_value_string(app_json, "full_path");
 
+    print_debug("Building " + full_path);
+
     if (!fs::exists(full_path))
         full_path = "FILE MISSING";
 
-    brls::ListItem* this_entry = new brls::ListItem(json_load_value_string(app_json, "name") + "  -  " + "v" + json_load_value_string(app_json, "version"), "", full_path);
+    std::string fav = "";
+    if (is_favorite(full_path))
+        fav = symbol_star() + " ";
+
+    brls::ListItem* this_entry = new brls::ListItem(fav + json_load_value_string(app_json, "name") + "  -  " + "v" + json_load_value_string(app_json, "version"), "", full_path);
 
     //this_entry->setValue(json_load_value_string(app_json, get_setting(setting_sort_type)));
     this_entry->setValue(json_load_value_string(app_json, "author"));
@@ -67,7 +74,7 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
         key = brls::Key::X;
 
     this_entry->updateActionHint(key, "Details");
-    this_entry->registerAction("Details", key, [full_path, app_json, icon_path]() {
+    this_entry->registerAction("Details", key, [this, full_path, app_json, icon_path]() {
         brls::TabFrame* appView = new brls::TabFrame();
 
         brls::List* manageList = new brls::List();
@@ -294,6 +301,34 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
             manageList->addView(delete_item);
         }
 
+        {
+            manageList->addView(new brls::Header("Other Actions"));
+            brls::ListItem* fav_item = new brls::ListItem("");
+            if (is_favorite(full_path))
+            {
+                fav_item->setLabel("Unfavorite App");
+                fav_item->getClickEvent()->subscribe([this, full_path](brls::View* view) {
+                    remove_favorite(full_path);
+                    needs_refresh = true;
+                    brls::Application::popView();
+                    refresh_list();
+                    return true;
+                });
+            }
+            else
+            {
+                fav_item->setLabel("Favorite App");
+                fav_item->getClickEvent()->subscribe([this, full_path](brls::View* view) {
+                    add_favorite(full_path);
+                    needs_refresh = true;
+                    brls::Application::popView();
+                    refresh_list();
+                    return true;
+                });
+            }
+            manageList->addView(fav_item);
+        }
+
         appView->addTab("Manage", manageList);
 
         brls::List* appInfoList = new brls::List();
@@ -303,6 +338,7 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
         add_list_entry("Author", json_load_value_string(app_json, "author"), "", appInfoList, 21);
         add_list_entry("Version", json_load_value_string(app_json, "version"), "", appInfoList, 21);
         add_list_entry("Size", to_megabytes(json_load_value_int(app_json, "size")) + " MB", "Exact Size:\n\n" + std::to_string(json_load_value_int(app_json, "size")) + " bytes", appInfoList, 21);
+        add_list_entry("Favorite", json_load_value_string(app_json, "favorite"), "", appInfoList, 21);
         //add_list_entry("Icon Size", std::to_string(json_load_value_int(app_json, "icon_size")), "", appInfoList, 21);
         appView->addTab("File Info", appInfoList);
 
@@ -355,16 +391,16 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 
     //
 
-    this_entry->getFocusEvent()->subscribe([this, this_entry](brls::View* view) {
-        if (needs_refresh)
-        {
+    //this_entry->getFocusEvent()->subscribe([this, this_entry](brls::View* view) {
+    //    if (needs_refresh)
+    //    {
 
-            //this_entry->onFocusLost();
-            //brls::Application::giveFocus(nullptr);
-            //refresh_list();
-        }
-        return true;
-    });
+    //        //this_entry->onFocusLost();
+    //        //brls::Application::giveFocus(nullptr);
+    //        //refresh_list();
+    //    }
+    //    return true;
+    //});
 
     return this_entry;
 }
@@ -382,62 +418,78 @@ struct AppComparator
 
     bool operator()(nlohmann::json a, nlohmann::json b) const
     {
-        if (get_setting(setting_sort_direction) == "descending")
+        //print_debug("Comparing " + comp_sort_main_a + " and " + comp_sort_main_b + " by " + sort_main + " and the result is " + std::to_string(comp_sort_main_a.compare(comp_sort_main_b) < 0));
+
+        std::string comp_fav_a = bool_string(is_favorite(json_load_value_string(a, "full_path")));
+        transform(comp_fav_a.begin(), comp_fav_a.end(), comp_fav_a.begin(), ::tolower);
+        if (comp_fav_a == "---")
+            comp_fav_a = "zzzzzzzzzzzzzz";
+        std::string comp_fav_b = bool_string(is_favorite(json_load_value_string(b, "full_path")));
+        transform(comp_fav_b.begin(), comp_fav_b.end(), comp_fav_b.begin(), ::tolower);
+        if (comp_fav_b == "---")
+            comp_fav_b = "zzzzzzzzzzzzzz";
+
+        if (comp_fav_a != comp_fav_b)
         {
-            nlohmann::json c = a;
-            a                = b;
-            b                = c;
-        }
-
-        //print_debug("Comparing " + _a + " and " + _b + " by " + sort_main + " and the result is " + std::to_string(_a.compare(_b) < 0));
-
-        std::string _e = json_load_value_string(a, get_setting(setting_sort_group));
-        transform(_e.begin(), _e.end(), _e.begin(), ::tolower);
-        if (_e == "---")
-            _e = "zzzzzzzzzzzzzz";
-        std::string _f = json_load_value_string(b, get_setting(setting_sort_group));
-        transform(_f.begin(), _f.end(), _f.begin(), ::tolower);
-        if (_f == "---")
-            _f = "zzzzzzzzzzzzzz";
-
-        if (_e != _f)
-        {
-            return (_e.compare(_f) < 0);
+            return (!(comp_fav_a.compare(comp_fav_b) < 0));
         }
         else
         {
-
-            std::string _a = json_load_value_string(a, sort_main);
-            transform(_a.begin(), _a.end(), _a.begin(), ::tolower);
-            if (_a == "---")
-                _a = "zzzzzzzzzzzzzz";
-            std::string _b = json_load_value_string(b, sort_main);
-            transform(_b.begin(), _b.end(), _b.begin(), ::tolower);
-            if (_b == "---")
-                _b = "zzzzzzzzzzzzzz";
-
-            if (_a != _b)
+            if (get_setting(setting_sort_direction) == "descending")
             {
-                return (_a.compare(_b) < 0);
+                nlohmann::json c = a;
+                a                = b;
+                b                = c;
+            }
+
+            std::string comp_sort_group_a = json_load_value_string(a, get_setting(setting_sort_group));
+            transform(comp_sort_group_a.begin(), comp_sort_group_a.end(), comp_sort_group_a.begin(), ::tolower);
+            if (comp_sort_group_a == "---")
+                comp_sort_group_a = "zzzzzzzzzzzzzz";
+            std::string comp_sort_group_b = json_load_value_string(b, get_setting(setting_sort_group));
+            transform(comp_sort_group_b.begin(), comp_sort_group_b.end(), comp_sort_group_b.begin(), ::tolower);
+            if (comp_sort_group_b == "---")
+                comp_sort_group_b = "zzzzzzzzzzzzzz";
+
+            if (comp_sort_group_a != comp_sort_group_b)
+            {
+                return (comp_sort_group_a.compare(comp_sort_group_b) < 0);
             }
             else
             {
-                std::string _c = json_load_value_string(a, sort_sub);
-                transform(_c.begin(), _c.end(), _c.begin(), ::tolower);
-                if (_c == "---")
-                    _c = "zzzzzzzzzzzzzz";
-                std::string _d = json_load_value_string(b, sort_sub);
-                transform(_d.begin(), _d.end(), _d.begin(), ::tolower);
-                if (_d == "---")
-                    _d = "zzzzzzzzzzzzzz";
 
-                if (_c != _d)
+                std::string comp_sort_main_a = json_load_value_string(a, sort_main);
+                transform(comp_sort_main_a.begin(), comp_sort_main_a.end(), comp_sort_main_a.begin(), ::tolower);
+                if (comp_sort_main_a == "---")
+                    comp_sort_main_a = "zzzzzzzzzzzzzz";
+                std::string comp_sort_main_b = json_load_value_string(b, sort_main);
+                transform(comp_sort_main_b.begin(), comp_sort_main_b.end(), comp_sort_main_b.begin(), ::tolower);
+                if (comp_sort_main_b == "---")
+                    comp_sort_main_b = "zzzzzzzzzzzzzz";
+
+                if (comp_sort_main_a != comp_sort_main_b)
                 {
-                    return (_c).compare(_d) < 0;
+                    return (comp_sort_main_a.compare(comp_sort_main_b) < 0);
                 }
                 else
                 {
-                    return (json_load_value_string(a, "version")).compare(json_load_value_string(b, "version")) < 0;
+                    std::string comp_sort_sub_a = json_load_value_string(a, sort_sub);
+                    transform(comp_sort_sub_a.begin(), comp_sort_sub_a.end(), comp_sort_sub_a.begin(), ::tolower);
+                    if (comp_sort_sub_a == "---")
+                        comp_sort_sub_a = "zzzzzzzzzzzzzz";
+                    std::string comp_sort_sub_b = json_load_value_string(b, sort_sub);
+                    transform(comp_sort_sub_b.begin(), comp_sort_sub_b.end(), comp_sort_sub_b.begin(), ::tolower);
+                    if (comp_sort_sub_b == "---")
+                        comp_sort_sub_b = "zzzzzzzzzzzzzz";
+
+                    if (comp_sort_sub_a != comp_sort_sub_b)
+                    {
+                        return (comp_sort_sub_a).compare(comp_sort_sub_b) < 0;
+                    }
+                    else
+                    {
+                        return (json_load_value_string(a, "version")).compare(json_load_value_string(b, "version")) < 0;
+                    }
                 }
             }
         }
@@ -469,7 +521,7 @@ brls::ListItem* AppsListPage::create_sort_type_choice(std::string label, std::st
         refresh_list();
 
         brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
-        for (unsigned int i = 0; i < list->getViewsCount(); i++)
+        for (size_t i = 0; i < list->getViewsCount(); i++)
             ((brls::ListItem*)(list->getChild(i)))->setChecked(false);
         dialogItem->setChecked(true);
 
@@ -490,7 +542,7 @@ brls::ListItem* AppsListPage::create_sort_group_choice(std::string label, std::s
         refresh_list();
 
         brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
-        for (unsigned int i = 0; i < list->getViewsCount(); i++)
+        for (size_t i = 0; i < list->getViewsCount(); i++)
             ((brls::ListItem*)(list->getChild(i)))->setChecked(false);
         dialogItem->setChecked(true);
 
@@ -511,11 +563,36 @@ brls::List* AppsListPage::build_app_list()
     {
         nlohmann::json entry = apps_list.at(i);
 
+        if (!favorites.empty())
+        {
+            if (apps_list.size() > 1)
+            {
+                std::string header_name = " Favorites";
+
+                if (i == 0)
+                {
+                    this_list->addView(new brls::Header(header_name));
+                }
+                else
+                {
+                    nlohmann::json entry_prev = apps_list.at(i - 1);
+
+                    std::string str1 = bool_string(is_favorite(json_load_value_string(entry, "full_path")));
+                    std::string str2 = bool_string(is_favorite(json_load_value_string(entry_prev, "full_path")));
+
+                    if (str1 != str2)
+                    {
+                        this_list->addView(new brls::Header(" Non-Favorites"));
+                    }
+                }
+            }
+        }
+
         if (get_setting(setting_sort_group) != "")
         {
             if (apps_list.size() > 1)
             {
-                std::string header_name = upper_first_letter(get_setting(setting_sort_group)) + ": " + upper_first_letter(json_load_value_string(entry, get_setting(setting_sort_group)));
+                std::string header_name = "  " + upper_first_letter(get_setting(setting_sort_group)) + ": " + upper_first_letter(json_load_value_string(entry, get_setting(setting_sort_group)));
 
                 if (i == 0)
                 {
@@ -528,7 +605,10 @@ brls::List* AppsListPage::build_app_list()
                     std::string str1 = json_load_value_string(entry, get_setting(setting_sort_group));
                     std::string str2 = json_load_value_string(entry_prev, get_setting(setting_sort_group));
 
-                    if (str1 != str2)
+                    std::string str3 = bool_string(is_favorite(json_load_value_string(entry, "full_path")));
+                    std::string str4 = bool_string(is_favorite(json_load_value_string(entry_prev, "full_path")));
+
+                    if (str1 != str2 || str3 != str4)
                         this_list->addView(new brls::Header(header_name));
                 }
             }
@@ -555,10 +635,21 @@ void AppsListPage::refresh_list()
     main_list->clear();
     main_list = build_app_list();
     this->setContentView(main_list);
-    if (get_setting(setting_sort_group) != "")
-        brls::Application::giveFocus(main_list->getChild(2));
-    else
-        brls::Application::giveFocus(main_list->getChild(1));
+
+    unsigned int select_num = 0;
+    for (unsigned int i = 0; i < main_list->getViewsCount(); i++)
+    {
+        brls::View* ent = main_list->getChild(i);
+        if (ent->describe() == "N4brls8ListItemE")
+        {
+            //print_debug("Choosing ")
+            select_num = i;
+            break;
+        }
+    }
+
+    if (select_num != 0)
+        brls::Application::giveFocus(main_list->getChild(select_num));
 }
 
 AppsListPage::AppsListPage()

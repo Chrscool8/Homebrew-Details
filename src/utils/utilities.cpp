@@ -174,6 +174,14 @@ std::string digits_string(int value, int numDigits)
     return oss.str();
 }
 
+std::string bool_string(bool boo)
+{
+    if (boo)
+        return "true";
+    else
+        return "false";
+}
+
 std::string get_time()
 {
     auto t  = std::time(nullptr);

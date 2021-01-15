@@ -15,7 +15,8 @@ IntroPage::IntroPage()
     short_wait        = 0;
     autoscan_cooldown = 0;
 
-    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setImage(get_resource_path("arrows_small.png"));
+    this->button = new brls::Button(brls::ButtonStyle::BORDERLESS);
+    this->button->setImage(get_resource_path("arrows_small.png"));
     if (!std::filesystem::exists(get_apps_cache_file()))
         this->button->setLabel("Begin Scan");
     else
