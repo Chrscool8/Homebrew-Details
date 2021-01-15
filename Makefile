@@ -37,15 +37,15 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-TARGET		:=	homebrew_details
+TARGET		:=	homebrew_details_next
 BUILD		:=	build.nx
 SOURCES		:=	src src/pages src/utils
 DATA		:=	data
 ICON		:=	resources/icon.jpg
 INCLUDES	:=	include include/pages include/utils
-APP_TITLE	:=	Homebrew Details
+APP_TITLE	:=	Homebrew Details Next
 APP_AUTHOR	:=	Chris Bradel
-APP_VERSION	:=	0.99
+APP_VERSION	:=	0.951
 
 ROMFS				:=	resources
 BOREALIS_PATH		:=	.

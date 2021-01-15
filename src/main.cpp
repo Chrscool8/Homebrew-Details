@@ -47,8 +47,8 @@ nlohmann::json store_info_json;
 std::vector<std::string> favorites;
 std::vector<std::string> blacklist;
 
-std::string asset_path   = "sdmc:/config/homebrew_details/assets/";
-std::string config__path = "sdmc:/config/homebrew_details/";
+std::string asset_path   = get_config_path("assets/");
+std::string config__path = get_config_path("");
 
 void export_resource(std::string folder, std::string src)
 {
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 
     copy_resources();
 
-    if (fs::exists("sdmc:/config/homebrew_details/debug"))
+    if (fs::exists(get_config_path("debug")))
         set_setting(setting_debug, "true");
 
     init_online_info();
@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     read_blacklist();
     read_notes();
 
-    if (fs::exists("sdmc:/config/homebrew_details/lock"))
+    if (fs::exists(get_config_path("lock")))
     {
         print_debug("Issue Page");
         show_framed(new IssuePage());

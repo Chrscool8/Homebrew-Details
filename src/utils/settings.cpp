@@ -13,12 +13,10 @@ namespace fs = std::filesystem;
 
 std::string settings[settings_num + 1];
 
-std::string config_path = "sdmc:/config/homebrew_details/";
-
 void file_load_settings()
 {
-    create_directories(config_path);
-    std::ifstream inputFile(config_path + "config.txt");
+    create_directories(get_config_path(""));
+    std::ifstream inputFile(get_config_path("config.txt"));
     if (inputFile)
     {
         int index = 0;
@@ -38,10 +36,10 @@ void file_load_settings()
 
 void file_save_settings()
 {
-    create_directories(config_path);
-    remove((config_path + "config.txt").c_str());
+    create_directories(get_config_path(""));
+    remove((get_config_path("config.txt")).c_str());
 
-    std::ofstream outputFile(config_path + "config.txt");
+    std::ofstream outputFile(get_config_path("config.txt"));
     if (outputFile)
     {
         int index = 0;

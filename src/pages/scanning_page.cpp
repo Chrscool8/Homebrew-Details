@@ -85,7 +85,7 @@ void ScanningPage::thread_scan()
 
 ScanningPage::ScanningPage()
 {
-    std::ofstream outputFile("sdmc:/config/homebrew_details/lock");
+    std::ofstream outputFile(get_config_path("lock"));
     if (outputFile)
     {
         outputFile << "lock";
@@ -170,8 +170,8 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
 
             print_debug("rm lock.");
 
-            if (fs::exists("sdmc:/config/homebrew_details/lock"))
-                remove("sdmc:/config/homebrew_details/lock");
+            if (fs::exists(get_config_path("lock")))
+                remove(get_config_path("lock").c_str());
 
             set_setting(setting_scan_settings_changed, "false");
 

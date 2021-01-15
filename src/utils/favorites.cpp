@@ -14,7 +14,7 @@ void read_favorites()
 {
     favorites.clear();
 
-    std::ifstream inputFile("sdmc:/config/homebrew_details/favorites.txt");
+    std::ifstream inputFile(get_config_path("favorites.txt").c_str());
     if (inputFile)
     {
         while (inputFile)
@@ -33,12 +33,12 @@ void read_favorites()
 
 void write_favorites()
 {
-    create_directories("sdmc:/config/homebrew_details/");
-    remove("sdmc:/config/homebrew_details/favorites.txt");
+    create_directories(get_config_path(""));
+    remove(get_config_path("favorites.txt").c_str());
 
     if (!favorites.empty())
     {
-        std::ofstream outputFile("sdmc:/config/homebrew_details/favorites.txt");
+        std::ofstream outputFile(get_config_path("favorites.txt"));
         if (outputFile)
         {
             unsigned int index = 0;

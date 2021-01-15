@@ -177,9 +177,9 @@ void new_list_files(const char* basePath, bool recursive)
                             fseek(file, header.size + asset_header.icon.offset, SEEK_SET);
                             fread(icon, icon_size, 1, file);
 
-                            create_directories("/config/homebrew_details/cache/");
+                            create_directories(get_config_path("cache/"));
                             std::ofstream fp;
-                            fp.open((std::string("/config/homebrew_details/cache/") + base64_encode(std::string(name) + version) + ".jpg").c_str(), std::ios::out | std::ios::binary);
+                            fp.open((std::string(get_config_path("cache/")) + base64_encode(std::string(name) + version) + ".jpg").c_str(), std::ios::out | std::ios::binary);
                             fp.write((char*)icon, icon_size);
                             fp.close();
                         }

@@ -196,24 +196,24 @@ std::string get_date()
     return (months[tm.tm_mon] + " " + digits_string(tm.tm_mday, 2) + ", " + std::to_string(1900 + tm.tm_year));
 }
 
+std::string get_config_path(std::string str)
+{
+    return "sdmc:/config/homebrew_details_beta/" + str;
+}
+
 std::string get_cache_path(std::string str)
 {
-    return "sdmc:/config/homebrew_details/cache/" + str;
+    return get_config_path("cache/" + str);
 }
 
 std::string get_resource_path(std::string str)
 {
-    return "sdmc:/config/homebrew_details/assets/" + str;
-}
-
-std::string get_config_path(std::string str)
-{
-    return "sdmc:/config/homebrew_details/" + str;
+    return get_config_path("assets/" + str);
 }
 
 std::string get_apps_cache_file()
 {
-    return "sdmc:/config/homebrew_details/apps_info.json";
+    return get_config_path("apps_info.json");
 }
 
 std::string to_megabytes(unsigned int size)

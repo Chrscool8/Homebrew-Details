@@ -618,7 +618,7 @@ MainPage::MainPage()
             brls::TabFrame* appView = new brls::TabFrame();
             appView->sidebar->setWidth(1000);
             appView->setHeight(400);
-            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, "\nUsing your favorite nsp installer, install the forwarder that is currently in:\n- sdmc:/config/homebrew_details/forwarder/HomebrewDetails_MultiForwarder.nsp\n\nIt will launch this application from any of the following locations:\n- sdmc:/switch/homebrew_details.nro\n- sdmc:/switch/homebrew_details/homebrew_details.nro\n- sdmc:/switch/homebrew-details/homebrew_details.nro", true));
+            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, "\nUsing your favorite nsp installer, install the forwarder that is currently in:\n- " + get_config_path("/") + "/forwarder/HomebrewDetails_MultiForwarder.nsp\n\nIt will launch this application from any of the following locations:\n- sdmc:/switch/homebrew_details.nro\n- sdmc:/switch/homebrew_details/homebrew_details.nro\n- sdmc:/switch/homebrew-details/homebrew_details.nro", true));
             appView->setIcon(get_resource_path("arrows.png"));
             brls::PopupFrame::open("How to Install to Home Menu", appView, "", "");
         });

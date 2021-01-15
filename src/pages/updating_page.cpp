@@ -89,7 +89,7 @@ bool UpdatingPage::download_update()
     print_debug("update time");
 
     CURL* curl_handle;
-    static const char* pagefilename = "sdmc:/config/homebrew_details/hbupdate.nro";
+    static const char* pagefilename = get_config_path("hbupdate.nro").c_str();
 
     remove(pagefilename);
 
