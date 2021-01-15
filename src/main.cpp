@@ -83,6 +83,7 @@ void copy_resources()
 int main(int argc, char* argv[])
 {
     printf(argv[0]);
+    printf("\n");
 
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
