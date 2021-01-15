@@ -12,7 +12,7 @@ class IntroPage : public brls::View
     brls::Image* image;
 
   public:
-    IntroPage(std::string label);
+    IntroPage();
     ~IntroPage();
 
     bool go;

@@ -1,4 +1,5 @@
 #include <math.h>
+#include <utils/panels.h>
 #include <utils/settings.h>
 
 #include <fstream>
@@ -6,7 +7,7 @@
 #include <pages/main_page.hpp>
 #include <pages/scanning_page.hpp>
 
-IntroPage::IntroPage(std::string label)
+IntroPage::IntroPage()
 {
     autoscanned       = false;
     go                = false;
@@ -14,7 +15,7 @@ IntroPage::IntroPage(std::string label)
     short_wait        = 0;
     autoscan_cooldown = 0;
 
-    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel(label)->setImage(get_resource_path("arrows_small.png"));
+    this->button = (new brls::Button(brls::ButtonStyle::BORDERLESS))->setLabel("Begin Scan")->setImage(get_resource_path("arrows_small.png"));
     this->button->setParent(this);
     this->button->getClickEvent()->subscribe([this](View* view) {
         if (!go)
@@ -34,6 +35,11 @@ IntroPage::IntroPage(std::string label)
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);
+
+    this->registerAction("Settings", brls::Key::Y, [this]() {
+        show_settings_panel();
+        return true;
+    });
 }
 
 void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)

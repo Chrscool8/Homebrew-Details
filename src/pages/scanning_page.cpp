@@ -58,10 +58,6 @@ void ScanningPage::thread_scan()
 {
     print_debug("scan go");
 
-    read_favorites();
-    read_blacklist();
-    load_notes();
-
     if (get_setting_true(setting_invalidate_cache))
     {
         set_setting(setting_invalidate_cache, "");

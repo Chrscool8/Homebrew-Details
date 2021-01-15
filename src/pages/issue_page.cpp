@@ -52,8 +52,7 @@ void IssuePage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
             set_setting(setting_scan_settings_changed, "true");
 
             asked = true;
-            //brls::Application::popView();
-            brls::Application::pushView(new IntroPage("Begin Scan"));
+            brls::Application::pushView(new IntroPage());
             go         = false;
             asked      = false;
             short_wait = 0;

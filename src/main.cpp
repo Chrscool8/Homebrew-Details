@@ -1,5 +1,6 @@
 #include <main.h>
 #include <utils/blacklist.h>
+#include <utils/favorites.h>
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
 #include <utils/notes.h>
@@ -111,6 +112,10 @@ int main(int argc, char* argv[])
 
     psmInitialize();
 
+    read_favorites();
+    read_blacklist();
+    read_notes();
+
     if (fs::exists("sdmc:/config/homebrew_details/lock"))
     {
         print_debug("Issue Page");
@@ -119,7 +124,7 @@ int main(int argc, char* argv[])
     else
     {
         print_debug("Intro Page");
-        show_framed(new IntroPage("Begin Scan"));
+        show_framed(new IntroPage());
     }
 
     // Run the app
