@@ -2,12 +2,15 @@
 .SUFFIXES:
 #---------------------------------------------------------------------------------
 
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
-endif
+#ifeq ($(strip $(DEVKITPRO)),)
+#$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+#endif
 
 TOPDIR ?= $(CURDIR)
-include $(DEVKITPRO)/libnx/switch_rules
+#include $(DEVKITPRO)/libnx/switch_rules
+
+include /g/Documents/GitHub/libnx/nx/switch_rules
+
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -66,7 +69,7 @@ CFLAGS	+=	$(INCLUDE) -D__SWITCH__ \
 CXXFLAGS	:= $(CFLAGS) -std=c++1z -O2
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-specs=/g/Documents/GitHub/libnx/nx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:= -lcurl -lz -lnx -lm
 
