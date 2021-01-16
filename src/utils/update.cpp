@@ -79,11 +79,14 @@ bool check_for_updates()
     print_debug("curl time\n");
 
     CURL* curl;
-    curl_global_init(CURL_GLOBAL_DEFAULT);
+    CURLcode res;
+
+    print_debug("curl globally initted\n");
 
     curl = curl_easy_init();
     if (curl)
     {
+        print_debug("curl easily initted\n");
         std::string s;
 
         curl_easy_setopt(curl, CURLOPT_URL, "https://api.github.com/repos/Chrscool8/Homebrew-Details/releases/latest");
@@ -93,9 +96,10 @@ bool check_for_updates()
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15);
 
-        CURLcode res = curl_easy_perform(curl);
+        res = curl_easy_perform(curl);
+        print_debug("curl easily performed\n");
         curl_easy_cleanup(curl);
 
         if (res == CURLE_OK)
@@ -118,6 +122,10 @@ bool check_for_updates()
                     return true;
                 }
             }
+        }
+        else
+        {
+            print_debug(std::string("Curl Error: ") + curl_easy_strerror(res));
         }
     }
 
