@@ -310,8 +310,6 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
                 fav_item->getClickEvent()->subscribe([this, full_path](brls::View* view) {
                     remove_favorite(full_path);
                     needs_refresh = true;
-                    brls::Application::popView();
-                    refresh_list();
                     return true;
                 });
             }
@@ -321,8 +319,6 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
                 fav_item->getClickEvent()->subscribe([this, full_path](brls::View* view) {
                     add_favorite(full_path);
                     needs_refresh = true;
-                    brls::Application::popView();
-                    refresh_list();
                     return true;
                 });
             }
@@ -391,16 +387,17 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 
     //
 
-    //this_entry->getFocusEvent()->subscribe([this, this_entry](brls::View* view) {
-    //    if (needs_refresh)
-    //    {
-
-    //        //this_entry->onFocusLost();
-    //        //brls::Application::giveFocus(nullptr);
-    //        //refresh_list();
-    //    }
-    //    return true;
-    //});
+    this_entry->getFocusEvent()->subscribe([this, this_entry](brls::View* view) {
+        print_debug("Focused");
+        if (needs_refresh)
+        {
+            print_debug("Refresh!");
+            needs_refresh = false;
+            do_refresh    = true;
+            ticker        = 0;
+        }
+        return true;
+    });
 
     return this_entry;
 }
@@ -517,8 +514,6 @@ brls::ListItem* AppsListPage::create_sort_type_choice(std::string label, std::st
         set_setting(setting_sort_type_2, secondary_sort);
 
         needs_refresh = true;
-        brls::Application::popView();
-        refresh_list();
 
         brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
         for (size_t i = 0; i < list->getViewsCount(); i++)
@@ -538,8 +533,6 @@ brls::ListItem* AppsListPage::create_sort_group_choice(std::string label, std::s
         set_setting(setting_sort_group, sort_group);
 
         needs_refresh = true;
-        brls::Application::popView();
-        refresh_list();
 
         brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
         for (size_t i = 0; i < list->getViewsCount(); i++)
@@ -553,6 +546,8 @@ brls::ListItem* AppsListPage::create_sort_group_choice(std::string label, std::s
 
 brls::List* AppsListPage::build_app_list()
 {
+    print_debug("Building App List");
+
     brls::List* this_list = new brls::List();
 
     std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, get_setting(setting_sort_type), get_setting(setting_sort_type_2));
@@ -627,12 +622,12 @@ void AppsListPage::refresh_list()
 {
     print_debug("Refreshing App List");
 
-    needs_refresh = false;
-
     brls::Application::giveFocus(nullptr);
-    this->setContentView(new brls::ListItem(""));
 
-    main_list->clear();
+    brls::List* templist = new brls::List();
+    templist->addView(new brls::ListItem(""));
+    this->setContentView(templist);
+
     main_list = build_app_list();
     this->setContentView(main_list);
 
@@ -642,7 +637,6 @@ void AppsListPage::refresh_list()
         brls::View* ent = main_list->getChild(i);
         if (ent->describe() == "N4brls8ListItemE")
         {
-            //print_debug("Choosing ")
             select_num = i;
             break;
         }
@@ -689,23 +683,20 @@ AppsListPage::AppsListPage()
 
         //
 
-        list                       = new brls::List();
+        brls::List* list2          = new brls::List();
         brls::ListItem* dialogItem = new brls::ListItem("Ascending");
         dialogItem->setChecked(get_setting(setting_sort_direction) != "descending");
         dialogItem->getClickEvent()->subscribe([this, dialogItem](brls::View* view) {
             set_setting(setting_sort_direction, "ascending");
 
-            brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
-            ((brls::ListItem*)(list->getChild(1)))->setChecked(false);
+            brls::Sidebar* list4 = (brls::Sidebar*)dialogItem->getParent();
+            ((brls::ListItem*)(list4->getChild(1)))->setChecked(false);
 
             dialogItem->setChecked(true);
             needs_refresh = true;
-            brls::Application::popView();
-            refresh_list();
-
             return true;
         });
-        list->addView(dialogItem);
+        list2->addView(dialogItem);
         //
 
         dialogItem = new brls::ListItem("Descending");
@@ -718,24 +709,22 @@ AppsListPage::AppsListPage()
 
             dialogItem->setChecked(true);
             needs_refresh = true;
-            brls::Application::popView();
-            refresh_list();
 
             return true;
         });
-        list->addView(dialogItem);
+        list2->addView(dialogItem);
 
-        appView->addTab("Sort Direction", list);
+        appView->addTab("Sort Direction", list2);
 
         //
 
-        list = new brls::List();
-        list->addView(create_sort_group_choice("None", ""));
-        list->addView(create_sort_group_choice("By Author", "author"));
-        list->addView(create_sort_group_choice("By Category", "category"));
-        list->addView(create_sort_group_choice("From Appstore", "is_appstore"));
+        brls::List* list3 = new brls::List();
+        list3->addView(create_sort_group_choice("None", ""));
+        list3->addView(create_sort_group_choice("By Author", "author"));
+        list3->addView(create_sort_group_choice("By Category", "category"));
+        list3->addView(create_sort_group_choice("From Appstore", "is_appstore"));
 
-        appView->addTab("Grouping", list);
+        appView->addTab("Grouping", list3);
 
         //
 
@@ -762,6 +751,22 @@ AppsListPage::~AppsListPage()
 
 void AppsListPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
 {
+
+    if (do_refresh)
+    {
+        if (ticker < 10)
+        {
+            ticker += 1;
+            print_debug(std::to_string(ticker));
+        }
+        else
+        {
+            do_refresh = false;
+            print_debug("Doing Refresh");
+            refresh_list();
+        }
+    }
+
     AppletFrame::draw(vg, x, y, width, height, style, ctx);
     draw_status(this, x, y, width, height, style, ctx);
 }
