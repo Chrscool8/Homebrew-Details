@@ -132,6 +132,7 @@ bool UpdatingPage::download_update()
             prog.downloading = true;
             CURLcode res     = curl_easy_perform(curl_handle);
             curl_easy_cleanup(curl_handle);
+            curl_global_cleanup();
             fclose(pagefile);
             prog.downloading = false;
             prog.complete    = true;

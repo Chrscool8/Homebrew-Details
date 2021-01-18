@@ -81,7 +81,8 @@ bool check_for_updates()
     CURL* curl;
     CURLcode res;
 
-    print_debug("curl globally initted\n");
+    print_debug("curl globally initting\n");
+    curl_global_init(CURL_GLOBAL_ALL);
 
     curl = curl_easy_init();
     if (curl)
@@ -96,11 +97,12 @@ bool check_for_updates()
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
         curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
 
         res = curl_easy_perform(curl);
         print_debug("curl easily performed\n");
         curl_easy_cleanup(curl);
+        curl_global_cleanup();
 
         if (res == CURLE_OK)
         {

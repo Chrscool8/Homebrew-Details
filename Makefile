@@ -61,7 +61,7 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 CFLAGS	:=	-g -Wall -Wno-unused-variable -Wno-unused-function -O2 -ffunction-sections  \
 			$(ARCH) $(DEFINES)
-
+CFLAGS	+=	`curl-config --cflags`
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ \
 			-DBOREALIS_RESOURCES="\"$(BOREALIS_RESOURCES)\"" \
 			-DAPP_VERSION="\"$(APP_VERSION)\""
@@ -71,7 +71,8 @@ CXXFLAGS	:= $(CFLAGS) -std=c++1z -O2
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=/g/Documents/GitHub/libnx/nx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lcurl -lz -lnx -lm
+LIBS	:=	`curl-config --libs`
+LIBS	+=	-lz -lnx -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
