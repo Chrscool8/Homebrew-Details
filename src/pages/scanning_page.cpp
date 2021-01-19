@@ -58,11 +58,11 @@ void ScanningPage::thread_scan()
 {
     print_debug("scan go");
 
-    if (settings_get_value_true(setting_invalidate_cache))
+    if (settings_get_value_true("internal", "invalidate cache"))
     {
-        settings_set_value(setting_invalidate_cache, "false");
+        settings_set_value("internal", "invalidate cache", "false");
         remove(get_apps_cache_file().c_str());
-        settings_set_value(setting_scan_settings_changed, "false");
+        settings_set_value("scan", "settings changed", "false");
     }
 
     if (std::filesystem::exists(get_apps_cache_file()))
@@ -79,7 +79,7 @@ void ScanningPage::thread_scan()
 
     print_debug("scan thread end");
 
-    settings_set_value(setting_previous_num_files, std::to_string(file_count));
+    settings_set_value("history", "previous number of files", std::to_string(file_count));
     scanprog.complete = true;
 }
 
@@ -110,10 +110,10 @@ ScanningPage::ScanningPage()
 
     scanprog.end_thread = false;
 
-    print_debug(settings_get_value(setting_previous_num_files) + " previous files");
+    print_debug(settings_get_value("history", "previous number of files") + " previous files");
 
-    if (is_number(settings_get_value(setting_previous_num_files)))
-        scanprog.prev_num_files = std::stoi(settings_get_value(setting_previous_num_files));
+    if (is_number(settings_get_value("history", "previous number of files")))
+        scanprog.prev_num_files = std::stoi(settings_get_value("history", "previous number of files"));
     else
         scanprog.prev_num_files = 1;
 
@@ -142,7 +142,7 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
     }
     else
     {
-        if (settings_get_value_true(setting_scan_settings_changed))
+        if (settings_get_value_true("scan", "settings changed"))
         {
             this->progressDisp->setProgress(0, 1);
             this->progressDisp->frame(ctx);
@@ -153,7 +153,7 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
         {
             this->progressDisp->setProgress(file_count, scanprog.prev_num_files);
             this->progressDisp->frame(ctx);
-            this->label->setText(std::to_string(file_count) + " / " + settings_get_value(setting_previous_num_files) + " Scanned");
+            this->label->setText(std::to_string(file_count) + " / " + settings_get_value("history", "previous number of files") + " Scanned");
             this->label->frame(ctx);
         }
 
@@ -173,7 +173,7 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
             if (fs::exists(get_config_path("lock")))
                 remove(get_config_path("lock").c_str());
 
-            settings_set_value(setting_scan_settings_changed, "false");
+            settings_set_value("scan", "settings changed", "false");
 
             //brls::Application::popView();
             brls::Application::pushView(new AppsListPage());

@@ -161,9 +161,9 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
     //});
 
     brls::Key key = brls::Key::A;
-    if (settings_get_value(setting_control_scheme) == "0")
+    if (settings_get_value("preferences", "control scheme") == "0")
         key = brls::Key::X;
-    else if (settings_get_value(setting_control_scheme) == "1")
+    else if (settings_get_value("preferences", "control scheme") == "1")
         key = brls::Key::A;
 
     popupItem->updateActionHint(key, "Launch");
@@ -184,9 +184,9 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
     });
 
     key = brls::Key::X;
-    if (settings_get_value(setting_control_scheme) == "0")
+    if (settings_get_value("preferences", "control scheme") == "0")
         key = brls::Key::A;
-    else if (settings_get_value(setting_control_scheme) == "1")
+    else if (settings_get_value("preferences", "control scheme") == "1")
         key = brls::Key::X;
 
     popupItem->updateActionHint(key, "Details");
@@ -573,8 +573,8 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 
 MainPage::MainPage()
 {
-    std::string title = "Homebrew Details v" + settings_get_value(setting_local_version);
-    if (settings_get_value_true(setting_debug))
+    std::string title = "Homebrew Details v" + settings_get_value("meta", "local version");
+    if (settings_get_value_true("meta", "debug"))
         title += " [Debug Mode]";
 
     this->setTitle(title.c_str());
@@ -633,17 +633,17 @@ MainPage::MainPage()
         settings_list->addView(new brls::Header("Scan Settings"));
 
         brls::ListItem* autoscan_switch = new brls::ListItem("Autoscan", "", "Begin scanning as soon as the app is launched.");
-        autoscan_switch->setChecked((settings_get_value_true(setting_autoscan)));
+        autoscan_switch->setChecked((settings_get_value_true("scan", "autoscan")));
         autoscan_switch->updateActionHint(brls::Key::A, "Toggle");
         autoscan_switch->getClickEvent()->subscribe([autoscan_switch](brls::View* view) {
-            if (settings_get_value(setting_autoscan) == "true")
+            if (settings_get_value("scan", "autoscan") == "true")
             {
-                settings_set_value(setting_autoscan, "false");
+                settings_set_value("scan", "autoscan", "false");
                 autoscan_switch->setChecked(false);
             }
             else
             {
-                settings_set_value(setting_autoscan, "true");
+                settings_set_value("scan", "autoscan", "true");
                 autoscan_switch->setChecked(true);
             }
         });
@@ -652,39 +652,39 @@ MainPage::MainPage()
         brls::ListItem* item_scan_switch = new brls::ListItem("Scan /switch/");
         item_scan_switch->setChecked(true);
         brls::ListItem* item_scan_switch_subs = new brls::ListItem("Scan /switch/'s subfolders");
-        item_scan_switch_subs->setChecked((settings_get_value_true(setting_search_subfolders)));
+        item_scan_switch_subs->setChecked((settings_get_value_true("scan", "subfolders")));
         item_scan_switch_subs->updateActionHint(brls::Key::A, "Toggle");
         item_scan_switch_subs->getClickEvent()->subscribe([item_scan_switch_subs](brls::View* view) {
-            if (settings_get_value(setting_search_subfolders) == "true")
+            if (settings_get_value("scan", "subfolders") == "true")
             {
-                settings_set_value(setting_search_subfolders, "false");
+                settings_set_value("scan", "subfolders", "false");
                 item_scan_switch_subs->setChecked(false);
             }
             else
             {
-                settings_set_value(setting_search_subfolders, "true");
+                settings_set_value("scan", "subfolders", "true");
                 item_scan_switch_subs->setChecked(true);
             }
 
-            settings_set_value(setting_scan_settings_changed, "true");
+            settings_set_value("scan", "settings changed", "true");
         });
 
         brls::ListItem* item_scan_root = new brls::ListItem("Scan / (not subfolders)");
-        item_scan_root->setChecked((settings_get_value_true(setting_search_root)));
+        item_scan_root->setChecked((settings_get_value_true("scan", "root")));
         item_scan_root->updateActionHint(brls::Key::A, "Toggle");
         item_scan_root->getClickEvent()->subscribe([item_scan_root](brls::View* view) {
-            if (settings_get_value(setting_search_root) == "true")
+            if (settings_get_value("scan", "root") == "true")
             {
-                settings_set_value(setting_search_root, "false");
+                settings_set_value("scan", "root", "false");
                 item_scan_root->setChecked(false);
             }
             else
             {
-                settings_set_value(setting_search_root, "true");
+                settings_set_value("scan", "root", "true");
                 item_scan_root->setChecked(true);
             }
 
-            settings_set_value(setting_scan_settings_changed, "true");
+            settings_set_value("scan", "settings changed", "true");
         });
 
         brls::SelectListItem* layerSelectItem = new brls::SelectListItem("Scan Range", { "Scan Whole SD Card (Slow!)", "Only scan some folders" });
@@ -693,27 +693,27 @@ MainPage::MainPage()
             switch (selection)
             {
                 case 1:
-                    settings_set_value(setting_scan_full_card, "false");
+                    settings_set_value("scan", "full card", "false");
                     item_scan_switch->expand(true);
                     item_scan_switch_subs->expand(true);
                     item_scan_root->expand(true);
                     break;
                 case 0:
-                    settings_set_value(setting_scan_full_card, "true");
+                    settings_set_value("scan", "full card", "true");
                     item_scan_switch->collapse(true);
                     item_scan_switch_subs->collapse(true);
                     item_scan_root->collapse(true);
                     break;
             }
 
-            settings_set_value(setting_scan_settings_changed, "true");
+            settings_set_value("scan", "settings changed", "true");
         });
         settings_list->addView(layerSelectItem);
         settings_list->addView(item_scan_switch);
         settings_list->addView(item_scan_switch_subs);
         settings_list->addView(item_scan_root);
 
-        if (settings_get_value(setting_scan_full_card) == "false")
+        if (settings_get_value("scan", "full card") == "false")
         {
             layerSelectItem->setSelectedValue(1);
             item_scan_switch->expand(true);
@@ -781,9 +781,9 @@ MainPage::MainPage()
 
         settings_list->addView(new brls::Header("Control Settings"));
 
-        brls::SelectListItem* controlSelectItem = new brls::SelectListItem("Control Settings", { "A: Details; X: Launch", "A: Launch; X: Details" }, std::stoi(settings_get_value(setting_control_scheme)), "Takes full effect on next launch.");
+        brls::SelectListItem* controlSelectItem = new brls::SelectListItem("Control Settings", { "A: Details; X: Launch", "A: Launch; X: Details" }, std::stoi(settings_get_value("preferences", "control scheme")), "Takes full effect on next launch.");
         controlSelectItem->getValueSelectedEvent()->subscribe([](size_t selection) {
-            settings_set_value(setting_control_scheme, std::to_string(selection));
+            settings_set_value("preferences", "control scheme", std::to_string(selection));
         });
         settings_list->addView(controlSelectItem);
 
@@ -791,15 +791,15 @@ MainPage::MainPage()
 
         settings_list->addView(new brls::Header("App Settings"));
 
-        brls::SelectListItem* exitToItem = new brls::SelectListItem("Exit To", { "sdmc:/hbmenu.nro", settings_get_value(setting_nro_path) });
-        exitToItem->setValue(settings_get_value(setting_exit_to));
+        brls::SelectListItem* exitToItem = new brls::SelectListItem("Exit To", { "sdmc:/hbmenu.nro", settings_get_value("meta", "nro path") });
+        exitToItem->setValue(settings_get_value("meta", "exit to"));
         exitToItem->getValueSelectedEvent()->subscribe([](size_t selection) {
             if (selection == 0)
-                settings_set_value(setting_exit_to, "sdmc:/hbmenu.nro");
+                settings_set_value("meta", "exit to", "sdmc:/hbmenu.nro");
             else if (selection == 1)
-                settings_set_value(setting_exit_to, settings_get_value(setting_nro_path));
+                settings_set_value("meta", "exit to", settings_get_value("meta", "nro path"));
 
-            std::string target = settings_get_value(setting_exit_to);
+            std::string target = settings_get_value("meta", "exit to");
             envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
         });
         settings_list->addView(exitToItem);
@@ -809,17 +809,17 @@ MainPage::MainPage()
         settings_list->addView(new brls::Header("Misc. Settings"));
 
         brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes full effect on next launch.");
-        debug_switch->setChecked(settings_get_value_true(setting_debug));
+        debug_switch->setChecked(settings_get_value_true("meta", "debug"));
         debug_switch->updateActionHint(brls::Key::A, "Toggle");
         debug_switch->getClickEvent()->subscribe([debug_switch](brls::View* view) {
-            if (settings_get_value(setting_debug) == "true")
+            if (settings_get_value("meta", "debug") == "true")
             {
-                settings_set_value(setting_debug, "false");
+                settings_set_value("meta", "debug", "false");
                 debug_switch->setChecked(false);
             }
             else
             {
-                settings_set_value(setting_debug, "true");
+                settings_set_value("meta", "debug", "true");
                 debug_switch->setChecked(true);
             }
         });
@@ -830,7 +830,7 @@ MainPage::MainPage()
     }
 
     print_debug("Debug Menu.");
-    if (settings_get_value_true(setting_debug))
+    if (settings_get_value_true("meta", "debug"))
     {
         this->addSeparator();
         brls::List* debug_list = new brls::List();
@@ -850,7 +850,7 @@ MainPage::MainPage()
             chargeStatus = chargerTypes[chargerType];
 
         add_list_entry("Charging Status", chargeStatus, "", debug_list, entry_width);
-        add_list_entry("Local Version", std::string("v") + settings_get_value(setting_local_version), "", debug_list, entry_width);
+        add_list_entry("Local Version", std::string("v") + settings_get_value("meta", "local version"), "", debug_list, entry_width);
         add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list, entry_width);
         //add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list, entry_width);
         //add_list_entry("Number of Local Apps", std::to_string(local_apps.size()), "", debug_list, entry_width);

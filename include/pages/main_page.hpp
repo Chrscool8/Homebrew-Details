@@ -15,8 +15,6 @@ class MainPage : public brls::TabFrame
   public:
     brls::ListItem* make_app_entry(app_entry* entry, bool is_appstore = false);
 
-    void build_main_tabs();
-
     MainPage();
     ~MainPage();
 

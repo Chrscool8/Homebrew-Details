@@ -45,8 +45,6 @@ LayoutSelectPage::LayoutSelectPage()
         this->thirdButton,
         brls::FocusDirection::LEFT,
         this->secondButton);
-
-
 }
 
 #define BUTTON_WIDTH 300

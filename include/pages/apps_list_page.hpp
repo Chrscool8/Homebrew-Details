@@ -15,8 +15,8 @@ class AppsListPage : public brls::AppletFrame
     brls::List* build_app_list();
     void refresh_list();
 
-    bool needs_refresh = false;
-    bool do_refresh = false;
+    bool needs_refresh  = false;
+    bool do_refresh     = false;
     unsigned int ticker = 0;
     brls::List* main_list;
 };

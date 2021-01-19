@@ -214,14 +214,14 @@ void new_list_files(const char* basePath, bool recursive)
 
 void new_load_all_apps()
 {
-    if (settings_get_value_true(setting_scan_full_card))
+    if (settings_get_value_true("scan", "full card"))
     {
         print_debug("Searching recursively within /");
         new_list_files("sdmc:/", true);
     }
     else
     {
-        if (settings_get_value_true(setting_search_subfolders))
+        if (settings_get_value_true("scan", "subfolders"))
         {
             print_debug("Searching recursively within /switch/");
             new_list_files("sdmc:/switch", true);
@@ -232,7 +232,7 @@ void new_load_all_apps()
             new_list_files("sdmc:/switch", false);
         }
 
-        if (settings_get_value_true(setting_search_root))
+        if (settings_get_value_true("scan", "root"))
         {
             print_debug("Searching only within /");
             new_list_files("sdmc:/", false);

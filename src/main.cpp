@@ -96,22 +96,25 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    if (fs::exists(get_config_path("debug")) || true)
+    {
+        settings_set_value("meta", "debug", "true");
+        print_debug("Found debug file, setting as such.");
+    }
+
+    print_debug("Beginning setting prep.");
+
     read_settings();
     init_settings();
-    settings_set_value(setting_nro_path, argv[0]);
+    settings_set_value("meta", "nro path", argv[0]);
 
     copy_resources();
-
-    if (fs::exists(get_config_path("debug")))
-        settings_set_value(setting_debug, "true");
 
     init_online_info();
     check_for_updates();
 
-    std::string target = settings_get_value(setting_exit_to);
+    std::string target = settings_get_value("meta", "exit to");
     envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
-
-    psmInitialize();
 
     read_favorites();
     read_blacklist();
@@ -133,8 +136,6 @@ int main(int argc, char* argv[])
         ;
 
     print_debug("Main loop end.");
-
-    psmExit();
 
     return EXIT_SUCCESS;
 }

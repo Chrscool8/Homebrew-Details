@@ -45,11 +45,11 @@ void IssuePage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
             short_wait += 1;
         else
         {
-            settings_set_value(setting_search_subfolders, "false");
-            settings_set_value(setting_search_root, "false");
-            settings_set_value(setting_scan_full_card, "false");
-            settings_set_value(setting_autoscan, "false");
-            settings_set_value(setting_scan_settings_changed, "true");
+            settings_set_value("scan", "subfolders", "false");
+            settings_set_value("scan", "root", "false");
+            settings_set_value("scan", "full card", "false");
+            settings_set_value("scan", "autoscan", "false");
+            settings_set_value("scan", "settings changed", "true");
 
             asked = true;
             brls::Application::pushView(new IntroPage());
