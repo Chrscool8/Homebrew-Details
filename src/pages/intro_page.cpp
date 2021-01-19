@@ -43,7 +43,7 @@ IntroPage::IntroPage()
     this->label->setParent(this);
 
     this->registerAction("Clear Cache", brls::Key::MINUS, [this]() {
-        set_setting(setting_invalidate_cache, "true");
+        settings_set_value(setting_invalidate_cache, "true");
         this->button->setLabel("Begin Scan");
         this->button->invalidate();
         return true;
@@ -85,7 +85,7 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
 
     if (!go && !autoscanned && autoscan_cooldown > 5)
     {
-        if (get_setting_true(setting_autoscan))
+        if (settings_get_value_true(setting_autoscan))
         {
             this->button->getClickEvent()->fire(this);
         }

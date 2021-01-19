@@ -126,7 +126,7 @@ std::string pad_string_with_spaces(std::string initial, int ending, unsigned int
 
 void print_debug(std::string str)
 {
-    if (get_setting_true(setting_debug))
+    if (settings_get_value_true(setting_debug))
     {
         str = "[DETAILS] " + str + "\n";
         printf(str.c_str());

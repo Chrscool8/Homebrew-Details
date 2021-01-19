@@ -152,8 +152,8 @@ bool UpdatingPage::download_update()
                         print_debug("good nacp");
 
                         romfsExit();
-                        remove(get_setting(setting_nro_path).c_str());
-                        rename(pagefilename, get_setting(setting_nro_path).c_str());
+                        remove(settings_get_value(setting_nro_path).c_str());
+                        rename(pagefilename, settings_get_value(setting_nro_path).c_str());
 
                         finished_download = true;
                         prog.success      = true;

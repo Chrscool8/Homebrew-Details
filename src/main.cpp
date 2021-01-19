@@ -96,19 +96,19 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    file_load_settings();
+    read_settings();
     init_settings();
-    set_setting(setting_nro_path, argv[0]);
+    settings_set_value(setting_nro_path, argv[0]);
 
     copy_resources();
 
     if (fs::exists(get_config_path("debug")))
-        set_setting(setting_debug, "true");
+        settings_set_value(setting_debug, "true");
 
     init_online_info();
     check_for_updates();
 
-    std::string target = get_setting(setting_exit_to);
+    std::string target = settings_get_value(setting_exit_to);
     envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
 
     psmInitialize();

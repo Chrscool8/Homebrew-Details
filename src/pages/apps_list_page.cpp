@@ -45,9 +45,9 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
     this_entry->setThumbnail(icon_path);
 
     brls::Key key = brls::Key::A;
-    if (get_setting(setting_control_scheme) == "0")
+    if (settings_get_value(setting_control_scheme) == "0")
         key = brls::Key::X;
-    else if (get_setting(setting_control_scheme) == "1")
+    else if (settings_get_value(setting_control_scheme) == "1")
         key = brls::Key::A;
 
     this_entry->updateActionHint(key, "Launch");
@@ -68,9 +68,9 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
     });
 
     key = brls::Key::X;
-    if (get_setting(setting_control_scheme) == "0")
+    if (settings_get_value(setting_control_scheme) == "0")
         key = brls::Key::A;
-    else if (get_setting(setting_control_scheme) == "1")
+    else if (settings_get_value(setting_control_scheme) == "1")
         key = brls::Key::X;
 
     this_entry->updateActionHint(key, "Details");
@@ -432,18 +432,18 @@ struct AppComparator
         }
         else
         {
-            if (get_setting(setting_sort_direction) == "descending")
+            if (settings_get_value(setting_sort_direction) == "descending")
             {
                 nlohmann::json c = a;
                 a                = b;
                 b                = c;
             }
 
-            std::string comp_sort_group_a = json_load_value_string(a, get_setting(setting_sort_group));
+            std::string comp_sort_group_a = json_load_value_string(a, settings_get_value(setting_sort_group));
             transform(comp_sort_group_a.begin(), comp_sort_group_a.end(), comp_sort_group_a.begin(), ::tolower);
             if (comp_sort_group_a == "---")
                 comp_sort_group_a = "zzzzzzzzzzzzzz";
-            std::string comp_sort_group_b = json_load_value_string(b, get_setting(setting_sort_group));
+            std::string comp_sort_group_b = json_load_value_string(b, settings_get_value(setting_sort_group));
             transform(comp_sort_group_b.begin(), comp_sort_group_b.end(), comp_sort_group_b.begin(), ::tolower);
             if (comp_sort_group_b == "---")
                 comp_sort_group_b = "zzzzzzzzzzzzzz";
@@ -508,10 +508,10 @@ std::vector<nlohmann::json> app_json_to_list(nlohmann::json json, std::string so
 brls::ListItem* AppsListPage::create_sort_type_choice(std::string label, std::string sort_name, std::string secondary_sort)
 {
     brls::ListItem* dialogItem = new brls::ListItem(label);
-    dialogItem->setChecked(get_setting(setting_sort_type) == sort_name);
+    dialogItem->setChecked(settings_get_value(setting_sort_type) == sort_name);
     dialogItem->getClickEvent()->subscribe([this, dialogItem, sort_name, secondary_sort](brls::View* view) {
-        set_setting(setting_sort_type, sort_name);
-        set_setting(setting_sort_type_2, secondary_sort);
+        settings_set_value(setting_sort_type, sort_name);
+        settings_set_value(setting_sort_type_2, secondary_sort);
 
         needs_refresh = true;
 
@@ -528,9 +528,9 @@ brls::ListItem* AppsListPage::create_sort_type_choice(std::string label, std::st
 brls::ListItem* AppsListPage::create_sort_group_choice(std::string label, std::string sort_group)
 {
     brls::ListItem* dialogItem = new brls::ListItem(label);
-    dialogItem->setChecked(get_setting(setting_sort_group) == sort_group);
+    dialogItem->setChecked(settings_get_value(setting_sort_group) == sort_group);
     dialogItem->getClickEvent()->subscribe([this, dialogItem, sort_group](brls::View* view) {
-        set_setting(setting_sort_group, sort_group);
+        settings_set_value(setting_sort_group, sort_group);
 
         needs_refresh = true;
 
@@ -550,9 +550,9 @@ brls::List* AppsListPage::build_app_list()
 
     brls::List* this_list = new brls::List();
 
-    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, get_setting(setting_sort_type), get_setting(setting_sort_type_2));
+    std::vector<nlohmann::json> apps_list = app_json_to_list(apps_info_json, settings_get_value(setting_sort_type), settings_get_value(setting_sort_type_2));
 
-    this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + get_setting(setting_sort_type) + " then " + get_setting(setting_sort_type_2) + ", " + get_setting(setting_sort_direction)));
+    this_list->addView(new brls::Header(std::to_string(apps_list.size()) + " Apps, sorted by " + settings_get_value(setting_sort_type) + " then " + settings_get_value(setting_sort_type_2) + ", " + settings_get_value(setting_sort_direction)));
 
     for (unsigned int i = 0; i < apps_list.size(); i++)
     {
@@ -583,11 +583,11 @@ brls::List* AppsListPage::build_app_list()
             }
         }
 
-        if (get_setting(setting_sort_group) != "")
+        if (settings_get_value(setting_sort_group) != "")
         {
             if (apps_list.size() > 1)
             {
-                std::string header_name = "  " + upper_first_letter(get_setting(setting_sort_group)) + ": " + upper_first_letter(json_load_value_string(entry, get_setting(setting_sort_group)));
+                std::string header_name = "  " + upper_first_letter(settings_get_value(setting_sort_group)) + ": " + upper_first_letter(json_load_value_string(entry, settings_get_value(setting_sort_group)));
 
                 if (i == 0)
                 {
@@ -597,8 +597,8 @@ brls::List* AppsListPage::build_app_list()
                 {
                     nlohmann::json entry_prev = apps_list.at(i - 1);
 
-                    std::string str1 = json_load_value_string(entry, get_setting(setting_sort_group));
-                    std::string str2 = json_load_value_string(entry_prev, get_setting(setting_sort_group));
+                    std::string str1 = json_load_value_string(entry, settings_get_value(setting_sort_group));
+                    std::string str2 = json_load_value_string(entry_prev, settings_get_value(setting_sort_group));
 
                     std::string str3 = bool_string(is_favorite(json_load_value_string(entry, "full_path")));
                     std::string str4 = bool_string(is_favorite(json_load_value_string(entry_prev, "full_path")));
@@ -649,8 +649,8 @@ void AppsListPage::refresh_list()
 AppsListPage::AppsListPage()
     : AppletFrame(false, false)
 {
-    std::string title = "Homebrew Details v" + get_setting(setting_local_version);
-    if (get_setting_true(setting_debug))
+    std::string title = "Homebrew Details v" + settings_get_value(setting_local_version);
+    if (settings_get_value_true(setting_debug))
         title += " [Debug Mode]";
     this->setTitle(title.c_str());
 
@@ -685,9 +685,9 @@ AppsListPage::AppsListPage()
 
         brls::List* list2          = new brls::List();
         brls::ListItem* dialogItem = new brls::ListItem("Ascending");
-        dialogItem->setChecked(get_setting(setting_sort_direction) != "descending");
+        dialogItem->setChecked(settings_get_value(setting_sort_direction) != "descending");
         dialogItem->getClickEvent()->subscribe([this, dialogItem](brls::View* view) {
-            set_setting(setting_sort_direction, "ascending");
+            settings_set_value(setting_sort_direction, "ascending");
 
             brls::Sidebar* list4 = (brls::Sidebar*)dialogItem->getParent();
             ((brls::ListItem*)(list4->getChild(1)))->setChecked(false);
@@ -700,9 +700,9 @@ AppsListPage::AppsListPage()
         //
 
         dialogItem = new brls::ListItem("Descending");
-        dialogItem->setChecked(get_setting(setting_sort_direction) == "descending");
+        dialogItem->setChecked(settings_get_value(setting_sort_direction) == "descending");
         dialogItem->getClickEvent()->subscribe([this, dialogItem](brls::View* view) {
-            set_setting(setting_sort_direction, "descending");
+            settings_set_value(setting_sort_direction, "descending");
 
             brls::Sidebar* list = (brls::Sidebar*)dialogItem->getParent();
             ((brls::ListItem*)(list->getChild(0)))->setChecked(false);

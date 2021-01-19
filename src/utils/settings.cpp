@@ -6,154 +6,88 @@
 
 #include <filesystem>
 #include <fstream>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
 namespace fs = std::filesystem;
 
-std::string settings[settings_num + 1];
+//std::string settings[settings_num + 1];
 
-void file_load_settings()
+std::string settings_path = get_config_path("settings.json");
+nlohmann::json settings_json;
+
+void read_settings()
+{
+    if (std::filesystem::exists(settings_path))
+    {
+        std::ifstream i(settings_path);
+        settings_json.clear();
+        i >> settings_json;
+    }
+}
+
+void save_settings()
 {
     create_directories(get_config_path(""));
-    std::ifstream inputFile(get_config_path("config.txt"));
-    if (inputFile)
-    {
-        int index = 0;
-        while (inputFile)
-        {
-            char line[513];
-            inputFile.getline(line, 512);
-            settings[index] = line;
-            print_debug(std::string(line));
-            index += 1;
-        }
-        inputFile.close();
-    }
+    std::ofstream o(settings_path);
+    o << settings_json << std::endl;
+}
+
+void settings_set_value(std::string key, std::string value)
+{
+    settings_json[key] = value;
+    print_debug("Set " + key + " to " + value);
+    save_settings();
+}
+
+std::string settings_get_value(std::string key)
+{
+    if (settings_json.contains(key))
+        return (settings_json[key]);
     else
-        print_debug("Can't find loadfile.\n");
+        return "---";
 }
 
-void file_save_settings()
+bool settings_get_value_true(std::string key)
 {
-    create_directories(get_config_path(""));
-    remove((get_config_path("config.txt")).c_str());
+    return (settings_get_value(key) == "true");
+}
 
-    std::ofstream outputFile(get_config_path("config.txt"));
-    if (outputFile)
+void initialize_setting(std::string setting, std::string initial)
+{
+    if (settings_get_value(setting) == "---")
     {
-        int index = 0;
-        while (index < settings_num)
-        {
-            outputFile << settings[index].c_str();
-            if (index != settings_num - 1)
-                outputFile << std::endl;
-            index += 1;
-        }
-        outputFile.close();
+        settings_set_value(setting, initial);
     }
-    else
-        print_debug("Can't open savefile.\n");
-}
-
-void set_setting(int setting, std::string value)
-{
-    settings[setting] = base64_encode(value);
-    print_debug("Set " + std::to_string(setting) + " to " + value);
-    file_save_settings();
-}
-
-std::string get_setting(int setting)
-{
-    return base64_decode(settings[setting]);
-}
-
-bool get_setting_true(int setting)
-{
-    return (get_setting(setting) == "true");
 }
 
 void init_settings()
 {
-    if (get_setting(setting_search_subfolders) == "")
-    {
-        set_setting(setting_search_subfolders, "true");
-    }
+    initialize_setting(setting_search_subfolders, "true");
+    initialize_setting(setting_search_root, "false");
+    initialize_setting(setting_scan_full_card, "false");
+    initialize_setting(setting_autoscan, "false");
 
-    if (get_setting(setting_search_root) == "")
-    {
-        set_setting(setting_search_root, "false");
-    }
-
-    if (get_setting(setting_scan_full_card) == "")
-    {
-        set_setting(setting_scan_full_card, "false");
-    }
-
-    if (get_setting(setting_autoscan) == "")
-    {
-        set_setting(setting_autoscan, "false");
-    }
-
-    if (get_setting(setting_debug) == "")
-    {
-        set_setting(setting_debug, "false");
-    }
-
-    if (get_setting_true(setting_debug))
-        set_setting(setting_local_version, std::string(APP_VERSION) + "d");
+    if (settings_get_value_true(setting_debug))
+        settings_set_value(setting_local_version, std::string(APP_VERSION) + "d");
     else
-        set_setting(setting_local_version, APP_VERSION);
+        settings_set_value(setting_local_version, APP_VERSION);
 
-    if (get_setting(setting_control_scheme) == "")
-    {
-        set_setting(setting_control_scheme, "0");
-    }
+    initialize_setting(setting_control_scheme, "0");
+    initialize_setting(setting_lax_store_compare, "false");
+    initialize_setting(setting_scan_settings_changed, "true");
+    initialize_setting(setting_previous_num_files, "1");
+    initialize_setting(setting_exit_to, "sdmc:/hbmenu.nro");
+    initialize_setting(setting_sort_type, "name");
+    initialize_setting(setting_sort_type_2, "version");
+    initialize_setting(setting_sort_direction, "ascending");
+    initialize_setting(setting_sort_group, "");
 
-    if (get_setting(setting_lax_store_compare) == "")
+    if (settings_get_value(setting_last_seen_version) == "---" || (APP_VERSION != settings_get_value(setting_last_seen_version)))
     {
-        set_setting(setting_lax_store_compare, "false");
-    }
-
-    if (get_setting(setting_scan_settings_changed) == "")
-    {
-        set_setting(setting_scan_settings_changed, "true");
-    }
-
-    if (get_setting(setting_previous_num_files) == "")
-    {
-        set_setting(setting_previous_num_files, "1");
-    }
-
-    if (get_setting(setting_exit_to) == "")
-    {
-        set_setting(setting_exit_to, "sdmc:/hbmenu.nro");
-    }
-
-    if (get_setting(setting_sort_type) == "")
-    {
-        set_setting(setting_sort_type, "name");
-    }
-
-    if (get_setting(setting_sort_type_2) == "")
-    {
-        set_setting(setting_sort_type_2, "version");
-    }
-
-    if (get_setting(setting_sort_direction) == "")
-    {
-        set_setting(setting_sort_direction, "ascending");
-    }
-
-    if (get_setting(setting_sort_group) == "")
-    {
-        set_setting(setting_sort_group, "");
-    }
-
-    if (get_setting(setting_last_seen_version) == "" || (APP_VERSION != get_setting(setting_last_seen_version)))
-    {
-        set_setting(setting_last_seen_version, std::string(APP_VERSION));
+        settings_set_value(setting_last_seen_version, std::string(APP_VERSION));
         print_debug("DIFFERING VERSION!!");
-        set_setting(setting_invalidate_cache, "true");
+        settings_set_value(setting_invalidate_cache, "true");
     }
 }

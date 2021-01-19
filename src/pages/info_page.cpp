@@ -27,7 +27,7 @@ InfoPage::InfoPage(brls::StagedAppletFrame* frame, int type)
         case info_page_dl_intro:
             button_label = "Begin Download";
             icon         = get_resource_path("download.png");
-            title        = std::string(" Update Wizard Engaged.\nv ") + get_setting(setting_local_version) + " " + " " + symbol_rightarrow() + " " + " v " + get_online_version_number();
+            title        = std::string(" Update Wizard Engaged.\nv ") + settings_get_value(setting_local_version) + " " + " " + symbol_rightarrow() + " " + " v " + get_online_version_number();
             break;
         case info_page_dl_done:
             button_label = "Proceed!";
@@ -98,7 +98,7 @@ void InfoPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heigh
             switch (page_type)
             {
                 case info_page_dl_done:
-                    launch_nro(get_setting(setting_nro_path), "\"" + get_setting(setting_nro_path) + "\"");
+                    launch_nro(settings_get_value(setting_nro_path), "\"" + settings_get_value(setting_nro_path) + "\"");
                     romfsExit();
                     brls::Application::quit();
                     break;
