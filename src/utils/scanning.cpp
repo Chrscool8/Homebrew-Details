@@ -44,8 +44,7 @@ void new_read_store_apps()
             if (isDirectory(filename.c_str()))
             {
                 std::ifstream info_file(filename + "/info.json");
-                nlohmann::json app_info_json;
-                info_file >> app_info_json;
+                nlohmann::json app_info_json = nlohmann::json::parse(info_file);
 
                 std::ifstream manifest_file(filename + "/manifest.install");
                 std::vector<std::string> files_in_manifest;
@@ -88,7 +87,7 @@ void new_read_store_apps()
     //std::ofstream o(get_config_path("temp_store_info.json"));
     //o << store_info_json << std::endl;
 
-    std::ofstream o2(get_config_path("apps_info.json"));
+    std::ofstream o2(get_config_path() + "apps_info.json");
     o2 << apps_info_json << std::endl;
 }
 
@@ -239,7 +238,7 @@ void new_load_all_apps()
         }
     }
 
-    std::ofstream o(get_config_path("apps_info.json"));
+    std::ofstream o(get_config_path() + "apps_info.json");
     o << apps_info_json << std::endl;
 }
 
@@ -290,7 +289,7 @@ brls::Image* load_image_cache(std::string filename)
                 cached_thumbs[filename_enc] = image;
             }
             else
-                image = new brls::Image(get_resource_path("unknown.png"));
+                image = new brls::Image(get_resource_path() + "unknown.png");
 
             free(icon);
             icon = NULL;
@@ -298,7 +297,7 @@ brls::Image* load_image_cache(std::string filename)
         else
         {
             print_debug(" Using Unknown");
-            image = new brls::Image(get_resource_path("unknown.png"));
+            image = new brls::Image(get_resource_path() + "unknown.png");
         }
     }
 

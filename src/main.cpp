@@ -48,18 +48,15 @@ std::vector<std::string> favorites;
 std::vector<std::string> blacklist;
 std::map<std::string, brls::Image*> cached_thumbs;
 
-std::string asset_path   = get_config_path("assets/");
-std::string config__path = get_config_path("");
-
 void export_resource(std::string folder, std::string src)
 {
     folder += "/";
-    create_directories(config__path + folder);
+    create_directories(get_config_path() + folder);
 
-    if (!fs::exists(config__path + folder + src))
+    if (!fs::exists(get_config_path() + folder + src))
     {
         std::ifstream srcfile(("romfs:/" + src).c_str(), std::ios::binary);
-        std::ofstream dstfile(config__path + folder + src, std::ios::binary);
+        std::ofstream dstfile(get_config_path() + folder + src, std::ios::binary);
 
         dstfile << srcfile.rdbuf();
     }
@@ -100,7 +97,7 @@ int main(int argc, char* argv[])
     print_debug("Beginning setting prep.");
     read_settings();
 
-    if (fs::exists(get_config_path("debug")))
+    if (fs::exists(get_config_path() + "debug"))
     {
         settings_set_value("meta", "debug", "true");
         print_debug("Found debug file, setting as such.");
@@ -121,7 +118,7 @@ int main(int argc, char* argv[])
     read_blacklist();
     read_notes();
 
-    if (fs::exists(get_config_path("lock")))
+    if (fs::exists(get_config_path() + "lock"))
     {
         print_debug("Issue Page");
         show_framed(new IssuePage());

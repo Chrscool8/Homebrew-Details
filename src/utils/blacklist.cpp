@@ -10,7 +10,7 @@ void read_blacklist()
 {
     blacklist.clear();
 
-    std::ifstream inputFile(get_config_path("blacklist.txt"));
+    std::ifstream inputFile(get_config_path() + "blacklist.txt");
     if (inputFile)
     {
         while (inputFile)
@@ -29,12 +29,12 @@ void read_blacklist()
 
 void write_blacklist()
 {
-    create_directories(get_config_path(""));
-    remove(get_config_path("blacklist.txt").c_str());
+    create_directories(get_config_path());
+    remove((get_config_path() + "blacklist.txt").c_str());
 
     if (!blacklist.empty())
     {
-        std::ofstream outputFile(get_config_path("blacklist.txt"));
+        std::ofstream outputFile(get_config_path() + "blacklist.txt");
         if (outputFile)
         {
             unsigned int index = 0;

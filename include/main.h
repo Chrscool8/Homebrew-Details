@@ -1,10 +1,10 @@
 #pragma once
 
 #include <borealis.hpp>
+#include <map>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
-#include <map>
 
 struct app_entry
 {

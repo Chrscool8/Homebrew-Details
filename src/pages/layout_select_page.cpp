@@ -12,17 +12,17 @@ LayoutSelectPage::LayoutSelectPage()
 {
     // Create views
     this->firstButton = new brls::Button(brls::ButtonStyle::REGULAR);
-    this->firstButton->setImage(get_resource_path("style_beta.png"));
+    this->firstButton->setImage(get_resource_path() + "style_beta.png");
     this->firstButton->registerAction("Select", brls::Key::A, []() { brls::Application::pushView(new MainPage()); return 0; });
     this->addView(this->firstButton);
 
     this->secondButton = new brls::Button(brls::ButtonStyle::REGULAR);
-    this->secondButton->setImage(get_resource_path("style_list.png"));
+    this->secondButton->setImage(get_resource_path() + "style_list.png");
     this->secondButton->registerAction("Select", brls::Key::A, []() { brls::Application::pushView(new AppsListPage()); return 0; });
     this->addView(this->secondButton);
 
     this->thirdButton = new brls::Button(brls::ButtonStyle::REGULAR);
-    this->thirdButton->setImage(get_resource_path("style_flow.png"));
+    this->thirdButton->setImage(get_resource_path() + "style_flow.png");
     this->addView(this->thirdButton);
 
     // Populate custom navigation map

@@ -27,7 +27,7 @@ void read_settings()
 
 void save_settings()
 {
-    create_directories(get_config_path(""));
+    create_directories(get_config_path());
     std::ofstream o(get_settings_path());
     o << settings_json << std::endl;
     print_debug("Saving settings");

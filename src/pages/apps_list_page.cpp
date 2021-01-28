@@ -647,7 +647,7 @@ AppsListPage::AppsListPage()
         title += " [Debug Mode]";
     this->setTitle(title.c_str());
 
-    this->setIcon(get_resource_path("icon.png"));
+    this->setIcon(get_resource_path() + "icon.png");
 
     main_list = build_app_list();
     this->setContentView(main_list);
@@ -721,7 +721,7 @@ AppsListPage::AppsListPage()
 
         //
 
-        appView->setIcon(get_resource_path("download.png"));
+        appView->setIcon(get_resource_path() + "download.png");
         brls::PopupFrame::open("Sorting Options", appView, "", "");
 
         return true;

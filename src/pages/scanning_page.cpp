@@ -85,7 +85,7 @@ void ScanningPage::thread_scan()
 
 ScanningPage::ScanningPage()
 {
-    std::ofstream outputFile(get_config_path("lock"));
+    std::ofstream outputFile(get_config_path() + "lock");
     if (outputFile)
     {
         outputFile << "lock";
@@ -170,12 +170,11 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
 
             print_debug("rm lock.");
 
-            if (fs::exists(get_config_path("lock")))
-                remove(get_config_path("lock").c_str());
+            if (fs::exists(get_config_path() + "lock"))
+                remove((get_config_path() + "lock").c_str());
 
             settings_set_value("scan", "settings changed", "false");
 
-            //brls::Application::popView();
             brls::Application::pushView(new AppsListPage());
 
             scanprog.prev_num_files = file_count;

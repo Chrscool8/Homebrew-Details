@@ -16,7 +16,7 @@ IntroPage::IntroPage()
     autoscan_cooldown = 0;
 
     this->button = new brls::Button(brls::ButtonStyle::BORDERLESS);
-    this->button->setImage(get_resource_path("arrows_small.png"));
+    this->button->setImage(get_resource_path() + "arrows_small.png");
     if (!std::filesystem::exists(get_apps_cache_file()))
         this->button->setLabel("Begin Scan");
     else
@@ -34,7 +34,7 @@ IntroPage::IntroPage()
         }
     });
 
-    this->image = (new brls::Image(get_resource_path("icon.png")));
+    this->image = (new brls::Image(get_resource_path() + "icon.png"));
     this->image->setParent(this);
 
     this->label = new brls::Label(brls::LabelStyle::DIALOG, "Welcome to Homebrew Details\nBy: Chris Bradel", true);
@@ -70,7 +70,7 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
             asked = true;
 
             brls::AppletFrame* frame_scanning = new brls::AppletFrame(true, true);
-            frame_scanning->setIcon(get_resource_path("icon.png"));
+            frame_scanning->setIcon(get_resource_path() + "icon.png");
             frame_scanning->setTitle("Scanning for Apps");
             frame_scanning->setContentView(new ScanningPage());
             brls::Application::pushView(frame_scanning);

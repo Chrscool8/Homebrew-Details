@@ -21,7 +21,7 @@ void show_update_panel()
     dialogItem->getClickEvent()->subscribe([&](brls::View* view) {
         brls::StagedAppletFrame* stagedFrame = new brls::StagedAppletFrame();
         stagedFrame->setTitle("Update Wizard");
-        stagedFrame->setIcon(get_resource_path("icon.png"));
+        stagedFrame->setIcon(get_resource_path() + "icon.png");
         stagedFrame->setActionAvailable(brls::Key::B, false);
 
         stagedFrame->addStage(new InfoPage(stagedFrame, info_page_dl_intro));
@@ -41,7 +41,7 @@ void show_update_panel()
     appView->sidebar->addView(add_list_entry("Description", get_online_version_description(), "", NULL, 40));
     appView->sidebar->addView(add_list_entry("Date", get_online_version_date(), "", NULL, 40));
 
-    appView->setIcon(get_resource_path("download.png"));
+    appView->setIcon(get_resource_path() + "download.png");
     brls::PopupFrame::open("Update Info", appView, vers, "");
 }
 
@@ -272,6 +272,6 @@ void show_settings_panel()
     }
     //
 
-    appView->setIcon(get_resource_path("download.png"));
+    appView->setIcon(get_resource_path() + "download.png");
     brls::PopupFrame::open("Options", appView, "", "");
 }

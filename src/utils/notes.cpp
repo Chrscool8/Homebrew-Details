@@ -7,14 +7,13 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-std::string notes_path = get_config_path("notes.json");
 nlohmann::json notes_json;
 
 void read_notes()
 {
-    if (std::filesystem::exists(notes_path))
+    if (std::filesystem::exists(get_notes_path()))
     {
-        std::ifstream i(notes_path);
+        std::ifstream i(get_notes_path());
         notes_json.clear();
         i >> notes_json;
     }
@@ -22,7 +21,7 @@ void read_notes()
 
 void save_notes()
 {
-    std::ofstream o(notes_path);
+    std::ofstream o(get_notes_path());
     o << notes_json << std::endl;
 }
 

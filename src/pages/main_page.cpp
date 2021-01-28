@@ -578,7 +578,7 @@ MainPage::MainPage()
         title += " [Debug Mode]";
 
     this->setTitle(title.c_str());
-    this->setIcon(get_resource_path("icon.png"));
+    this->setIcon(get_resource_path() + "icon.png");
     print_debug("init rootframe");
 
     print_debug("Check for updates.");
@@ -618,8 +618,8 @@ MainPage::MainPage()
             brls::TabFrame* appView = new brls::TabFrame();
             appView->sidebar->setWidth(1000);
             appView->setHeight(400);
-            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, "\nUsing your favorite nsp installer, install the forwarder that is currently in:\n- " + get_config_path("/") + "/forwarder/HomebrewDetails_MultiForwarder.nsp\n\nIt will launch this application from any of the following locations:\n- sdmc:/switch/homebrew_details.nro\n- sdmc:/switch/homebrew_details/homebrew_details.nro\n- sdmc:/switch/homebrew-details/homebrew_details.nro", true));
-            appView->setIcon(get_resource_path("arrows.png"));
+            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, "\nUsing your favorite nsp installer, install the forwarder that is currently in:\n- " + get_config_path() + "/forwarder/HomebrewDetails_MultiForwarder.nsp\n\nIt will launch this application from any of the following locations:\n- sdmc:/switch/homebrew_details.nro\n- sdmc:/switch/homebrew_details/homebrew_details.nro\n- sdmc:/switch/homebrew-details/homebrew_details.nro", true));
+            appView->setIcon(get_resource_path() + "arrows.png");
             brls::PopupFrame::open("How to Install to Home Menu", appView, "", "");
         });
         tools_list->addView(nsp_item);
@@ -878,7 +878,7 @@ MainPage::MainPage()
         brls::ListItem* test_grid_item = new brls::ListItem("Grid Layout Test");
         test_grid_item->getClickEvent()->subscribe([](brls::View* view) {
             brls::AppletFrame* fr = new brls::AppletFrame(true, true);
-            fr->setIcon(get_resource_path("icon.png"));
+            fr->setIcon(get_resource_path() + "icon.png");
             fr->setTitle("Choose your Menu Style");
             //fr->setFooterText("This can be changed later");
             fr->setContentView(new LayoutSelectPage());
@@ -897,7 +897,7 @@ MainPage::MainPage()
             //}
 
             brls::AppletFrame* fr = new brls::AppletFrame(true, true);
-            fr->setIcon(get_resource_path("icon.png"));
+            fr->setIcon(get_resource_path() + "icon.png");
             fr->setTitle("Choose your Menu Style");
             fr->setFooterText("This can be changed later");
             fr->setContentView(appsList);

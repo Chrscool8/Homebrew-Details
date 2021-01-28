@@ -89,7 +89,7 @@ bool UpdatingPage::download_update()
     print_debug("update time");
 
     CURL* curl_handle;
-    static const char* pagefilename = get_config_path("hbupdate.nro").c_str();
+    static const char* pagefilename = (get_config_path() + "hbupdate.nro").c_str();
 
     remove(pagefilename);
 
@@ -137,6 +137,7 @@ bool UpdatingPage::download_update()
             prog.downloading = false;
             prog.complete    = true;
 
+            print_debug(std::string("res ") + std::to_string(res));
             print_debug(std::string("res ") + std::to_string(res));
             if (res == CURLE_OK)
             {
