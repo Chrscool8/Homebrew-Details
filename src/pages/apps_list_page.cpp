@@ -6,6 +6,7 @@
 #include <utils/modules.h>
 #include <utils/notes.h>
 #include <utils/panels.h>
+#include <utils/scanning.h>
 #include <utils/settings.h>
 #include <utils/update.h>
 #include <utils/utilities.h>
@@ -32,17 +33,9 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 
     brls::ListItem* this_entry = new brls::ListItem(fav + json_load_value_string(app_json, "name") + "  -  " + "v" + json_load_value_string(app_json, "version"), "", full_path);
 
-    //this_entry->setValue(json_load_value_string(app_json, get_setting("sort","main")));
     this_entry->setValue(json_load_value_string(app_json, "author"));
 
-    std::string icon_path = get_resource_path("unknown.png");
-
-    std::string encoded_icon_path = get_cache_path(base64_encode(json_load_value_string(app_json, "name") + json_load_value_string(app_json, "version")) + ".jpg");
-
-    if (fs::exists(encoded_icon_path))
-        icon_path = encoded_icon_path;
-
-    this_entry->setThumbnail(icon_path);
+    this_entry->setThumbnail(load_image_cache(json_load_value_string(app_json, "full_path")));
 
     brls::Key key = brls::Key::A;
     if (settings_get_value("preferences", "control scheme") == "0")
@@ -74,7 +67,7 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
         key = brls::Key::X;
 
     this_entry->updateActionHint(key, "Details");
-    this_entry->registerAction("Details", key, [this, full_path, app_json, icon_path]() {
+    this_entry->registerAction("Details", key, [this, full_path, app_json]() {
         brls::TabFrame* appView = new brls::TabFrame();
 
         brls::List* manageList = new brls::List();
@@ -380,7 +373,7 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
             appView->addTab("Notes", notesList);
         }
 
-        brls::PopupFrame::open(json_load_value_string(app_json, "name"), icon_path, appView, std::string("Author: ") + json_load_value_string(app_json, "author"), std::string("Version: ") + json_load_value_string(app_json, "version"));
+        brls::PopupFrame::open(json_load_value_string(app_json, "name"), appView, std::string("Author: ") + json_load_value_string(app_json, "author"), std::string("Version: ") + json_load_value_string(app_json, "version"));
 
         return true;
     });

@@ -1,8 +1,10 @@
 #pragma once
 
+#include <borealis.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
+#include <map>
 
 struct app_entry
 {
@@ -33,3 +35,5 @@ extern std::string config__path;
 
 extern nlohmann::json apps_info_json;
 extern nlohmann::json store_info_json;
+
+extern std::map<std::string, brls::Image*> cached_thumbs;

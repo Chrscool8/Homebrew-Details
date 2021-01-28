@@ -5,6 +5,7 @@
 void new_read_store_apps();
 void new_list_files(const char* basePath, bool recursive);
 void new_load_all_apps();
+brls::Image* load_image_cache(std::string filename);
 
 extern std::atomic<int> file_count;
 extern std::string last_file_name;

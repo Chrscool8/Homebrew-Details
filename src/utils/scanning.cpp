@@ -169,23 +169,23 @@ void new_list_files(const char* basePath, bool recursive)
 
                         apps_info_json[filename] = app_json;
 
-                        size_t icon_size = asset_header.icon.size;
-                        uint8_t* icon    = (uint8_t*)malloc(icon_size);
-                        if (icon != NULL && icon_size != 0)
-                        {
-                            memset(icon, 0, icon_size);
-                            fseek(file, header.size + asset_header.icon.offset, SEEK_SET);
-                            fread(icon, icon_size, 1, file);
+                        //size_t icon_size = asset_header.icon.size;
+                        //uint8_t* icon    = (uint8_t*)malloc(icon_size);
+                        //if (icon != NULL && icon_size != 0)
+                        //{
+                        //    memset(icon, 0, icon_size);
+                        //    fseek(file, header.size + asset_header.icon.offset, SEEK_SET);
+                        //    fread(icon, icon_size, 1, file);
 
-                            create_directories(get_config_path("cache/"));
-                            std::ofstream fp;
-                            fp.open((std::string(get_config_path("cache/")) + base64_encode(std::string(name) + version) + ".jpg").c_str(), std::ios::out | std::ios::binary);
-                            fp.write((char*)icon, icon_size);
-                            fp.close();
-                        }
+                        //    create_directories(get_config_path("cache/"));
+                        //    std::ofstream fp;
+                        //    fp.open((std::string(get_config_path("cache/")) + base64_encode(std::string(name) + version) + ".jpg").c_str(), std::ios::out | std::ios::binary);
+                        //    fp.write((char*)icon, icon_size);
+                        //    fp.close();
+                        //}
 
-                        free(icon);
-                        icon = NULL;
+                        //free(icon);
+                        //icon = NULL;
 
                         fclose(file);
                     }
@@ -241,4 +241,66 @@ void new_load_all_apps()
 
     std::ofstream o(get_config_path("apps_info.json"));
     o << apps_info_json << std::endl;
+}
+
+brls::Image* load_image_cache(std::string filename)
+{
+    print_debug("Requesting " + filename);
+
+    brls::Image* image = nullptr;
+
+    std::string filename_enc = base64_encode(filename);
+
+    std::map<std::string, brls::Image*>::iterator it;
+
+    it = cached_thumbs.find(filename_enc);
+    // found
+    if (it != cached_thumbs.end())
+    {
+        print_debug(" Already Cached");
+        image = cached_thumbs[filename_enc];
+    }
+    else
+    // not found
+    {
+        print_debug(" Not yet cached");
+
+        FILE* file = fopen(filename.c_str(), "rb");
+        if (file)
+        {
+            fseek(file, sizeof(NroStart), SEEK_SET);
+            NroHeader header;
+            fread(&header, sizeof(header), 1, file);
+            fseek(file, header.size, SEEK_SET);
+            NroAssetHeader asset_header;
+            fread(&asset_header, sizeof(asset_header), 1, file);
+
+            size_t icon_size = asset_header.icon.size;
+            uint8_t* icon    = (uint8_t*)malloc(icon_size);
+            if (icon != NULL && icon_size != 0)
+            {
+                memset(icon, 0, icon_size);
+                fseek(file, header.size + asset_header.icon.offset, SEEK_SET);
+                fread(icon, icon_size, 1, file);
+
+                print_debug(" Caching new");
+
+                image = new brls::Image(icon, icon_size);
+
+                cached_thumbs[filename_enc] = image;
+            }
+            else
+                image = new brls::Image(get_resource_path("unknown.png"));
+
+            free(icon);
+            icon = NULL;
+        }
+        else
+        {
+            print_debug(" Using Unknown");
+            image = new brls::Image(get_resource_path("unknown.png"));
+        }
+    }
+
+    return image;
 }

@@ -46,6 +46,8 @@ nlohmann::json store_info_json;
 ////
 std::vector<std::string> favorites;
 std::vector<std::string> blacklist;
+std::map<std::string, brls::Image*> cached_thumbs;
+
 
 std::string asset_path   = get_config_path("assets/");
 std::string config__path = get_config_path("");
