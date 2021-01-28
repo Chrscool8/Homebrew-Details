@@ -216,6 +216,11 @@ std::string get_apps_cache_file()
     return get_config_path("apps_info.json");
 }
 
+std::string get_settings_path()
+{
+    return get_config_path("settings.json");
+}
+
 std::string to_megabytes(unsigned int size)
 {
     std::stringstream stream;

@@ -12,16 +12,14 @@
 
 namespace fs = std::filesystem;
 
-std::string settings_path = get_config_path("settings.json");
 nlohmann::json settings_json;
 
 void read_settings()
 {
-    if (std::filesystem::exists(settings_path))
+    if (std::filesystem::exists(get_settings_path()))
     {
-        std::ifstream i(settings_path);
-        settings_json.clear();
-        i >> settings_json;
+        std::ifstream file(get_settings_path());
+        settings_json = nlohmann::json::parse(file);
     }
     else
         print_debug("Settings json not found.");
@@ -30,13 +28,17 @@ void read_settings()
 void save_settings()
 {
     create_directories(get_config_path(""));
-    std::ofstream o(settings_path);
+    std::ofstream o(get_settings_path());
     o << settings_json << std::endl;
+    print_debug("Saving settings");
 }
 
 void settings_set_value(std::string category, std::string key, std::string value)
 {
-    nlohmann::json j_sub    = settings_json[category];
+    nlohmann::json j_sub;
+    if (settings_json.contains(category))
+        j_sub = settings_json[category];
+
     j_sub[key]              = value;
     settings_json[category] = j_sub;
     print_debug("Set " + key + " to " + value);

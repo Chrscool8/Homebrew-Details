@@ -48,7 +48,6 @@ std::vector<std::string> favorites;
 std::vector<std::string> blacklist;
 std::map<std::string, brls::Image*> cached_thumbs;
 
-
 std::string asset_path   = get_config_path("assets/");
 std::string config__path = get_config_path("");
 
@@ -98,15 +97,15 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    if (fs::exists(get_config_path("debug")) || true)
+    print_debug("Beginning setting prep.");
+    read_settings();
+
+    if (fs::exists(get_config_path("debug")))
     {
         settings_set_value("meta", "debug", "true");
         print_debug("Found debug file, setting as such.");
     }
 
-    print_debug("Beginning setting prep.");
-
-    read_settings();
     init_settings();
     settings_set_value("meta", "nro path", argv[0]);
 
