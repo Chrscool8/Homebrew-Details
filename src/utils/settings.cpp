@@ -50,16 +50,19 @@ std::string settings_get_value(std::string category, std::string key)
         nlohmann::json j_sub = settings_json[category];
 
         if (j_sub.contains(key))
+        {
+            printf(std::string("[DETAILS] Reading setting " + category + " " + key + "\n").c_str());
             return (j_sub[key]);
+        }
         else
         {
-            print_debug("Heads up! Setting: " + category + ", " + key + " not found.");
+            printf(std::string("[DETAILS] Heads up! Setting: " + category + ", >" + key + "< not found.\n").c_str());
             return "---";
         }
     }
     else
     {
-        print_debug("Heads up! Setting: " + category + ", " + key + " not found.");
+        printf(std::string("[DETAILS] Heads up! Setting: >" + category + "<, " + key + " not found.\n").c_str());
         return "---";
     }
 }
