@@ -126,10 +126,13 @@ void Hint::rebuildHints()
     // Populate the layout with labels
     for (Action action : actions)
     {
-        std::string hintText = Hint::getKeyIcon(action.key) + "  " + action.hintText;
+        if (!action.hintText.empty())
+        {
+            std::string hintText = Hint::getKeyIcon(action.key) + "  " + action.hintText;
 
-        Label* label = new Label(LabelStyle::HINT, hintText);
-        this->addView(label);
+            Label* label = new Label(LabelStyle::HINT, hintText);
+            this->addView(label);
+        }
     }
 }
 
