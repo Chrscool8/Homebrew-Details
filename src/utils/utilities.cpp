@@ -376,6 +376,8 @@ brls::AppletFrame* show_framed(brls::View* view)
 {
     brls::AppletFrame* frame = new brls::AppletFrame(false, false);
     frame->setContentView(view);
+    frame->updateActionHint(brls::Key::B, "");
+
     brls::Application::pushView(frame);
     return frame;
 }

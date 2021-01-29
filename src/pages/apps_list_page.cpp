@@ -662,6 +662,12 @@ AppsListPage::AppsListPage()
         return true;
     });
 
+    //this->registerAction("Favorite", brls::Key::LSTICK, [this]() {
+    //    return true;
+    //});
+
+    this->updateActionHint(brls::Key::B, "");
+
     //sort panel
     this->registerAction("Sorting Options", brls::Key::L, [this]() {
         brls::TabFrame* appView = new brls::TabFrame();

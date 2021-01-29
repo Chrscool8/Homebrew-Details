@@ -22,6 +22,8 @@ InfoPage::InfoPage(brls::StagedAppletFrame* frame, int type)
     std::string icon;
     std::string title;
 
+    this->updateActionHint(brls::Key::B, "");
+
     switch (page_type)
     {
         case info_page_dl_intro:

@@ -213,6 +213,8 @@ void new_list_files(const char* basePath, bool recursive)
 
 void new_load_all_apps()
 {
+    print_debug("New load all apps");
+
     if (settings_get_value_true("scan", "full card"))
     {
         print_debug("Searching recursively within /");

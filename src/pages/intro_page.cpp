@@ -53,6 +53,8 @@ IntroPage::IntroPage()
         show_settings_panel();
         return true;
     });
+
+    this->updateActionHint(brls::Key::B, "");
 }
 
 void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, brls::Style* style, brls::FrameContext* ctx)
