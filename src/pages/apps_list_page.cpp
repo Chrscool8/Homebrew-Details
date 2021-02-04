@@ -523,7 +523,7 @@ brls::ListItem* AppsListPage::create_sort_group_choice(std::string label, std::s
     brls::ListItem* dialogItem = new brls::ListItem(label);
     dialogItem->setChecked(settings_get_value("sort", "grouping") == sort_group);
     dialogItem->getClickEvent()->subscribe([this, dialogItem, sort_group](brls::View* view) {
-        settings_set_value("sort", "group", sort_group);
+        settings_set_value("sort", "grouping", sort_group);
 
         needs_refresh = true;
 
