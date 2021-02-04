@@ -38,6 +38,7 @@ bool copy_file(const char* srce_file, const char* dest_file);
 std::string symbol_star();
 std::string symbol_downarrow();
 std::string symbol_rightarrow();
+std::string symbol_bullet();
 std::string folder_of_file(std::string filename);
 std::string immediate_folder_of_file(std::string filename);
 brls::AppletFrame* show_framed(brls::View* view);

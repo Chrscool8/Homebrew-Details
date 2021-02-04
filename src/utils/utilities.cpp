@@ -360,6 +360,11 @@ std::string symbol_rightarrow()
     return "\uE090";
 }
 
+std::string symbol_bullet()
+{
+    return "\u2022";
+}
+
 std::string folder_of_file(std::string filename)
 {
     size_t found = filename.find_last_of("/\\");

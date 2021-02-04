@@ -4,6 +4,7 @@
 #include <utils/launching.h>
 #include <utils/nacp_utils.h>
 #include <utils/notes.h>
+#include <utils/panels.h>
 #include <utils/reboot_to_payload.h>
 #include <utils/settings.h>
 #include <utils/update.h>
@@ -74,6 +75,7 @@ void copy_resources()
     export_resource("assets", "style_flow.png");
     export_resource("assets", "style_beta.png");
     export_resource("assets", "unknown.png");
+    export_resource("assets", "credits.png");
 
     export_resource("forwarder", "HomebrewDetails_MultiForwarder.nsp");
 }
@@ -118,15 +120,29 @@ int main(int argc, char* argv[])
     read_blacklist();
     read_notes();
 
-    if (fs::exists(get_config_path() + "lock"))
-    {
-        print_debug("Issue Page");
-        show_framed(new IssuePage());
-    }
-    else
+    //if (fs::exists(get_config_path() + "lock"))
+    //{
+    //    print_debug("Issue Page");
+    //    show_framed(new IssuePage());
+    //}
+    //else
     {
         print_debug("Intro Page");
-        show_framed(new IntroPage());
+        brls::AppletFrame* intro = show_framed(new IntroPage());
+        intro->registerAction("Show Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
+        intro->updateActionHint(brls::Key::X, "Show Welcome Screen");
+
+        if (!fs::exists(get_config_path() + "introduced"))
+        {
+            std::ofstream outputFile(get_config_path() + "introduced");
+            if (outputFile)
+            {
+                outputFile << "introduced";
+                outputFile.close();
+            }
+
+            show_first_time_panel();
+        }
     }
 
     // Run the app

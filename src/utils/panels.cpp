@@ -275,3 +275,88 @@ void show_settings_panel()
     appView->setIcon(get_resource_path() + "download.png");
     brls::PopupFrame::open("Options", appView, "", "");
 }
+
+void show_first_time_panel()
+{
+    brls::TabFrame* appView = new brls::TabFrame();
+    appView->sidebar->setWidth(385);
+
+    //appView->addTab("Welcome", new brls::Image(get_resource_path() + "credits.png"));
+
+    brls::Image* credits = new brls::Image(get_resource_path() + "credits.png");
+    credits->setScaleType(brls::ImageScaleType::NO_RESIZE);
+    appView->addTab("Introduction", credits);
+
+    appView->addSeparator();
+
+    brls::List* list_about = new brls::List();
+    list_about->addView(new brls::Header("What is it?"));
+    list_about->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "This is an app that allows you to view details about, launch, categorize, and manage all the .nro files on your Switch using borealis for a native-feeling UI. It also includes a toolbox of handy quick actions like rebooting to a payload. It is nearly a feature-complete replacement/alternative to hbmenu.", true));
+
+    list_about->addView(new brls::Header("What will it be?"));
+    list_about->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "Hopefully, an all-around manager for all your apps. Some people have already expressed that they'd like it to be a full hbmenu replacement. With app launching, it's just about there already. Coming soon is checking for and updating app store apps, and more.", true));
+
+    list_about->setSpacing(20);
+
+    appView->addTab("About this App", list_about);
+
+    //appView->sidebar->getChild(0)->setActionAvailable(brls::Key::A, false);
+
+    brls::List* list_features1 = new brls::List();
+    list_features1->addView(new brls::Header("NRO Features"));
+    list_features1->addView(new brls::Label(brls::LabelStyle::DESCRIPTION,
+        "" + symbol_bullet() + "  Launch Apps\n" + ""
+            + symbol_bullet() + "  View details about your apps such as:\n" + ""
+            + " \u2015" + " " + "  Name, Filename, File Location, Author, Size\n" + ""
+            + "" + symbol_bullet() + "  App Store Info including:\n" + ""
+            + " \u2015" + " " + "  URL, Category, License, Description, Summary, Changelog\n" + ""
+            + symbol_bullet() + "  Add custom notes to an app\n" + ""
+            + symbol_bullet() + "  Rename, Copy, Move, Delete an app\n" + ""
+            + symbol_bullet() + "  Pin/Favorite apps to the top of the list",
+        true));
+
+    appView->addTab("Features, Part 1", list_features1);
+
+    brls::List* list_features2 = new brls::List();
+    list_features2->addView(new brls::Header("Scanning Features"));
+    list_features2->addView(new brls::Label(brls::LabelStyle::DESCRIPTION,
+        "" + symbol_bullet() + "  Scan your SD card for homebrew programs (.nros)\n" + ""
+            + symbol_bullet() + "  App Sorting and grouping\n" + ""
+            + symbol_bullet() + "  Blacklist folders from search\n" + ""
+            + symbol_bullet() + "  App list caching",
+        true));
+
+    list_features2->addView(new brls::Header("Toolbox Features"));
+    list_features2->addView(new brls::Label(brls::LabelStyle::DESCRIPTION,
+        "" + symbol_bullet() + "  Reboot to a payload\n" + "",
+        true));
+
+    appView->addTab("Features, Part 2", list_features2);
+    appView->addSeparator();
+
+    brls::List* contact_list = new brls::List();
+    contact_list->setSpacing(contact_list->getSpacing() / 2);
+
+    contact_list->addView(new brls::Header("Chris Bradel"));
+    contact_list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "Email: chrsdev8@gmail.com\n"
+                                                                         "Discord: Chrscool8#0001\n"
+                                                                         "Github: https://github.com/Chrscool8\n"
+                                                                         "YouTube: https://www.youtube.com/chrscool8\n"
+                                                                         "Twitch: https://www.twitch.tv/chrisbradel\n",
+        true));
+
+    contact_list->addView(new brls::Header("Let me know!"));
+    contact_list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "Feel free to message me any time with questions, concerns, issues, or feature or app suggestions. You can also join the discussion on the following websites:", true));
+
+    contact_list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "Github: https://github.com/Chrscool8/Homebrew-Details"));
+    contact_list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "GBATEMP Forum (Shortened Link): https://rebrand.ly/HBDetails"));
+
+    appView->addTab("Contact", contact_list);
+
+    appView->sidebar->registerAction("", brls::Key::DRIGHT, []() { return true; });
+
+    appView->setIcon(get_resource_path() + "icon.png");
+    appView->updateActionHint(brls::Key::B, "Back to Main Screen");
+    appView->updateActionHint(brls::Key::A, "");
+    brls::PopupFrame::open("Welcome To Homebrew Details", appView, "First Time Overview", "");
+}
