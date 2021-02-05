@@ -13,6 +13,7 @@ library
 include/curl/
 include/nlohmann/
 include/xxHash/
+include/borealis/
 *.sln
 *.vcxproj
 *.filters
