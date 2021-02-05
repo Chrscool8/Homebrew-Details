@@ -244,6 +244,44 @@ void new_load_all_apps()
     o << apps_info_json << std::endl;
 }
 
+brls::Image* get_image_from_nro(std::string filename)
+{
+    brls::Image* image = nullptr;
+
+    FILE* file = fopen(filename.c_str(), "rb");
+    if (file)
+    {
+        fseek(file, sizeof(NroStart), SEEK_SET);
+        NroHeader header;
+        fread(&header, sizeof(header), 1, file);
+        fseek(file, header.size, SEEK_SET);
+        NroAssetHeader asset_header;
+        fread(&asset_header, sizeof(asset_header), 1, file);
+
+        size_t icon_size = asset_header.icon.size;
+        uint8_t* icon    = (uint8_t*)malloc(icon_size);
+        if (icon != NULL && icon_size != 0)
+        {
+            memset(icon, 0, icon_size);
+            fseek(file, header.size + asset_header.icon.offset, SEEK_SET);
+            fread(icon, icon_size, 1, file);
+
+            image = new brls::Image(icon, icon_size);
+        }
+        else
+            image = new brls::Image(get_resource_path() + "unknown.png");
+
+        free(icon);
+        icon = NULL;
+    }
+    else
+    {
+        image = new brls::Image(get_resource_path() + "unknown.png");
+    }
+
+    return image;
+}
+
 brls::Image* load_image_cache(std::string filename)
 {
     print_debug("Requesting " + filename);
