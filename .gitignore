@@ -10,10 +10,7 @@ builddir
 .vs
 library
 *.sh
-include/curl/
-include/nlohmann/
-include/xxHash/
-include/borealis/
+include/extern/
 *.sln
 *.vcxproj
 *.filters

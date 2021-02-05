@@ -2,9 +2,9 @@
 .SUFFIXES:
 #---------------------------------------------------------------------------------
 
-#ifeq ($(strip $(DEVKITPRO)),)
-#$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
-#endif
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+endif
 
 TOPDIR ?= $(CURDIR)
 #include $(DEVKITPRO)/libnx/switch_rules
@@ -42,17 +42,33 @@ include /g/Documents/GitHub/libnx/nx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	homebrew_details_next
 BUILD		:=	build.nx
-SOURCES		:=	src src/pages src/utils
+SOURCES		:=	src src/pages src/utils 
 DATA		:=	data
 ICON		:=	resources/icon.jpg
-INCLUDES	:=	include include/pages include/utils
+INCLUDES	:=	include include/pages include/utils 
 APP_TITLE	:=	Homebrew Details Next
 APP_AUTHOR	:=	Chris Bradel
 APP_VERSION	:=	1.0
 
 ROMFS				:=	resources
-BOREALIS_PATH		:=	.
 BOREALIS_RESOURCES	:=	romfs:/
+
+#------------------------------------
+# borealis includes
+#------------------------------------
+
+SOURCES		+=	library/lib \
+				library/lib/extern \
+				library/lib/extern/glad \
+				library/lib/extern/nanovg \
+				library/lib/extern/libretro-common/compat \
+				library/lib/extern/libretro-common/encodings \
+				library/lib/extern/libretro-common/features \
+				library/lib/extern/nxfmtwrapper
+
+INCLUDES	+=	library/include \
+				library/lib/extern/fmt/include \
+				library/include/borealis/extern
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -72,7 +88,7 @@ ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=/g/Documents/GitHub/libnx/nx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
 LIBS	:=	`curl-config --libs`
-LIBS	+=	-lz -lnx -lm
+LIBS	+=	-lglfw3 -lEGL -lglapi -ldrm_nouveau -lz -lnx -lm 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -80,7 +96,7 @@ LIBS	+=	-lz -lnx -lm
 #---------------------------------------------------------------------------------
 LIBDIRS	:= $(PORTLIBS) $(LIBNX)
 
-include $(TOPDIR)/library/borealis.mk
+#include $(TOPDIR)/library/borealis.mk
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
