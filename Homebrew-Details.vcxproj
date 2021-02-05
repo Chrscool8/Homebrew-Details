@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\extern\nlohmann\json.hpp" />
+    <ClInclude Include="include\main.h" />
+    <ClInclude Include="include\pages\apps_list_page.hpp" />
+    <ClInclude Include="include\pages\info_page.hpp" />
+    <ClInclude Include="include\pages\intro_page.hpp" />
+    <ClInclude Include="include\pages\issue_page.hpp" />
+    <ClInclude Include="include\pages\layout_select_page.hpp" />
+    <ClInclude Include="include\pages\main_page.hpp" />
+    <ClInclude Include="include\pages\scanning_page.hpp" />
+    <ClInclude Include="include\pages\updating_page.hpp" />
+    <ClInclude Include="include\utils\base64.h" />
+    <ClInclude Include="include\utils\blacklist.h" />
+    <ClInclude Include="include\utils\favorites.h" />
+    <ClInclude Include="include\utils\launching.h" />
+    <ClInclude Include="include\utils\modules.h" />
+    <ClInclude Include="include\utils\nacp_utils.h" />
+    <ClInclude Include="include\utils\notes.h" />
+    <ClInclude Include="include\utils\panels.h" />
+    <ClInclude Include="include\utils\reboot_to_payload.h" />
+    <ClInclude Include="include\utils\scanning.h" />
+    <ClInclude Include="include\utils\settings.h" />
+    <ClInclude Include="include\utils\update.h" />
+    <ClInclude Include="include\utils\utilities.h" />
+    <ClInclude Include="library\include\borealis.hpp" />
+    <ClInclude Include="library\include\borealis\absolute_layout.hpp" />
+    <ClInclude Include="library\include\borealis\actions.hpp" />
+    <ClInclude Include="library\include\borealis\animations.hpp" />
+    <ClInclude Include="library\include\borealis\applet_frame.hpp" />
+    <ClInclude Include="library\include\borealis\application.hpp" />
+    <ClInclude Include="library\include\borealis\background.hpp" />
+    <ClInclude Include="library\include\borealis\box_layout.hpp" />
+    <ClInclude Include="library\include\borealis\button.hpp" />
+    <ClInclude Include="library\include\borealis\crash_frame.hpp" />
+    <ClInclude Include="library\include\borealis\dialog.hpp" />
+    <ClInclude Include="library\include\borealis\dropdown.hpp" />
+    <ClInclude Include="library\include\borealis\event.hpp" />
+    <ClInclude Include="library\include\borealis\extern\glad\glad.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\boolean.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\compat\strl.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\encodings\utf.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\features\features_cpu.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\libretro.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\retro_assert.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\retro_common_api.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\retro_inline.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\retro_math.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\retro_miscellaneous.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\retro_timers.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\streams\file_stream.h" />
+    <ClInclude Include="library\include\borealis\extern\libretro-common\string\stdstring.h" />
+    <ClInclude Include="library\include\borealis\extern\nanovg\fontstash.h" />
+    <ClInclude Include="library\include\borealis\extern\nanovg\nanovg.h" />
+    <ClInclude Include="library\include\borealis\extern\nanovg\nanovg_gl.h" />
+    <ClInclude Include="library\include\borealis\extern\nanovg\nanovg_gl_utils.h" />
+    <ClInclude Include="library\include\borealis\extern\nanovg\stb_image.h" />
+    <ClInclude Include="library\include\borealis\extern\nanovg\stb_truetype.h" />
+    <ClInclude Include="library\include\borealis\extern\nlohmann\json.hpp" />
+    <ClInclude Include="library\include\borealis\frame_context.hpp" />
+    <ClInclude Include="library\include\borealis\header.hpp" />
+    <ClInclude Include="library\include\borealis\hint.hpp" />
+    <ClInclude Include="library\include\borealis\i18n.hpp" />
+    <ClInclude Include="library\include\borealis\image.hpp" />
+    <ClInclude Include="library\include\borealis\label.hpp" />
+    <ClInclude Include="library\include\borealis\layer_view.hpp" />
+    <ClInclude Include="library\include\borealis\list.hpp" />
+    <ClInclude Include="library\include\borealis\logger.hpp" />
+    <ClInclude Include="library\include\borealis\material_icon.hpp" />
+    <ClInclude Include="library\include\borealis\notification_manager.hpp" />
+    <ClInclude Include="library\include\borealis\popup_frame.hpp" />
+    <ClInclude Include="library\include\borealis\progress_display.hpp" />
+    <ClInclude Include="library\include\borealis\progress_spinner.hpp" />
+    <ClInclude Include="library\include\borealis\rectangle.hpp" />
+    <ClInclude Include="library\include\borealis\repeating_task.hpp" />
+    <ClInclude Include="library\include\borealis\scroll_view.hpp" />
+    <ClInclude Include="library\include\borealis\sidebar.hpp" />
+    <ClInclude Include="library\include\borealis\staged_applet_frame.hpp" />
+    <ClInclude Include="library\include\borealis\style.hpp" />
+    <ClInclude Include="library\include\borealis\swkbd.hpp" />
+    <ClInclude Include="library\include\borealis\table.hpp" />
+    <ClInclude Include="library\include\borealis\tab_frame.hpp" />
+    <ClInclude Include="library\include\borealis\task_manager.hpp" />
+    <ClInclude Include="library\include\borealis\theme.hpp" />
+    <ClInclude Include="library\include\borealis\thumbnail_frame.hpp" />
+    <ClInclude Include="library\include\borealis\view.hpp" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\chrono.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\color.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\compile.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\core.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\format-inl.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\format.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\locale.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\os.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\ostream.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\posix.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\printf.h" />
+    <ClInclude Include="library\lib\extern\fmt\include\fmt\ranges.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\fuzzing\fuzzer_common.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\gmock\gmock.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\gtest-extra.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\gtest\gtest-spi.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\gtest\gtest.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\mock-allocator.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\posix-mock.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\scan.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\test-assert.h" />
+    <ClInclude Include="library\lib\extern\fmt\test\util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".clang-format" />
+    <None Include=".gitattributes" />
+    <None Include=".gitignore" />
+    <None Include="borealis - copying" />
+    <None Include="build_and_run.sh" />
+    <None Include="CONTRIBUTING.md" />
+    <None Include="homebrew_details_next.elf" />
+    <None Include="homebrew_details_next.nacp" />
+    <None Include="homebrew_details_next.nro" />
+    <None Include="library\lib\extern\fmt\doc\basic-bootstrap\layout.html" />
+    <None Include="library\lib\extern\fmt\doc\_templates\layout.html" />
+    <None Include="library\lib\extern\fmt\doc\_templates\search.html" />
+    <None Include="library\lib\extern\fmt\support\rtd\theme\layout.html" />
+    <None Include="LICENSE" />
+    <Text Include="Makefile">
+      <FileType>Document</FileType>
+    </Text>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="library\lib\absolute_layout.cpp" />
+    <ClCompile Include="library\lib\animations.cpp" />
+    <ClCompile Include="library\lib\applet_frame.cpp" />
+    <ClCompile Include="library\lib\application.cpp" />
+    <ClCompile Include="library\lib\box_layout.cpp" />
+    <ClCompile Include="library\lib\button.cpp" />
+    <ClCompile Include="library\lib\crash_frame.cpp" />
+    <ClCompile Include="library\lib\dialog.cpp" />
+    <ClCompile Include="library\lib\dropdown.cpp" />
+    <ClCompile Include="library\lib\extern\fmt\src\format.cc" />
+    <ClCompile Include="library\lib\extern\fmt\src\os.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\add-subdirectory-test\main.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\assert-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\chrono-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\color-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\compile-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\core-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\cuda-test\cpp14.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\custom-formatter-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\find-package-test\main.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\format-dyn-args-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\format-impl-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\format-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\fuzzing\chrono_duration.cpp" />
+    <ClCompile Include="library\lib\extern\fmt\test\fuzzing\main.cpp" />
+    <ClCompile Include="library\lib\extern\fmt\test\fuzzing\named_arg.cpp" />
+    <ClCompile Include="library\lib\extern\fmt\test\fuzzing\one_arg.cpp" />
+    <ClCompile Include="library\lib\extern\fmt\test\fuzzing\sprintf.cpp" />
+    <ClCompile Include="library\lib\extern\fmt\test\fuzzing\two_args.cpp" />
+    <ClCompile Include="library\lib\extern\fmt\test\gmock-gtest-all.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\grisu-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\gtest-extra-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\gtest-extra.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\header-only-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\header-only-test2.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\locale-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\os-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\ostream-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\posix-mock-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\printf-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\ranges-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\scan-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\std-format-test.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\test-main.cc" />
+    <ClCompile Include="library\lib\extern\fmt\test\util.cc" />
+    <ClCompile Include="library\lib\extern\glad\glad.c" />
+    <ClCompile Include="library\lib\extern\libretro-common\compat\compat_strl.c" />
+    <ClCompile Include="library\lib\extern\libretro-common\encodings\encoding_utf.c" />
+    <ClCompile Include="library\lib\extern\libretro-common\features\features_cpu.c" />
+    <ClCompile Include="library\lib\extern\nanovg\nanovg.c" />
+    <ClCompile Include="library\lib\extern\nxfmtwrapper\format.cpp" />
+    <ClCompile Include="library\lib\header.cpp" />
+    <ClCompile Include="library\lib\hint.cpp" />
+    <ClCompile Include="library\lib\i18n.cpp" />
+    <ClCompile Include="library\lib\image.cpp" />
+    <ClCompile Include="library\lib\label.cpp" />
+    <ClCompile Include="library\lib\layer_view.cpp" />
+    <ClCompile Include="library\lib\list.cpp" />
+    <ClCompile Include="library\lib\logger.cpp" />
+    <ClCompile Include="library\lib\material_icon.cpp" />
+    <ClCompile Include="library\lib\notification_manager.cpp" />
+    <ClCompile Include="library\lib\popup_frame.cpp" />
+    <ClCompile Include="library\lib\progress_display.cpp" />
+    <ClCompile Include="library\lib\progress_spinner.cpp" />
+    <ClCompile Include="library\lib\rectangle.cpp" />
+    <ClCompile Include="library\lib\repeating_task.cpp" />
+    <ClCompile Include="library\lib\scroll_view.cpp" />
+    <ClCompile Include="library\lib\sidebar.cpp" />
+    <ClCompile Include="library\lib\staged_applet_frame.cpp" />
+    <ClCompile Include="library\lib\style.cpp" />
+    <ClCompile Include="library\lib\switch_wrapper.c" />
+    <ClCompile Include="library\lib\swkbd.cpp" />
+    <ClCompile Include="library\lib\table.cpp" />
+    <ClCompile Include="library\lib\tab_frame.cpp" />
+    <ClCompile Include="library\lib\task_manager.cpp" />
+    <ClCompile Include="library\lib\theme.cpp" />
+    <ClCompile Include="library\lib\thumbnail_frame.cpp" />
+    <ClCompile Include="library\lib\view.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\pages\apps_list_page.cpp" />
+    <ClCompile Include="src\pages\info_page.cpp" />
+    <ClCompile Include="src\pages\intro_page.cpp" />
+    <ClCompile Include="src\pages\issue_page.cpp" />
+    <ClCompile Include="src\pages\layout_select_page.cpp" />
+    <ClCompile Include="src\pages\main_page.cpp" />
+    <ClCompile Include="src\pages\scanning_page.cpp" />
+    <ClCompile Include="src\pages\updating_page.cpp" />
+    <ClCompile Include="src\utils\base64.cpp" />
+    <ClCompile Include="src\utils\blacklist.cpp" />
+    <ClCompile Include="src\utils\favorites.cpp" />
+    <ClCompile Include="src\utils\launching.cpp" />
+    <ClCompile Include="src\utils\modules.cpp" />
+    <ClCompile Include="src\utils\nacp_utils.cpp" />
+    <ClCompile Include="src\utils\notes.cpp" />
+    <ClCompile Include="src\utils\panels.cpp" />
+    <ClCompile Include="src\utils\reboot_to_payload.cpp" />
+    <ClCompile Include="src\utils\scanning.cpp" />
+    <ClCompile Include="src\utils\settings.cpp" />
+    <ClCompile Include="src\utils\update.cpp" />
+    <ClCompile Include="src\utils\utilities.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{7e955e8a-8aba-49de-91e8-eff43c382ba2}</ProjectGuid>
+    <RootNamespace>HomebrewDetails</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>include;include/pages;include/utils;library/include;library/lib/extern/fmt/include;library/include/borealis/extern;C:/devkitPro/libnx/include;C:\devkitPro\msys2\usr\include;C:\devkitPro\devkitA64\lib\gcc\aarch64-none-elf\10.2.0\include\;$(IncludePath)</IncludePath>
+    <SourcePath>src;library/lib;$(SourcePath)</SourcePath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <NMakeBuildCommandLine>bash build_and_run.sh</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>make clean all</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>make clean</NMakeCleanCommandLine>
+    <NMakePreprocessorDefinitions>APP_VERSION="1.0"</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level1</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PreprocessorDefinitions>APP_VERSION="1.0";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <PreLinkEvent>
+      <Command>
+      </Command>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>bash build_and_run.sh</Command>
+      <Message>run make</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
