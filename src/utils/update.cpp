@@ -4,7 +4,6 @@
 #include <utils/utilities.h>
 //
 #include <curl/curl.h>
-#include <curl/easy.h>
 
 s_online_info online_info;
 

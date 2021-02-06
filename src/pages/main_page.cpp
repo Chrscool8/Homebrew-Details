@@ -31,9 +31,6 @@
 //
 #include <sys/select.h>
 //
-#include <curl/curl.h>
-#include <curl/easy.h>
-//
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

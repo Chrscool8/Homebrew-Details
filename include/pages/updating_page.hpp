@@ -12,9 +12,6 @@
 #include <pages/main_page.hpp>
 #include <thread>
 //
-#include <curl/curl.h>
-#include <curl/easy.h>
-//
 #include <assert.h>
 #include <dirent.h>
 #include <math.h>
@@ -38,6 +35,8 @@
 #include <string>
 #include <thread>
 #include <vector>
+
+#include <curl/curl.h>
 
 #include "switch/services/psm.h"
 

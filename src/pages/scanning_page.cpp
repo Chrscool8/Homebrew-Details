@@ -24,9 +24,6 @@
 #include <thread>
 
 //
-#include <curl/curl.h>
-#include <curl/easy.h>
-//
 #include <assert.h>
 #include <dirent.h>
 #include <math.h>
