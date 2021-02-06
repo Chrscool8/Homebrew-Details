@@ -97,6 +97,8 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    psmInitialize();
+
     print_debug("Beginning setting prep.");
     read_settings();
 
