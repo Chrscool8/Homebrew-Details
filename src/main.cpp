@@ -90,6 +90,7 @@ int main(int argc, char* argv[])
     i18n::loadTranslations();
 
     std::string title = "Homebrew Details v" APP_VERSION;
+    printf((title + "\n").c_str());
     if (!brls::Application::init(title.c_str()))
     {
         brls::Logger::error("Unable to init Borealis application, Homebrew Details");
