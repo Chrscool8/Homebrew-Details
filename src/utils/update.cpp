@@ -101,7 +101,7 @@ bool check_for_updates()
         res = curl_easy_perform(curl);
         print_debug("curl easily performed\n");
         curl_easy_cleanup(curl);
-        curl_global_cleanup();
+        //curl_global_cleanup();
 
         if (res == CURLE_OK)
         {

@@ -85,21 +85,24 @@ bool UpdatingPage::download_update()
 {
     print_debug("update time");
 
-    CURL* curl_handle;
-    static const char* pagefilename = (get_config_path() + "hbupdate.nro").c_str();
+    CURL* curl;
+    std::string pagefilename = (get_config_path() + "hbupdate.nro").c_str();
+    print_debug(pagefilename);
+    remove(pagefilename.c_str());
 
-    remove(pagefilename);
-
-    curl_global_init(CURL_GLOBAL_DEFAULT);
+    print_debug("curl globally initting\n");
+    //curl_global_init(CURL_GLOBAL_ALL);
 
     /* init the curl session */
-    curl_handle = curl_easy_init();
+    curl = curl_easy_init();
 
-    if (curl_handle)
+    if (curl)
     {
+        print_debug("curl easily initted\n");
+
         prog.lastruntime = 0;
         prog.progress    = 0;
-        prog.curl        = curl_handle;
+        prog.curl        = curl;
         prog.complete    = false;
         prog.success     = false;
         prog.downloading = false;
@@ -108,27 +111,27 @@ bool UpdatingPage::download_update()
 
         print_debug(url);
 
-        curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "Homebrew-Details");
-        curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
-        curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Homebrew-Details");
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
 
-        curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
-        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-        curl_easy_setopt(curl_handle, CURLOPT_XFERINFOFUNCTION, progress_func);
-        curl_easy_setopt(curl_handle, CURLOPT_XFERINFODATA, &prog);
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_func);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &prog);
 
-        FILE* pagefile = fopen(pagefilename, "wb");
+        FILE* pagefile = fopen(pagefilename.c_str(), "wb");
         if (pagefile)
         {
             print_debug("pagefile good");
-            curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, pagefile);
 
             prog.downloading = true;
-            CURLcode res     = curl_easy_perform(curl_handle);
-            curl_easy_cleanup(curl_handle);
+            CURLcode res     = curl_easy_perform(curl);
+            curl_easy_cleanup(curl);
             curl_global_cleanup();
             fclose(pagefile);
             prog.downloading = false;
@@ -151,7 +154,7 @@ bool UpdatingPage::download_update()
 
                         romfsExit();
                         remove(settings_get_value("meta", "nro path").c_str());
-                        rename(pagefilename, settings_get_value("meta", "nro path").c_str());
+                        rename(pagefilename.c_str(), settings_get_value("meta", "nro path").c_str());
 
                         finished_download = true;
                         prog.success      = true;
@@ -162,7 +165,11 @@ bool UpdatingPage::download_update()
                 }
             }
         }
+        else
+            print_debug("pagefile BAD");
     }
+    else
+        print_debug("curl NOT easily initted\n");
 
     finished_download = true;
     prog.success      = false;
