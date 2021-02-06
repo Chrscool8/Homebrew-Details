@@ -656,7 +656,7 @@ void AppsListPage::refresh_list()
 AppsListPage::AppsListPage()
     : AppletFrame(false, false)
 {
-    std::string title = std::string("") + "Homebrew Details v" + APP_VERSION;
+    std::string title = std::string("") + "Homebrew Details Next  -  v" + APP_VERSION;
     if (settings_get_value_true("meta", "debug"))
         title += " [Debug Mode]";
     this->setTitle(title.c_str());
