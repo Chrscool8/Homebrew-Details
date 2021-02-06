@@ -132,6 +132,14 @@ int main(int argc, char* argv[])
     {
         print_debug("Intro Page");
         brls::AppletFrame* intro = show_framed(new IntroPage());
+
+        std::string title = std::string("") + "Homebrew Details Next  -  v" + APP_VERSION;
+        if (settings_get_value_true("meta", "debug"))
+            title += " [Debug Mode]";
+        intro->setTitle(title.c_str());
+
+        intro->setIcon(get_resource_path() + "arrows.png");
+
         intro->registerAction("Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
         intro->updateActionHint(brls::Key::X, "Welcome Screen");
 
