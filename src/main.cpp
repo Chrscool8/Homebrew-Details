@@ -129,8 +129,8 @@ int main(int argc, char* argv[])
     {
         print_debug("Intro Page");
         brls::AppletFrame* intro = show_framed(new IntroPage());
-        intro->registerAction("Show Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
-        intro->updateActionHint(brls::Key::X, "Show Welcome Screen");
+        intro->registerAction("Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
+        intro->updateActionHint(brls::Key::X, "Welcome Screen");
 
         if (!fs::exists(get_config_path() + "introduced"))
         {
