@@ -31,9 +31,18 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
     if (is_favorite(full_path))
         fav = symbol_star() + " ";
 
-    brls::ListItem* this_entry = new brls::ListItem(fav + json_load_value_string(app_json, "name") + "  -  " + "v" + json_load_value_string(app_json, "version"), "", full_path);
+    std::string subvalue = settings_get_value("sort", "main");
 
-    this_entry->setValue(json_load_value_string(app_json, "author"));
+    std::string entry_title = fav + json_load_value_string(app_json, "name");
+    if (subvalue != "version")
+        entry_title += "  -  v" + json_load_value_string(app_json, "version");
+
+    brls::ListItem* this_entry = new brls::ListItem(entry_title, "", full_path);
+
+    if (subvalue == "name" || subvalue == "full_path")
+        subvalue = "author";
+
+    this_entry->setValue(json_load_value_string(app_json, subvalue));
 
     this_entry->setThumbnail(load_image_cache(json_load_value_string(app_json, "full_path")));
 
@@ -360,11 +369,13 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
                 std::string dest_string = get_keyboard_input(notes_get_value(json_load_value_string(app_json, "file_name")));
                 notes_set_value(json_load_value_string(app_json, "file_name"), dest_string);
                 desc->setText(dest_string);
+                desc->invalidate();
 
                 if (dest_string.empty())
                     note_header->collapse(true);
                 else
                     note_header->expand(true);
+                note_header->invalidate();
             });
 
             notesList->addView(notes_item);
@@ -447,13 +458,16 @@ struct AppComparator
             }
             else
             {
-
                 std::string comp_sort_main_a = json_load_value_string(a, sort_main);
                 transform(comp_sort_main_a.begin(), comp_sort_main_a.end(), comp_sort_main_a.begin(), ::tolower);
+                if (sort_main == "size")
+                    comp_sort_main_a = string_pad_zeroes(comp_sort_main_a);
                 if (comp_sort_main_a == "---")
                     comp_sort_main_a = "zzzzzzzzzzzzzz";
                 std::string comp_sort_main_b = json_load_value_string(b, sort_main);
                 transform(comp_sort_main_b.begin(), comp_sort_main_b.end(), comp_sort_main_b.begin(), ::tolower);
+                if (sort_main == "size")
+                    comp_sort_main_b = string_pad_zeroes(comp_sort_main_b);
                 if (comp_sort_main_b == "---")
                     comp_sort_main_b = "zzzzzzzzzzzzzz";
 
