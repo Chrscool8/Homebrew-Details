@@ -39,7 +39,7 @@ IntroPage::IntroPage()
     this->image = (new brls::Image(get_resource_path() + "icon.png"));
     this->image->setParent(this);
 
-    this->label = new brls::Label(brls::LabelStyle::DIALOG, "Welcome to Homebrew Details\nBy: Chris Bradel", true);
+    this->label = new brls::Label(brls::LabelStyle::DIALOG, "Welcome to NEW Homebrew Details\nBy: Chris Bradel", true);
     this->label->setHorizontalAlign(NVG_ALIGN_CENTER);
     this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);
