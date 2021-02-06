@@ -1,3 +1,5 @@
+#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 #include <switch.h>
 #include <sys/statvfs.h>
@@ -259,7 +261,7 @@ std::string get_free_space()
 std::string get_keyboard_input(std::string default_str)
 {
     SwkbdConfig kbd;
-    unsigned int str_len = 256;
+    const unsigned int str_len = 256;
     if (R_SUCCEEDED(swkbdCreate(&kbd, 0)))
     {
         swkbdConfigMakePresetDefault(&kbd);
@@ -427,4 +429,11 @@ std::string upper_first_letter(std::string str)
 {
     str[0] = toupper(str[0]);
     return str;
+}
+
+std::string string_pad_zeroes(std::string number)
+{
+    while (number.length() < 15)
+        number = "0" + number;
+    return number;
 }
