@@ -87,6 +87,8 @@ void init_settings()
 {
     initialize_setting("scan", "subfolders", "false");
     initialize_setting("scan", "root", "false");
+    initialize_setting("scan", "subfolders", "true");
+    initialize_setting("scan", "root", "true");
     initialize_setting("scan", "full card", "false");
     initialize_setting("scan", "autoscan", "false");
 
