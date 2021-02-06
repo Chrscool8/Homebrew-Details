@@ -7,10 +7,7 @@ $(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/de
 endif
 
 TOPDIR ?= $(CURDIR)
-#include $(DEVKITPRO)/libnx/switch_rules
-
-include /g/Documents/GitHub/libnx/nx/switch_rules
-
+include $(DEVKITPRO)/libnx/switch_rules
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -42,13 +39,13 @@ include /g/Documents/GitHub/libnx/nx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	homebrew_details_next
 BUILD		:=	build.nx
-SOURCES		:=	src src/pages src/utils 
+SOURCES		:=	src src/pages src/utils
 DATA		:=	data
 ICON		:=	resources/icon.jpg
-INCLUDES	:=	include include/pages include/utils 
+INCLUDES	:=	include include/pages include/utils include/extern
 APP_TITLE	:=	Homebrew Details Next
 APP_AUTHOR	:=	Chris Bradel
-APP_VERSION	:=	1.0
+APP_VERSION	:=	0.98
 
 ROMFS				:=	resources
 BOREALIS_RESOURCES	:=	romfs:/
@@ -77,7 +74,7 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 CFLAGS	:=	-g -Wall -Wno-unused-variable -Wno-unused-function -O2 -ffunction-sections  \
 			$(ARCH) $(DEFINES)
-CFLAGS	+=	`curl-config --cflags`
+
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ \
 			-DBOREALIS_RESOURCES="\"$(BOREALIS_RESOURCES)\"" \
 			-DAPP_VERSION="\"$(APP_VERSION)\""
@@ -85,18 +82,15 @@ CFLAGS	+=	$(INCLUDE) -D__SWITCH__ \
 CXXFLAGS	:= $(CFLAGS) -std=c++1z -O2
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-specs=/g/Documents/GitHub/libnx/nx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:=	`curl-config --libs`
-LIBS	+=	-lglfw3 -lEGL -lglapi -ldrm_nouveau -lz -lnx -lm 
+LIBS	:=	-lglfw3 -lcurl -lEGL -lglapi -ldrm_nouveau -lz -lnx -lm
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:= $(PORTLIBS) $(LIBNX)
-
-#include $(TOPDIR)/library/borealis.mk
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
