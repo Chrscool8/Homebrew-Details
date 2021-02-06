@@ -1,4 +1,5 @@
 #include <utils/blacklist.h>
+#include <utils/launching.h>
 #include <utils/panels.h>
 #include <utils/settings.h>
 #include <utils/update.h>
@@ -14,7 +15,6 @@ void show_update_panel()
 {
     brls::TabFrame* appView = new brls::TabFrame();
     appView->sidebar->setWidth(1000);
-    std::string vers = " v" + settings_get_value("meta", "local version") + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
     std::string vers = std::string("") + " v" + APP_VERSION + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
     appView->sidebar->addView(new brls::Header("Update Actions", false));
     brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
@@ -206,7 +206,8 @@ void show_settings_panel()
         settings_list_blacklist->addView(bl_edit_item);
 
         brls::Table* table = new brls::Table();
-        //table->addRow(brls::TableRowType::HEADER, "Blacklisted Folders");
+        if (blacklist.size() != 0)
+            settings_list_blacklist->addView(new brls::Header("Blacklisted Folders"));
         for (unsigned int iii = 0; iii < blacklist.size(); iii++)
         {
             const char* item_name = blacklist.at(iii).c_str();
@@ -250,6 +251,49 @@ void show_settings_panel()
         });
         settings_list_app->addView(exitToItem);
 
+        appView->addSeparator();
+
+        print_debug("Toolbox.");
+        brls::List* tools_list = new brls::List();
+
+        tools_list->addView(new brls::Header("Actionables"));
+
+        brls::ListItem* rta_item = new brls::ListItem("Restart App");
+        rta_item->getClickEvent()->subscribe([](brls::View* view) {
+            print_debug("restart app");
+            launch_nro(settings_get_value("meta", "nro path"), "\"" + settings_get_value("meta", "nro path") + "\"");
+            romfsExit();
+            brls::Application::quit();
+        });
+        tools_list->addView(rta_item);
+
+        brls::ListItem* rtp_item = new brls::ListItem("Reboot to Payload", "sdmc:/atmosphere/reboot_payload.bin");
+        rtp_item->getClickEvent()->subscribe([](brls::View* view) {
+            print_debug("reboot_to_payload");
+            int result = reboot_to_payload();
+            if (result == -1)
+                brls::Application::notify("Problem initializing spl");
+            else if (result == -2)
+                brls::Application::notify("Failed to open atmosphere/ reboot_payload.bin!");
+        });
+        tools_list->addView(rtp_item);
+
+        tools_list->addView(new brls::Header("Information"));
+
+        brls::ListItem* nsp_item = new brls::ListItem("How to Install to Home Menu...");
+        nsp_item->getClickEvent()->subscribe([](brls::View* view) {
+            brls::TabFrame* appView = new brls::TabFrame();
+            appView->sidebar->setWidth(1920);
+            appView->setWidth(1920);
+            appView->setHeight(400);
+            appView->sidebar->addView(new brls::Label(brls::LabelStyle::REGULAR, "\nUsing your favorite nsp installer, install the forwarder that is currently in:\n\n" + get_config_path() + "forwarder/HomebrewDetails_MultiForwarder.nsp\n\nIt will launch this application from any of the following locations:\n- sdmc:/switch/homebrew_details.nro\n- sdmc:/switch/homebrew_details/homebrew_details.nro\n- sdmc:/switch/homebrew-details/homebrew_details.nro", true));
+            appView->setIcon(get_resource_path() + "arrows.png");
+            brls::PopupFrame::open("How to Install to Home Menu", appView, "", "");
+        });
+        tools_list->addView(nsp_item);
+
+        appView->addTab("Toolbox", tools_list);
+
         print_debug("Misc.");
         settings_list_app->addView(new brls::Header("Misc. Settings"));
 
@@ -269,6 +313,7 @@ void show_settings_panel()
             }
         });
         settings_list_app->addView(debug_switch);
+        appView->sidebar->setWidth(320);
         appView->addTab("Misc", settings_list_app);
     }
     //
@@ -294,8 +339,8 @@ void show_first_time_panel()
     list_about->addView(new brls::Header("What is it?"));
     list_about->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "This is an app that allows you to view details about, launch, categorize, and manage all the .nro files on your Switch using borealis for a native-feeling UI. It also includes a toolbox of handy quick actions like rebooting to a payload. It is nearly a feature-complete replacement/alternative to hbmenu.", true));
 
-    list_about->addView(new brls::Header("What will it be?"));
-    list_about->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "Hopefully, an all-around manager for all your apps. Some people have already expressed that they'd like it to be a full hbmenu replacement. With app launching, it's just about there already. Coming soon is checking for and updating app store apps, and more.", true));
+    list_about->addView(new brls::Header("How can you help?"));
+    list_about->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "Comments, criticism, and suggestions are welcomed and encouraged. I'd love to make the greatest product I can for the community and I'm generally happy to cater to your specific requests when possible. All I ask of you is to enjoy using it. I'm making this in my free time, and if you'd like to monetarily support me to allow me to have more free time, you can find a sponsor/donation link on the GitHub page to toss me a buck, but this project will always be free for all.", true));
 
     list_about->setSpacing(20);
 
@@ -358,6 +403,5 @@ void show_first_time_panel()
 
     appView->setIcon(get_resource_path() + "icon.png");
     appView->updateActionHint(brls::Key::B, "Back to Main Screen");
-    appView->updateActionHint(brls::Key::A, "");
     brls::PopupFrame::open("Welcome To Homebrew Details", appView, "First Time Overview", "");
 }
