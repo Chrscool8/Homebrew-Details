@@ -10,6 +10,7 @@
 #include <borealis.hpp>
 #include <nlohmann/json.hpp>
 #include <pages/main_page.hpp>
+#include <sstream>
 #include <string>
 
 #include "switch/services/psm.h"
@@ -200,7 +201,7 @@ std::string get_date()
 
 std::string get_config_path()
 {
-    return "sdmc:/config/homebrew_details_beta/";
+    return "sdmc:/config/homebrew_details_next/";
 }
 
 std::string get_cache_path()
