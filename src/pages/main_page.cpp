@@ -570,7 +570,8 @@ brls::ListItem* MainPage::make_app_entry(app_entry* entry, bool is_appstore)
 
 MainPage::MainPage()
 {
-    std::string title = "Homebrew Details v" + settings_get_value("meta", "local version");
+    std::string title = std::string("") + "Homebrew Details v" + APP_VERSION;
+
     if (settings_get_value_true("meta", "debug"))
         title += " [Debug Mode]";
 

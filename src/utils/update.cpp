@@ -112,11 +112,11 @@ bool check_for_updates()
             set_online_version_description(json_load_value_string(j, "body"));
             set_online_version_date(json_load_value_string(j, "created_at"));
 
-            print_debug((std::string("") + get_online_version_number() + " : " + settings_get_value("meta", "local version") + "\n").c_str());
-            if (is_number(get_online_version_number()) && is_number(settings_get_value("meta", "local version")))
+            print_debug((std::string("") + get_online_version_number() + " : " + APP_VERSION + "\n").c_str());
+            if (is_number(get_online_version_number()))
             {
                 print_debug("nums\n");
-                if (std::stod(get_online_version_number()) > std::stod(settings_get_value("meta", "local version")))
+                if (std::stod(get_online_version_number()) > std::stod(APP_VERSION))
                 {
                     print_debug("need up\n");
                     set_online_version_available(true);

@@ -15,6 +15,7 @@ void show_update_panel()
     brls::TabFrame* appView = new brls::TabFrame();
     appView->sidebar->setWidth(1000);
     std::string vers = " v" + settings_get_value("meta", "local version") + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
+    std::string vers = std::string("") + " v" + APP_VERSION + "  " + " " + symbol_rightarrow() + " " + "  v" + get_online_version_number() + "\n\n";
     appView->sidebar->addView(new brls::Header("Update Actions", false));
     brls::ListItem* dialogItem = new brls::ListItem("Update Wizard");
 

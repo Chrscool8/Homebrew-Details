@@ -94,6 +94,10 @@ void init_settings()
         settings_set_value("meta", "local version", std::string(APP_VERSION) + "d");
     else
         settings_set_value("meta", "local version", APP_VERSION);
+    //if (settings_get_value_true("meta", "debug"))
+    //    settings_set_value("meta", "local version", std::string("") + APP_VERSION + "d");
+    //else
+    //    settings_set_value("meta", "local version", APP_VERSION);
 
     initialize_setting("preferences", "control scheme", "0");
     initialize_setting("old", "lax store compare", "false");
@@ -108,6 +112,7 @@ void init_settings()
     if (settings_get_value("history", "last seen version") == "---" || (APP_VERSION != settings_get_value("history", "last seen version")))
     {
         settings_set_value("history", "last seen version", std::string(APP_VERSION));
+        settings_set_value("history", "last seen version", APP_VERSION);
         print_debug("DIFFERING VERSION!!");
         settings_set_value("internal", "invalidate cache", "true");
     }

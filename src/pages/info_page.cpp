@@ -29,7 +29,7 @@ InfoPage::InfoPage(brls::StagedAppletFrame* frame, int type)
         case info_page_dl_intro:
             button_label = "Begin Download";
             icon         = get_resource_path() + "download.png";
-            title        = std::string(" Update Wizard Engaged.\nv ") + settings_get_value("meta", "local version") + " " + " " + symbol_rightarrow() + " " + " v " + get_online_version_number();
+            title        = std::string(" Update Wizard Engaged.\nv ") + APP_VERSION + " " + " " + symbol_rightarrow() + " " + " v " + get_online_version_number();
             break;
         case info_page_dl_done:
             button_label = "Proceed!";
