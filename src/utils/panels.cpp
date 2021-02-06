@@ -164,7 +164,7 @@ void show_settings_panel()
         for (unsigned int ii = 0; ii < blacklist.size(); ii++)
             bl_vec.push_back(blacklist.at(ii));
 
-        brls::ListItem* bl_edit_item = new brls::ListItem("Edit Blacklist");
+        brls::ListItem* bl_edit_item = new brls::ListItem("Edit Blacklist", "Blacklisted folders won't be scanned.");
         bl_edit_item->registerAction("Edit", brls::Key::A, [&]() {
             brls::TabFrame* appView = new brls::TabFrame();
             appView->sidebar->setWidth(1000);
@@ -374,7 +374,7 @@ void show_first_time_panel()
 
     list_features2->addView(new brls::Header("Toolbox Features"));
     list_features2->addView(new brls::Label(brls::LabelStyle::DESCRIPTION,
-        "" + symbol_bullet() + "  Reboot to a payload\n" + "",
+        "" + symbol_bullet() + "  Reboot to a payload\n" + symbol_bullet() + "  Restart the app\n" + symbol_bullet() + "  Installing to the home screen ",
         true));
 
     appView->addTab("Features, Part 2", list_features2);
