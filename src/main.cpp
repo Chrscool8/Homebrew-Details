@@ -132,6 +132,17 @@ int main(int argc, char* argv[])
         intro->registerAction("Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
         intro->updateActionHint(brls::Key::X, "Welcome Screen");
 
+        if (get_online_version_available())
+        {
+            brls::Application::notify("Update Available!\nPress R for more info.");
+
+            intro->registerAction("Update Info", brls::Key::R, []() {
+                show_update_panel();
+                return true;
+            });
+            intro->updateActionHint(brls::Key::R, "Update Info");
+        }
+
         if (!fs::exists(get_config_path() + "introduced"))
         {
             std::ofstream outputFile(get_config_path() + "introduced");
