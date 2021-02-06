@@ -2,3 +2,6 @@
 build.nx
 Debug
 library
+include/extern
+*.nacp
+*.elf
