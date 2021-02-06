@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <main.h>
+#include <sys/stat.h>
 #include <utils/nacp_utils.h>
 #include <utils/scanning.h>
 #include <utils/settings.h>
@@ -84,9 +85,6 @@ void new_read_store_apps()
 
     closedir(dir);
 
-    //std::ofstream o(get_config_path("temp_store_info.json"));
-    //o << store_info_json << std::endl;
-
     std::ofstream o2(get_config_path() + "apps_info.json");
     o2 << apps_info_json << std::endl;
 }
@@ -167,24 +165,6 @@ void new_list_files(const char* basePath, bool recursive)
                         app_json["size"]      = fs::file_size(filename);
 
                         apps_info_json[filename] = app_json;
-
-                        //size_t icon_size = asset_header.icon.size;
-                        //uint8_t* icon    = (uint8_t*)malloc(icon_size);
-                        //if (icon != NULL && icon_size != 0)
-                        //{
-                        //    memset(icon, 0, icon_size);
-                        //    fseek(file, header.size + asset_header.icon.offset, SEEK_SET);
-                        //    fread(icon, icon_size, 1, file);
-
-                        //    create_directories(get_config_path("cache/"));
-                        //    std::ofstream fp;
-                        //    fp.open((std::string(get_config_path("cache/")) + base64_encode(std::string(name) + version) + ".jpg").c_str(), std::ios::out | std::ios::binary);
-                        //    fp.write((char*)icon, icon_size);
-                        //    fp.close();
-                        //}
-
-                        //free(icon);
-                        //icon = NULL;
 
                         fclose(file);
                     }
