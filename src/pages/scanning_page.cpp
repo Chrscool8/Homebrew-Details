@@ -62,7 +62,9 @@ void ScanningPage::thread_scan()
         settings_set_value("scan", "settings changed", "false");
     }
 
-    if (std::filesystem::exists(get_apps_cache_file()))
+    from_cache = std::filesystem::exists(get_apps_cache_file());
+
+    if (from_cache)
     {
         std::ifstream i(get_apps_cache_file());
         apps_info_json.clear();
@@ -77,7 +79,8 @@ void ScanningPage::thread_scan()
     print_debug("scan thread end");
 
     settings_set_value("history", "previous number of files", std::to_string(file_count));
-    scanprog.complete = true;
+    scanprog.complete       = true;
+    scanprog.prev_num_files = file_count;
 }
 
 ScanningPage::ScanningPage()
@@ -100,19 +103,18 @@ ScanningPage::ScanningPage()
 
     file_count = 0;
 
-    scanprog.progress = 0;
-    scanprog.complete = false;
-    scanprog.success  = false;
-    scanprog.scanning = false;
-
+    scanprog.progress   = 0;
+    scanprog.complete   = false;
+    scanprog.success    = false;
+    scanprog.scanning   = false;
     scanprog.end_thread = false;
 
     print_debug(settings_get_value("history", "previous number of files") + " previous files");
 
-    if (is_number(settings_get_value("history", "previous number of files")))
+    if ((settings_get_value("history", "previous number of files")) != "---")
         scanprog.prev_num_files = std::stoi(settings_get_value("history", "previous number of files"));
     else
-        scanprog.prev_num_files = 1;
+        scanprog.prev_num_files = -1;
 
     // Label
     this->progressDisp = new brls::ProgressDisplay();
@@ -139,18 +141,28 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
     }
     else
     {
-        if (settings_get_value_true("scan", "settings changed"))
+        if (!from_cache)
         {
-            this->progressDisp->setProgress(0, 1);
+            int num     = file_count;
+            int num_out = scanprog.prev_num_files;
+
+            this->progressDisp->setProgress(num, num_out);
             this->progressDisp->frame(ctx);
-            this->label->setText("First Time Scan: " + std::to_string(file_count) + " Files Scanned So Far");
+
+            if (num < num_out)
+                this->label->setText(std::to_string(num) + " / " + std::to_string(num_out) + " Files Scanned");
+            else
+                this->label->setText(std::to_string(num) + " Files Scanned");
+
             this->label->frame(ctx);
         }
         else
         {
-            this->progressDisp->setProgress(file_count, scanprog.prev_num_files);
+            this->progressDisp->setProgress(1, 1);
             this->progressDisp->frame(ctx);
-            this->label->setText(std::to_string(file_count) + " / " + settings_get_value("history", "previous number of files") + " Scanned");
+
+            this->label->setText("Loading from Cache");
+
             this->label->frame(ctx);
         }
 
@@ -161,9 +173,6 @@ void ScanningPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned h
         {
             continued = true;
             scanner->join();
-
-            //print_debug("----------- Launch Layout Page");
-            //show_framed(new LayoutSelectPage())->setTitle("Choose a layout style");
 
             print_debug("rm lock.");
 

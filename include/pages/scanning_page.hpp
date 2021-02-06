@@ -53,6 +53,7 @@ class ScanningPage : public brls::View
     int short_wait;
     bool asked;
     bool finished_download;
+    bool from_cache;
 
     void thread_scan();
 

@@ -15,12 +15,14 @@ IntroPage::IntroPage()
     short_wait        = 0;
     autoscan_cooldown = 0;
 
+    from_cache = std::filesystem::exists(get_apps_cache_file());
+
     this->button = new brls::Button(brls::ButtonStyle::BORDERLESS);
     this->button->setImage(get_resource_path() + "arrows_small.png");
-    if (!std::filesystem::exists(get_apps_cache_file()))
-        this->button->setLabel("Begin Scan");
-    else
+    if (from_cache)
         this->button->setLabel("Load Cache");
+    else
+        this->button->setLabel("Begin Scan");
 
     this->button->setParent(this);
     this->button->getClickEvent()->subscribe([this](View* view) {
@@ -42,12 +44,15 @@ IntroPage::IntroPage()
     this->label->setVerticalAlign(NVG_ALIGN_MIDDLE);
     this->label->setParent(this);
 
-    this->registerAction("Clear Cache", brls::Key::MINUS, [this]() {
-        settings_set_value("internal", "invalidate cache", "true");
-        this->button->setLabel("Begin Scan");
-        this->button->invalidate();
-        return true;
-    });
+    if (from_cache)
+    {
+        this->registerAction("Clear Cache", brls::Key::MINUS, [this]() {
+            settings_set_value("internal", "invalidate cache", "true");
+            this->button->setLabel("Begin Scan");
+            this->button->invalidate();
+            return true;
+        });
+    }
 
     this->registerAction("Settings", brls::Key::Y, [this]() {
         show_settings_panel();
@@ -71,11 +76,9 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
         {
             asked = true;
 
-            brls::AppletFrame* frame_scanning = new brls::AppletFrame(true, true);
-            frame_scanning->setIcon(get_resource_path() + "icon.png");
-            frame_scanning->setTitle("Scanning for Apps");
-            frame_scanning->setContentView(new ScanningPage());
-            brls::Application::pushView(frame_scanning);
+            brls::AppletFrame* scanning_page = show_framed(new ScanningPage());
+            scanning_page->setIcon(get_resource_path() + "icon.png");
+            scanning_page->setTitle("Scanning for Apps");
 
             go         = false;
             asked      = false;
