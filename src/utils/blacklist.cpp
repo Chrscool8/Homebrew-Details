@@ -3,6 +3,7 @@
 #include <utils/blacklist.h>
 #include <utils/utilities.h>
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -24,7 +25,10 @@ void read_blacklist()
         inputFile.close();
     }
     else
+    {
         print_debug("Can't find blacklist file.");
+        add_blacklist("sdmc:/switch/checkpoint/saves/");
+    }
 }
 
 void write_blacklist()
@@ -32,30 +36,25 @@ void write_blacklist()
     create_directories(get_config_path());
     remove((get_config_path() + "blacklist.txt").c_str());
 
-    if (!blacklist.empty())
+    std::ofstream outputFile(get_config_path() + "blacklist.txt");
+    if (outputFile)
     {
-        std::ofstream outputFile(get_config_path() + "blacklist.txt");
-        if (outputFile)
+        unsigned int index = 0;
+        while (index < blacklist.size())
         {
-            unsigned int index = 0;
-            while (index < blacklist.size())
+            if (!blacklist.at(index).empty())
             {
-                if (!blacklist.at(index).empty())
-                {
-                    outputFile << (base64_encode(blacklist.at(index))).c_str();
-                    if (index != blacklist.size() - 1)
-                        outputFile << std::endl;
-                }
-                index += 1;
+                outputFile << (base64_encode(blacklist.at(index))).c_str();
+                if (index != blacklist.size() - 1)
+                    outputFile << std::endl;
             }
-            outputFile.close();
-            print_debug("BL written");
+            index += 1;
         }
-        else
-            print_debug("Can't open blacklist.");
+        outputFile.close();
+        print_debug("BL written");
     }
     else
-        print_debug("BL not written");
+        print_debug("Can't open blacklist.");
 }
 
 void add_blacklist(std::string str)
