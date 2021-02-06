@@ -53,7 +53,8 @@ std::string settings_get_value(std::string category, std::string key)
 
         if (j_sub.contains(key))
         {
-            printf(std::string("[DETAILS] Reading setting " + category + " " + key + "\n").c_str());
+            if (key != "debug")
+                printf(std::string("[DETAILS] Reading setting " + category + " " + key + "\n").c_str());
             return (j_sub[key]);
         }
         else
