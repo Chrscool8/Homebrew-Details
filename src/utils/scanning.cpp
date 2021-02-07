@@ -1,6 +1,7 @@
 #include <dirent.h>
 #include <main.h>
 #include <sys/stat.h>
+#include <utils/blacklist.h>
 #include <utils/nacp_utils.h>
 #include <utils/scanning.h>
 #include <utils/settings.h>
@@ -101,7 +102,8 @@ void new_list_files(const char* basePath, bool recursive)
     // blacklist
     std::string pa = to_lower(std::string(basePath));
     string_replace(pa, "//", "/");
-    if (vector_contains(blacklist, pa))
+
+    if (blacklist_contains(pa))
     {
         print_debug("Blacklist: " + pa);
     }

@@ -76,3 +76,13 @@ void remove_blacklist(std::string str)
         write_blacklist();
     }
 }
+
+bool blacklist_contains(std::string str)
+{
+    for (long unsigned int i = 0; i < blacklist.size(); i++)
+    {
+        if (string_contains(str, blacklist.at(i)))
+            return true;
+    }
+    return false;
+}
