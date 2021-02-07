@@ -47,3 +47,4 @@ bool compare_json_by_name(nlohmann::json a, nlohmann::json b);
 std::string upper_first_letter(std::string str);
 std::string bool_string(bool boo);
 std::string string_pad_zeroes(std::string number);
+bool string_contains(std::string str, std::string substr);

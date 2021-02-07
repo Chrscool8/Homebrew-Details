@@ -148,7 +148,7 @@ bool UpdatingPage::download_update()
 
                     app_entry check;
                     read_nacp_from_file(pagefilename, &check);
-                    if (check.name == "Homebrew Details")
+                    if (string_contains(check.name, "Homebrew Details"))
                     {
                         print_debug("good nacp");
 

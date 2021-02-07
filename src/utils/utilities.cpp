@@ -438,3 +438,8 @@ std::string string_pad_zeroes(std::string number)
         number = "0" + number;
     return number;
 }
+
+bool string_contains(std::string str, std::string substr)
+{
+    return (str.find(substr) != std::string::npos);
+}
