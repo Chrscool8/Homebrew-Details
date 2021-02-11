@@ -54,6 +54,11 @@ IntroPage::IntroPage()
         });
     }
 
+    this->registerAction("What's New", brls::Key::L, [this]() {
+        show_whatsnew_panel();
+        return true;
+    });
+
     this->registerAction("Settings", brls::Key::Y, [this]() {
         show_settings_panel();
         return true;
