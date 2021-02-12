@@ -288,6 +288,11 @@ void ListItem::setDrawTopSeparator(bool draw)
     this->drawTopSeparator = draw;
 }
 
+void ListItem::setDrawBottomSeparator(bool draw)
+{
+    this->drawBottomSeparator = draw;
+}
+
 View* ListItem::getDefaultFocus()
 {
     if (this->collapseState != 1.0f)
@@ -429,9 +434,12 @@ void ListItem::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heigh
     }
 
     // Bottom
-    nvgBeginPath(vg);
-    nvgRect(vg, x, y + 1 + baseHeight, width, 1);
-    nvgFill(vg);
+    if (this->drawBottomSeparator)
+    {
+        nvgBeginPath(vg);
+        nvgRect(vg, x, y + 1 + baseHeight, width, 1);
+        nvgFill(vg);
+    }
 }
 
 bool ListItem::hasDescription()

@@ -48,6 +48,7 @@ class ListItem : public View
     unsigned textSize;
 
     bool drawTopSeparator = true;
+    bool drawBottomSeparator = true;
 
     Label* descriptionView = nullptr;
     Image* thumbnailView   = nullptr;
@@ -75,6 +76,7 @@ class ListItem : public View
 
     bool hasDescription();
     void setDrawTopSeparator(bool draw);
+    void setDrawBottomSeparator(bool draw);
 
     bool getReduceDescriptionSpacing();
     void setReduceDescriptionSpacing(bool value);
