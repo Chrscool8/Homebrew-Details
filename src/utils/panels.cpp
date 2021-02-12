@@ -412,13 +412,6 @@ void show_whatsnew_panel()
     appView->sidebar->setWidth(250);
     brls::List* list = new brls::List();
 
-    //list->addView(new brls::Label(brls::LabelStyle::REGULAR, "Long time, no see! For the last four months or so I've been rewriting the application almost completely from the ground up. Here's what's new.\n\nFeatures:\n\n- Scan files more than twice as fast\n- Cache app lists to json and instantly reload them on next run without having to rescan\n- Cache app icons for instantly reloading menus\n- Sort list by categories (name, path, author, size, category)\n- Sort list ascending or descending\n- Group sorted lists by category (none, author, category, from appstore)\n- Groundwork for language localization\n- Groundwork for multiple view styles (icon grid and icon list coming soon)\n- Welcome Page and Introduction for first run\n- Settings is now a categorized json\n- Pin Favorite apps to the top of the list\n- Move Settings and Updater into their own panels accessible by list or main screen\n- Delete folder if deleting app and it's the only thing in the folder\n- Basically every other aspect rewritten for speed and stability\n\nFrameworks:\n\n- Updated nlohmann json\n- Updated libnx\n- Updated borealis ui\n- Updated curl", true));
-
-    //brls::ListItem* skinny2 = new brls::ListItem("");
-    //skinny2->setHeight(20);
-    //skinny2->setForceTranslucent(true);
-    //list->addView(skinny2);
-
     std::vector<std::string> lines = explode("Long time, no see! For the last four months or so I've been rewriting the application almost completely from the ground up. Here's what's new.**Features:**- Scan files more than twice as fast*- Cache app lists to json and instantly reload them on next run without having to rescan*- Cache app icons for instantly reloading menus*- Sort list by categories (name, path, author, size, category)*- Sort list ascending or descending*- Group sorted lists by category (none, author, category, from appstore)*- Groundwork for language localization*- Groundwork for multiple view styles (icon grid and icon list coming soon)*- Welcome Page and Introduction for first run*- Settings is now a categorized json*- Pin Favorite apps to the top of the list*- Move Settings and Updater into their own panels accessible by list or main screen*- Delete folder if deleting app and it's the only thing in the folder*- Basically every other aspect rewritten for speed and stability**Frameworks:**- Updated nlohmann json*- Updated libnx*- Updated borealis ui*- Updated curl", '*');
     for (unsigned int i = 0; i < lines.size(); i++)
     {
@@ -440,8 +433,9 @@ void show_whatsnew_panel()
                 }
 
                 brls::ListItem* skinny2 = new brls::ListItem(line);
+                skinny2->setWidth(35);
                 skinny2->setHeight(35);
-                skinny2->setDrawTopSeparator(false);
+                skinny2->setDrawBottomSeparator(false);
                 list->addView(skinny2);
             }
         }
@@ -449,6 +443,8 @@ void show_whatsnew_panel()
         {
             brls::ListItem* skinny2 = new brls::ListItem("");
             skinny2->setHeight(35);
+            skinny2->setDrawTopSeparator(false);
+            skinny2->setDrawBottomSeparator(false);
             list->addView(skinny2);
         }
     }
