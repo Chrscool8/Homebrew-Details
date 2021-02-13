@@ -2,4 +2,4 @@
 build.nx
 Debug
 library
-include/extern
+include/extern/
