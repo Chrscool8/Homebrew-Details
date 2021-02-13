@@ -347,6 +347,9 @@
     <None Include="CONTRIBUTING.md" />
     <None Include="LICENSE" />
     <None Include="README.md" />
+    <None Include="homebrew_details.nro" />
+    <None Include="homebrew_details.elf" />
+    <None Include="homebrew_details.nacp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="library\lib\extern\fmt\src\format.cc">

@@ -233,26 +233,9 @@ void show_settings_panel()
         appView->addTab("Controls", settings_list_controls);
     }
     //
+    appView->addSeparator();
 
     {
-        brls::List* settings_list_app = new brls::List();
-        settings_list_app->addView(new brls::Header("App Settings"));
-
-        brls::SelectListItem* exitToItem = new brls::SelectListItem("Exit To", { "sdmc:/hbmenu.nro", settings_get_value("meta", "nro path") });
-        exitToItem->setValue(settings_get_value("meta", "exit to"));
-        exitToItem->getValueSelectedEvent()->subscribe([](size_t selection) {
-            if (selection == 0)
-                settings_set_value("meta", "exit to", "sdmc:/hbmenu.nro");
-            else if (selection == 1)
-                settings_set_value("meta", "exit to", settings_get_value("meta", "nro path"));
-
-            std::string target = settings_get_value("meta", "exit to");
-            envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
-        });
-        settings_list_app->addView(exitToItem);
-
-        appView->addSeparator();
-
         print_debug("Toolbox.");
         brls::List* tools_list = new brls::List();
 
@@ -295,6 +278,33 @@ void show_settings_panel()
         appView->addTab("Toolbox", tools_list);
 
         print_debug("Misc.");
+
+        brls::List* settings_list_app = new brls::List();
+        settings_list_app->addView(new brls::Header("App Settings"));
+
+        brls::SelectListItem* exitToItem = new brls::SelectListItem("Exit To", { "sdmc:/hbmenu.nro", settings_get_value("meta", "nro path") });
+        exitToItem->setValue(settings_get_value("meta", "exit to"));
+        exitToItem->getValueSelectedEvent()->subscribe([](size_t selection) {
+            if (selection == 0)
+                settings_set_value("meta", "exit to", "sdmc:/hbmenu.nro");
+            else if (selection == 1)
+                settings_set_value("meta", "exit to", settings_get_value("meta", "nro path"));
+
+            std::string target = settings_get_value("meta", "exit to");
+            envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
+        });
+
+        settings_list_app->addView(exitToItem);
+
+        settings_list_app->addView(new brls::Header("Forwarder Settings"));
+        brls::ListItem* item = new brls::ListItem("Reset Automatic Forwarding");
+        item->getClickEvent()->subscribe([item](brls::View* view) {
+            settings_set_value("forwarder", "option", "Manually Choose");
+            item->setChecked(true);
+            return true;
+        });
+        settings_list_app->addView(item);
+
         settings_list_app->addView(new brls::Header("Misc. Settings"));
 
         brls::ListItem* debug_switch = new brls::ListItem("Debug Mode", "Takes full effect on next launch.");

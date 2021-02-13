@@ -125,6 +125,9 @@
     <None Include="borealis - copying" />
     <None Include="build_and_run.sh" />
     <None Include="CONTRIBUTING.md" />
+    <None Include="homebrew_details.elf" />
+    <None Include="homebrew_details.nacp" />
+    <None Include="homebrew_details.nro" />
     <None Include="library\lib\extern\fmt\doc\basic-bootstrap\layout.html" />
     <None Include="library\lib\extern\fmt\doc\_templates\layout.html" />
     <None Include="library\lib\extern\fmt\doc\_templates\search.html" />
