@@ -77,7 +77,7 @@ void copy_resources()
     export_resource("assets", "unknown.png");
     export_resource("assets", "credits.png");
 
-    export_resource("forwarder", "HomebrewDetails_MultiForwarder.nsp");
+    export_resource("forwarder", "HomebrewDetailsForwarder_v2.nsp");
 }
 
 int main(int argc, char* argv[])
