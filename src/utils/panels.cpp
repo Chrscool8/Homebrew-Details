@@ -293,7 +293,6 @@ void show_settings_panel()
             std::string target = settings_get_value("meta", "exit to");
             envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
         });
-
         settings_list_app->addView(exitToItem);
 
         settings_list_app->addView(new brls::Header("Forwarder Settings"));
