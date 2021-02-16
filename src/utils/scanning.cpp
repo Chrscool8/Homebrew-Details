@@ -72,7 +72,7 @@ void new_read_store_apps()
                             temp_json["url"]           = app_info_json["url"];
                             temp_json["is_appstore"]   = "true";
 
-                            apps_info_json[std::string("sdmc:/" + file_line.substr(3))] = temp_json;
+                            apps_info_json[std::string("sdmc:/" + file_line.substr(3))] = nlohmann::json::parse(temp_json.dump(-1, ' ', true, nlohmann::json::error_handler_t::replace));
                         }
                     }
                 }
@@ -87,7 +87,7 @@ void new_read_store_apps()
     closedir(dir);
 
     std::ofstream o2(get_config_path() + "apps_info.json");
-    o2 << apps_info_json << std::endl;
+    o2 << std::setw(4) << apps_info_json << std::endl;
 }
 
 void new_list_files(const char* basePath, bool recursive)
@@ -166,7 +166,7 @@ void new_list_files(const char* basePath, bool recursive)
                         app_json["file_name"] = filename.substr(filename.find_last_of("/\\") + 1);
                         app_json["size"]      = fs::file_size(filename);
 
-                        apps_info_json[filename] = app_json;
+                        apps_info_json[filename] = nlohmann::json::parse(app_json.dump(-1, ' ', true, nlohmann::json::error_handler_t::replace));
 
                         fclose(file);
                     }
@@ -223,7 +223,7 @@ void new_load_all_apps()
     }
 
     std::ofstream o(get_config_path() + "apps_info.json");
-    o << apps_info_json << std::endl;
+    o << std::setw(4) << apps_info_json << std::endl;
 }
 
 brls::Image* get_image_from_nro(std::string filename)
