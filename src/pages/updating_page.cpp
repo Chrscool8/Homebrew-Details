@@ -86,9 +86,9 @@ bool UpdatingPage::download_update()
     print_debug("update time");
 
     CURL* curl;
-    std::string pagefilename = (get_config_path() + "hbupdate.nro").c_str();
-    print_debug(pagefilename);
-    remove(pagefilename.c_str());
+    std::string new_update_file = (get_config_path() + "hbupdate.nro").c_str();
+    print_debug(new_update_file);
+    remove(new_update_file.c_str());
 
     print_debug("curl globally initting\n");
     //curl_global_init(CURL_GLOBAL_ALL);
@@ -123,7 +123,7 @@ bool UpdatingPage::download_update()
         curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_func);
         curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &prog);
 
-        FILE* pagefile = fopen(pagefilename.c_str(), "wb");
+        FILE* pagefile = fopen(new_update_file.c_str(), "wb");
         if (pagefile)
         {
             print_debug("pagefile good");
@@ -142,19 +142,18 @@ bool UpdatingPage::download_update()
             if (res == CURLE_OK)
             {
                 print_debug("curl update okay");
-                if (fs::exists(pagefilename))
+                if (fs::exists(new_update_file))
                 {
                     print_debug("new version downloaded");
 
-                    app_entry check;
-                    read_nacp_from_file(pagefilename, &check);
-                    if (string_contains(check.author, "Chris Bradel"))
+                    nlohmann::json app_json = read_nacp_from_file(new_update_file);
+                    if (string_contains(json_load_value_string(app_json, "author"), "Chris Bradel"))
                     {
                         print_debug("good nacp");
 
                         romfsExit();
                         remove(settings_get_value("meta", "nro path").c_str());
-                        rename(pagefilename.c_str(), settings_get_value("meta", "nro path").c_str());
+                        rename(new_update_file.c_str(), settings_get_value("meta", "nro path").c_str());
 
                         finished_download = true;
                         prog.success      = true;

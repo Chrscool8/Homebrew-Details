@@ -35,7 +35,11 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 
     std::string entry_title = fav + json_load_value_string(app_json, "name");
     if (subvalue != "version")
-        entry_title += "  -  v" + json_load_value_string(app_json, "version");
+    {
+        std::string version_string = json_load_value_string(app_json, "version");
+        string_replace(version_string, "Unknown", "0.0");
+        entry_title += "  -  v" + version_string;
+    }
 
     brls::ListItem* this_entry = new brls::ListItem(entry_title, "", full_path);
 

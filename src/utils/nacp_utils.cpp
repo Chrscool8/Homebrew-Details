@@ -39,8 +39,26 @@
 #include <string>
 #include <vector>
 
-void read_nacp_from_file(std::string path, app_entry* current)
+nlohmann::json errored_entry(std::string path)
 {
+    nlohmann::json app_json;
+
+    std::string name = std::string(path);
+    string_replace(name, ".nro", "");
+    app_json["name"]      = name.substr(name.find_last_of("/\\") + 1);
+    app_json["author"]    = "Unknown";
+    app_json["version"]   = "Unknown";
+    app_json["full_path"] = path;
+    app_json["file_name"] = path.substr(path.find_last_of("/\\") + 1);
+    app_json["size"]      = fs::file_size(path);
+
+    return app_json;
+}
+
+nlohmann::json read_nacp_from_file(std::string path)
+{
+    nlohmann::json app_json;
+
     FILE* file = fopen(path.c_str(), "rb");
     if (file)
     {
@@ -50,10 +68,30 @@ void read_nacp_from_file(std::string path, app_entry* current)
 
         fseek(file, sizeof(NroStart), SEEK_SET);
         NroHeader header;
-        fread(&header, sizeof(header), 1, file);
+        size_t sz = fread(&header, sizeof(header), 1, file);
+        if (sz != 1)
+        {
+            fclose(file);
+            return errored_entry(path);
+        }
+
         fseek(file, header.size, SEEK_SET);
         NroAssetHeader asset_header;
-        fread(&asset_header, sizeof(asset_header), 1, file);
+        if (fread(&asset_header, sizeof(asset_header), 1, file) != 1
+            || asset_header.magic != NROASSETHEADER_MAGIC
+            || asset_header.version > NROASSETHEADER_VERSION
+            || asset_header.nacp.offset == 0
+            || asset_header.nacp.size == 0)
+        {
+            fclose(file);
+            return errored_entry(path);
+        }
+
+        if (asset_header.nacp.size < sizeof(NacpStruct))
+        {
+            fclose(file);
+            return errored_entry(path);
+        }
 
         NacpStruct* nacp = (NacpStruct*)malloc(sizeof(NacpStruct));
         if (nacp != NULL)
@@ -74,15 +112,17 @@ void read_nacp_from_file(std::string path, app_entry* current)
             nacp = NULL;
         }
 
-        fclose(file);
+        app_json["name"]      = name;
+        app_json["author"]    = author;
+        app_json["version"]   = version;
+        app_json["full_path"] = path;
+        app_json["file_name"] = path.substr(path.find_last_of("/\\") + 1);
+        app_json["size"]      = fs::file_size(path);
 
-        current->name      = name;
-        current->author    = author;
-        current->version   = version;
-        current->full_path = path;
-        current->file_name = path.substr(path.find_last_of("/\\") + 1);
-        current->size      = fs::file_size(path);
+        fclose(file);
     }
+
+    return app_json;
 }
 
 bool read_icon_from_file(std::string path, app_entry* current)

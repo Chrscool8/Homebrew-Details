@@ -122,56 +122,8 @@ void new_list_files(const char* basePath, bool recursive)
                 {
                     print_debug("Found: " + filename);
 
-                    //
-
-                    FILE* file = fopen(filename.c_str(), "rb");
-                    if (file)
-                    {
-                        char name[513];
-                        char author[257];
-                        char version[17];
-
-                        fseek(file, sizeof(NroStart), SEEK_SET);
-                        NroHeader header;
-                        fread(&header, sizeof(header), 1, file);
-                        fseek(file, header.size, SEEK_SET);
-                        NroAssetHeader asset_header;
-                        fread(&asset_header, sizeof(asset_header), 1, file);
-
-                        NacpStruct* nacp = (NacpStruct*)malloc(sizeof(NacpStruct));
-                        if (nacp != NULL)
-                        {
-                            fseek(file, header.size + asset_header.nacp.offset, SEEK_SET);
-                            fread(nacp, sizeof(NacpStruct), 1, file);
-
-                            NacpLanguageEntry* langentry = NULL;
-                            Result rc                    = nacpGetLanguageEntry(nacp, &langentry);
-                            if (R_SUCCEEDED(rc) && langentry != NULL)
-                            {
-                                strncpy(name, langentry->name, sizeof(name) - 1);
-                                strncpy(author, langentry->author, sizeof(author) - 1);
-                            }
-                            strncpy(version, nacp->display_version, sizeof(version) - 1);
-
-                            free(nacp);
-                            nacp = NULL;
-                        }
-
-                        nlohmann::json app_json;
-
-                        app_json["name"]      = name;
-                        app_json["author"]    = author;
-                        app_json["version"]   = version;
-                        app_json["full_path"] = filename;
-                        app_json["file_name"] = filename.substr(filename.find_last_of("/\\") + 1);
-                        app_json["size"]      = fs::file_size(filename);
-
-                        apps_info_json[filename] = nlohmann::json::parse(app_json.dump(-1, ' ', true, nlohmann::json::error_handler_t::replace));
-
-                        fclose(file);
-                    }
-
-                    //
+                    nlohmann::json app_json  = read_nacp_from_file(filename);
+                    apps_info_json[filename] = nlohmann::json::parse(app_json.dump(-1, ' ', true, nlohmann::json::error_handler_t::replace));
                 }
                 //else
                 //    print_debug("Skip: " + filename);
