@@ -29,9 +29,6 @@ IntroPage::IntroPage()
         if (!go)
         {
             printf("Clicked scan\n");
-
-            //this->button->setLabel("Scanning...");
-            //this->button->invalidate();
             go = true;
         }
     });
@@ -48,6 +45,7 @@ IntroPage::IntroPage()
     {
         this->registerAction("Clear Cache", brls::Key::MINUS, [this]() {
             settings_set_value("internal", "invalidate cache", "true");
+            remove(get_apps_cache_file().c_str());
             this->button->setLabel("Begin Scan");
             this->button->invalidate();
             return true;
@@ -129,13 +127,13 @@ void IntroPage::layout(NVGcontext* vg, brls::Style* style, brls::FontStash* stas
 
     this->label->setBoundaries(
         this->x + this->width / 2 - this->label->getWidth() / 2 + 140 + 43,
-        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2 - 10,
+        this->y + (this->height) / 2 - 125 + this->label->getHeight() / 2 - 10 + 5,
         this->label->getWidth(),
         this->label->getHeight());
 
     this->button->setBoundaries(
         this->x + this->width / 2 - style->CrashFrame.buttonWidth / 2 + 140 + 43,
-        this->y + this->height / 2 + 100 - this->button->getHeight() - 60,
+        this->y + this->height / 2 + 150 - this->button->getHeight() - 60,
         style->CrashFrame.buttonWidth,
         style->CrashFrame.buttonHeight);
     this->button->invalidate();

@@ -392,7 +392,6 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
     //
 
     this_entry->getFocusEvent()->subscribe([this, this_entry](brls::View* view) {
-        print_debug("Focused");
         if (needs_refresh)
         {
             print_debug("Refresh!");

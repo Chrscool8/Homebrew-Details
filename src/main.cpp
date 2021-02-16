@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 
     i18n::loadTranslations();
 
-    std::string title = "Homebrew Details v" APP_VERSION;
+    std::string title = std::string("") + "Homebrew Details Next  -  v" + APP_VERSION;
     printf((title + "\n").c_str());
     if (!brls::Application::init(title.c_str()))
     {
@@ -97,6 +97,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    psmExit();
     psmInitialize();
 
     print_debug("Beginning setting prep.");
@@ -123,48 +124,39 @@ int main(int argc, char* argv[])
     read_blacklist();
     read_notes();
 
-    //if (fs::exists(get_config_path() + "lock"))
-    //{
-    //    print_debug("Issue Page");
-    //    show_framed(new IssuePage());
-    //}
-    //else
+    print_debug("Intro Page");
+    brls::AppletFrame* intro = show_framed(new IntroPage());
+
+    if (settings_get_value_true("meta", "debug"))
+        title += " [Debug Mode]";
+    intro->setTitle(title.c_str());
+
+    intro->setIcon(get_resource_path() + "arrows.png");
+
+    intro->registerAction("Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
+    intro->updateActionHint(brls::Key::X, "Welcome Screen");
+
+    if (get_online_version_available())
     {
-        print_debug("Intro Page");
-        brls::AppletFrame* intro = show_framed(new IntroPage());
+        brls::Application::notify("Update Available!\nPress R for more info.");
 
-        std::string title = std::string("") + "Homebrew Details Next  -  v" + APP_VERSION;
-        if (settings_get_value_true("meta", "debug"))
-            title += " [Debug Mode]";
-        intro->setTitle(title.c_str());
+        intro->registerAction("Update Info", brls::Key::R, []() {
+            show_update_panel();
+            return true;
+        });
+        intro->updateActionHint(brls::Key::R, "Update Info");
+    }
 
-        intro->setIcon(get_resource_path() + "arrows.png");
-
-        intro->registerAction("Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
-        intro->updateActionHint(brls::Key::X, "Welcome Screen");
-
-        if (get_online_version_available())
+    if (!fs::exists(get_config_path() + "introduced"))
+    {
+        std::ofstream outputFile(get_config_path() + "introduced");
+        if (outputFile)
         {
-            brls::Application::notify("Update Available!\nPress R for more info.");
-
-            intro->registerAction("Update Info", brls::Key::R, []() {
-                show_update_panel();
-                return true;
-            });
-            intro->updateActionHint(brls::Key::R, "Update Info");
+            outputFile << "introduced";
+            outputFile.close();
         }
 
-        if (!fs::exists(get_config_path() + "introduced"))
-        {
-            std::ofstream outputFile(get_config_path() + "introduced");
-            if (outputFile)
-            {
-                outputFile << "introduced";
-                outputFile.close();
-            }
-
-            show_first_time_panel();
-        }
+        show_first_time_panel();
     }
 
     // Run the app
