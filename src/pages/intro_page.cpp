@@ -1,4 +1,5 @@
 #include <math.h>
+#include <utils/modules.h>
 #include <utils/panels.h>
 #include <utils/settings.h>
 
@@ -102,6 +103,8 @@ void IntroPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heig
 
     if (autoscan_cooldown <= 5)
         autoscan_cooldown += 1;
+
+    draw_status(this, x, y - 90, width, height, style, ctx);
 }
 
 brls::View* IntroPage::getDefaultFocus()

@@ -18,7 +18,10 @@ void draw_status(brls::View* view, int x, int y, int width, int height, brls::St
     date_label->setParent(view);
 
     battery_label->setFontSize(18);
-    battery_label->setText("Battery" + get_battery_status() + ": " + std::to_string(get_battery_percent()) + "%");
+    if (get_battery_percent() != 0)
+        battery_label->setText("Battery" + get_battery_status() + ": " + std::to_string(get_battery_percent()) + "%");
+    else
+        battery_label->setText("No Battery Info");
     battery_label->invalidate(true);
     battery_label->setBoundaries(x + width - battery_label->getWidth() - 50, y + style->AppletFrame.headerHeightRegular * .5 + 14 + 4, battery_label->getWidth(), battery_label->getHeight());
     battery_label->invalidate(true);
