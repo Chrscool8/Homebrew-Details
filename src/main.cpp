@@ -84,7 +84,6 @@ int main(int argc, char* argv[])
     copy_resources();
 
     init_online_info();
-    check_for_updates();
 
     std::string target = settings_get_value("meta", "exit to");
     envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
@@ -105,17 +104,6 @@ int main(int argc, char* argv[])
     intro->registerAction("Welcome Screen", brls::Key::X, []() { show_first_time_panel(); return true; });
     intro->updateActionHint(brls::Key::X, "Welcome Screen");
 
-    if (get_online_version_available())
-    {
-        brls::Application::notify("Update Available!\nPress R for more info.");
-
-        intro->registerAction("Update Info", brls::Key::R, []() {
-            show_update_panel();
-            return true;
-        });
-        intro->updateActionHint(brls::Key::R, "Update Info");
-    }
-
     if (!fs::exists(get_config_path() + "introduced"))
     {
         std::ofstream outputFile(get_config_path() + "introduced");
@@ -126,6 +114,19 @@ int main(int argc, char* argv[])
         }
 
         show_first_time_panel();
+    }
+    else
+        check_for_updates();
+
+    if (get_online_version_available())
+    {
+        brls::Application::notify("Update Available!\nPress R for more info.");
+
+        intro->registerAction("Update Info", brls::Key::R, []() {
+            show_update_panel();
+            return true;
+        });
+        intro->updateActionHint(brls::Key::R, "Update Info");
     }
 
     // Run the app
