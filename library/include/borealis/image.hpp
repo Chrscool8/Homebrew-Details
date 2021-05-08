@@ -77,7 +77,6 @@ class Image : public View
 
     unsigned char* copyImgBuf() const;
 
-  private:
     std::string imagePath;
     unsigned char* imageBuffer = nullptr;
     size_t imageBufferSize     = 0;
@@ -94,6 +93,7 @@ class Image : public View
     int origViewWidth = 0, origViewHeight = 0;
 
     void reloadTexture();
+  private:
 };
 
 } // namespace brls

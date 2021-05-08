@@ -31,16 +31,17 @@ namespace brls
 class PopupFrame : public View
 {
   private:
+  public:
     PopupFrame(std::string title, unsigned char* imageBuffer, size_t imageBufferSize, AppletFrame* contentView, std::string subTitleLeft = "", std::string subTitleRight = "");
     PopupFrame(std::string title, std::string imagePath, AppletFrame* contentView, std::string subTitleLeft = "", std::string subTitleRight = "");
     PopupFrame(std::string title, AppletFrame* contentView, std::string subTitleLeft = "", std::string subTitleRight = "");
+    PopupFrame(std::string title, AppletFrame* contentView, std::string subTitleLeft, std::string subTitleRight, brls::Image* thumb);
 
     AppletFrame* contentView = nullptr;
 
-  protected:
+    //protected:
     unsigned getShowAnimationDuration(ViewAnimation animation) override;
 
-  public:
     ~PopupFrame();
 
     void draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, Style* style, FrameContext* ctx) override;
@@ -53,6 +54,7 @@ class PopupFrame : public View
     static void open(std::string title, unsigned char* imageBuffer, size_t imageBufferSize, AppletFrame* contentView, std::string subTitleLeft = "", std::string subTitleRight = "");
     static void open(std::string title, std::string imagePath, AppletFrame* contentView, std::string subTitleLeft = "", std::string subTitleRight = "");
     static void open(std::string title, AppletFrame* contentView, std::string subTitleLeft = "", std::string subTitleRight = "");
+    static void open(std::string title, AppletFrame* contentView, std::string subTitleLeft, std::string subTitleRight, brls::Image* thumb);
 
     bool isTranslucent() override
     {
