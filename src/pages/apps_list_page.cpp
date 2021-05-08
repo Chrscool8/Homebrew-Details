@@ -388,7 +388,7 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
             appView->addTab("Notes", notesList);
         }
 
-        brls::PopupFrame::open(json_load_value_string(app_json, "name"), appView, std::string("Author: ") + json_load_value_string(app_json, "author"), std::string("Version: ") + json_load_value_string(app_json, "version"));
+        brls::PopupFrame::open(json_load_value_string(app_json, "name"), appView, std::string("Author: ") + json_load_value_string(app_json, "author"), std::string("Version: ") + json_load_value_string(app_json, "version"), load_image_cache(json_load_value_string(app_json, "full_path")));
 
         return true;
     });
