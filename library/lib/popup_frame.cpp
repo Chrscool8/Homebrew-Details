@@ -79,6 +79,25 @@ PopupFrame::PopupFrame(std::string title, AppletFrame* contentView, std::string 
     this->registerAction("brls/hints/back"_i18n, Key::B, [this] { return this->onCancel(); });
 }
 
+PopupFrame::PopupFrame(std::string title, AppletFrame* contentView, std::string subTitleLeft, std::string subTitleRight, brls::Image* thumb)
+    : contentView(contentView)
+{
+    if (this->contentView)
+    {
+        this->contentView->setParent(this);
+        this->contentView->setHeaderStyle(HeaderStyle::POPUP);
+        this->contentView->setTitle(title);
+        this->contentView->setSubtitle(subTitleLeft, subTitleRight);
+
+        brls::Image* new_thumb = new brls::Image(thumb->imageBuffer, thumb->imageBufferSize);
+        this->contentView->setIcon(new_thumb);
+        this->contentView->invalidate();
+    }
+
+    contentView->setAnimateHint(true);
+    this->registerAction("brls/hints/back"_i18n, Key::B, [this] { return this->onCancel(); });
+}
+
 void PopupFrame::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned height, Style* style, FrameContext* ctx)
 {
     // Backdrop
@@ -144,6 +163,12 @@ void PopupFrame::open(std::string title, std::string imagePath, AppletFrame* con
 void PopupFrame::open(std::string title, AppletFrame* contentView, std::string subTitleLeft, std::string subTitleRight)
 {
     PopupFrame* popupFrame = new PopupFrame(title, contentView, subTitleLeft, subTitleRight);
+    Application::pushView(popupFrame);
+}
+
+void PopupFrame::open(std::string title, AppletFrame* contentView, std::string subTitleLeft, std::string subTitleRight, brls::Image* thumb)
+{
+    PopupFrame* popupFrame = new PopupFrame(title, contentView, subTitleLeft, subTitleRight, thumb);
     Application::pushView(popupFrame);
 }
 
