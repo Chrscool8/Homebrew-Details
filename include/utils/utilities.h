@@ -5,6 +5,8 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
+void export_resource(std::string folder, std::string src);
+void copy_resources();
 bool vector_contains(std::vector<std::string> vec, std::string str);
 bool is_number(const std::string& s);
 bool compare_by_name(const app_entry& a, const app_entry& b);

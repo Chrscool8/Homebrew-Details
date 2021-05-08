@@ -49,37 +49,6 @@ std::vector<std::string> favorites;
 std::vector<std::string> blacklist;
 std::map<std::string, brls::Image*> cached_thumbs;
 
-void export_resource(std::string folder, std::string src)
-{
-    folder += "/";
-    create_directories(get_config_path() + folder);
-
-    if (!fs::exists(get_config_path() + folder + src))
-    {
-        std::ifstream srcfile(("romfs:/" + src).c_str(), std::ios::binary);
-        std::ofstream dstfile(get_config_path() + folder + src, std::ios::binary);
-
-        dstfile << srcfile.rdbuf();
-    }
-}
-
-void copy_resources()
-{
-    export_resource("assets", "arrows.png");
-    export_resource("assets", "arrows_small.png");
-    export_resource("assets", "download.png");
-    export_resource("assets", "icon.png");
-    export_resource("assets", "warning.png");
-    export_resource("assets", "warning_arrows.png");
-    export_resource("assets", "style_list.png");
-    export_resource("assets", "style_flow.png");
-    export_resource("assets", "style_beta.png");
-    export_resource("assets", "unknown.png");
-    export_resource("assets", "credits.png");
-
-    export_resource("forwarder", "HomebrewDetailsForwarder_v2.nsp");
-}
-
 int main(int argc, char* argv[])
 {
     printf(argv[0]);
