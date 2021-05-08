@@ -263,8 +263,9 @@ void show_settings_panel()
 
         tools_list->addView(new brls::Header("Information"));
 
-        brls::ListItem* nsp_item = new brls::ListItem("How to Install to Home Menu...");
+        brls::ListItem* nsp_item = new brls::ListItem("How to Install to Home Menu...", "Will take a few seconds to copy file on first click.");
         nsp_item->getClickEvent()->subscribe([](brls::View* view) {
+            export_resource("forwarder", "HomebrewDetailsForwarder_v2.nsp");
             brls::TabFrame* appView = new brls::TabFrame();
             appView->sidebar->setWidth(1920);
             appView->setWidth(1920);
