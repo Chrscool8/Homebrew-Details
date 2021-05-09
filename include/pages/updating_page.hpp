@@ -1,7 +1,6 @@
 #pragma once
 
 #include <math.h>
-#include <sys/select.h>
 #include <utils/nacp_utils.h>
 #include <utils/settings.h>
 #include <utils/update.h>
@@ -18,8 +17,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef __SWITCH__
 #include <switch.h>
 #include <sys/stat.h>
+#include "switch/services/psm.h"
+#include <sys/select.h>
+#endif // __SWITCH__
 
 #include <algorithm>
 #include <array>
@@ -36,9 +40,13 @@
 #include <thread>
 #include <vector>
 
+#ifdef __SWITCH__
 #include <curl/curl.h>
+#endif
+#ifdef _WIN32
+#include <curl_win/curl.h>
+#endif // __SWITCH__
 
-#include "switch/services/psm.h"
 
 size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream);
 int progress_func(void* p, long long dltotal, long long dlnow, long long ultotal, long long ulnow);

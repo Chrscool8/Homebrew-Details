@@ -18,6 +18,10 @@
 #include <pages/main_page.hpp>
 #include <pages/updating_page.hpp>
 
+#ifdef _WIN32
+#include <extern/result_win.h>
+#endif
+
 brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 {
     std::string full_path = json_load_value_string(app_json, "full_path");

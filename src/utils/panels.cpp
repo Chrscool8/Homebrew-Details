@@ -1,6 +1,7 @@
 #include <utils/blacklist.h>
 #include <utils/launching.h>
 #include <utils/panels.h>
+#include <utils/reboot_to_payload.h>
 #include <utils/settings.h>
 #include <utils/update.h>
 #include <utils/utilities.h>
@@ -245,7 +246,9 @@ void show_settings_panel()
         rta_item->getClickEvent()->subscribe([](brls::View* view) {
             print_debug("restart app");
             launch_nro(settings_get_value("meta", "nro path"), "\"" + settings_get_value("meta", "nro path") + "\"");
+#ifdef __SWITCH__
             romfsExit();
+#endif
             brls::Application::quit();
         });
         tools_list->addView(rta_item);
@@ -292,7 +295,9 @@ void show_settings_panel()
                 settings_set_value("meta", "exit to", settings_get_value("meta", "nro path"));
 
             std::string target = settings_get_value("meta", "exit to");
+#ifdef __SWITCH__
             envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
+#endif
         });
         settings_list_app->addView(exitToItem);
 

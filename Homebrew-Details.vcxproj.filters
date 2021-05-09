@@ -333,6 +333,9 @@
     <ClInclude Include="library\lib\extern\fmt\test\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\extern\curl_win\curl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="library\lib\extern\fmt\doc\_templates\layout.html" />
@@ -350,6 +353,7 @@
     <None Include="homebrew_details.nro" />
     <None Include="homebrew_details.elf" />
     <None Include="homebrew_details.nacp" />
+    <None Include="meson.build" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="library\lib\extern\fmt\src\format.cc">
@@ -650,6 +654,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\nacp_win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

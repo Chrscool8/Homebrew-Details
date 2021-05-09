@@ -1,13 +1,17 @@
+#include <atomic>
 #include <dirent.h>
 #include <main.h>
-#include <sys/stat.h>
 #include <utils/blacklist.h>
 #include <utils/nacp_utils.h>
 #include <utils/scanning.h>
 #include <utils/settings.h>
 #include <utils/utilities.h>
-
-#include <atomic>
+#ifdef __SWITCH__
+#include <switch.h>
+#include <sys/stat.h>
+#elif _WIN32
+#include <extern/nro_win.h>
+#endif // __SWITCH__
 
 namespace fs = std::filesystem;
 
@@ -18,10 +22,14 @@ scanprogress scanprog;
 
 int isDirectory(const char* path)
 {
+#ifdef __SWITCH__
     struct stat statbuf;
     if (stat(path, &statbuf) != 0)
         return 0;
     return S_ISDIR(statbuf.st_mode);
+#else
+    return 0;
+#endif // __SWITCH__
 }
 
 void new_read_store_apps()

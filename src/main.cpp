@@ -20,7 +20,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __SWITCH__
 #include <switch.h>
+#endif // __SWITCH__
 
 #include <algorithm>
 #include <borealis.hpp>
@@ -54,6 +56,13 @@ int main(int argc, char* argv[])
     printf(argv[0]);
     printf("\n");
 
+    #ifdef __SWITCH__
+    printf("RUNNING ON SWITCH\n");
+    #endif
+    #ifdef _WIN32
+    printf("RUNNING ON WIN32\n");
+    #endif
+
     brls::Logger::setLogLevel(brls::LogLevel::DEBUG);
 
     i18n::loadTranslations();
@@ -66,8 +75,10 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+#ifdef __SWITCH__
     psmExit();
     psmInitialize();
+#endif // __SWITCH__
 
     print_debug("Beginning setting prep.");
     read_settings();
@@ -86,7 +97,10 @@ int main(int argc, char* argv[])
     init_online_info();
 
     std::string target = settings_get_value("meta", "exit to");
+
+#ifdef __SWITCH__
     envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
+#endif // __SWITCH__
 
     read_favorites();
     read_blacklist();

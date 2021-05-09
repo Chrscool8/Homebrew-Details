@@ -1,7 +1,6 @@
 #pragma once
 
 #include <math.h>
-#include <sys/select.h>
 #include <utils/nacp_utils.h>
 #include <utils/settings.h>
 #include <utils/update.h>
@@ -18,8 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __SWITCH__
 #include <switch.h>
 #include <sys/stat.h>
+#include "switch/services/psm.h"
+#include <sys/select.h>
+#endif // __SWITCH__
 
 #include <algorithm>
 #include <array>
@@ -36,7 +39,6 @@
 #include <thread>
 #include <vector>
 
-#include "switch/services/psm.h"
 
 class ScanningPage : public brls::View
 {

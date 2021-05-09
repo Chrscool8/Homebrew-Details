@@ -18,7 +18,6 @@
 //
 
 #include <math.h>
-#include <sys/select.h>
 
 #include <chrono>
 #include <thread>
@@ -30,8 +29,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __SWITCH__
 #include <switch.h>
 #include <sys/stat.h>
+#include <sys/select.h>
+#include "switch/services/psm.h"
+#endif // __SWITCH__
 
 #include <algorithm>
 #include <array>
@@ -49,7 +52,6 @@
 #include <thread>
 #include <vector>
 
-#include "switch/services/psm.h"
 
 void ScanningPage::thread_scan()
 {

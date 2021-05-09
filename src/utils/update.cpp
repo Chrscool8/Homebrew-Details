@@ -1,9 +1,18 @@
+#ifdef __SWITCH__
 #include <sys/select.h>
+#endif // __SWITCH__
 #include <utils/settings.h>
 #include <utils/update.h>
 #include <utils/utilities.h>
 //
+
+#ifdef __SWITCH__
 #include <curl/curl.h>
+#endif
+
+#ifdef _WIN32
+#include <extern/curl_win/curl.h>
+#endif // __SWITCH__
 
 s_online_info online_info;
 
@@ -75,6 +84,7 @@ size_t CurlWrite_CallbackFunc_StdString(void* contents, size_t size, size_t nmem
 
 bool check_for_updates()
 {
+#ifdef __SWITCH__
     print_debug("curl time\n");
 
     CURL* curl;
@@ -139,5 +149,6 @@ bool check_for_updates()
 
     print_debug("no update\n");
     set_online_version_available(false);
+#endif
     return false;
 }

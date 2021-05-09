@@ -12,7 +12,6 @@
 //
 
 #include <math.h>
-#include <sys/select.h>
 
 #include <chrono>
 #include <thread>
@@ -24,8 +23,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __SWITCH__
 #include <switch.h>
+#include <sys/select.h>
 #include <sys/stat.h>
+
+#include "switch/services/psm.h"
+#endif // __SWITCH__
 
 #include <algorithm>
 #include <array>
@@ -42,7 +46,15 @@
 #include <thread>
 #include <vector>
 
-#include "switch/services/psm.h"
+#define CURL_STATICLIB
+//#include <curl/curl.h>
+
+#ifdef __SWITCH__
+#include <curl/curl.h>
+#endif
+//#ifdef _WIN32
+//#include <extern/curl_win/curl.h>
+//#endif // __SWITCH__
 
 myprogress prog;
 
@@ -54,6 +66,7 @@ size_t write_data(void* ptr, size_t size, size_t nmemb, void* stream)
 
 int progress_func(void* p, long long dltotal, long long dlnow, long long ultotal, long long ulnow)
 {
+#ifdef __SWITCH__
     struct myprogress* myp = (struct myprogress*)p;
     CURL* curl             = myp->curl;
     long long curtime      = 0;
@@ -78,11 +91,13 @@ int progress_func(void* p, long long dltotal, long long dlnow, long long ultotal
     if (myp->end_thread)
         return 1;
 
+#endif // __SWITCH__
     return 0;
 }
 
 bool UpdatingPage::download_update()
 {
+#ifdef __SWITCH__
     print_debug("update time");
 
     CURL* curl;
@@ -172,6 +187,7 @@ bool UpdatingPage::download_update()
 
     finished_download = true;
     prog.success      = false;
+#endif
     return false;
 }
 

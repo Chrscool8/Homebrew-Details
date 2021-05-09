@@ -24,17 +24,20 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __SWITCH__
 #include <switch.h>
+#include <sys/select.h>
+#include <sys/stat.h>
 
 #include "switch/services/psm.h"
-
-//
-#include <sys/select.h>
+#endif // __SWITCH__
+#ifdef _WIN32
+#include <extern/result_win.h>
+#endif
 //
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
 #include <time.h>
 
 #include <algorithm>
@@ -798,7 +801,9 @@ MainPage::MainPage()
                 settings_set_value("meta", "exit to", settings_get_value("meta", "nro path"));
 
             std::string target = settings_get_value("meta", "exit to");
+#ifdef __SWITCH__
             envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
+#endif
         });
         settings_list->addView(exitToItem);
 
@@ -837,6 +842,7 @@ MainPage::MainPage()
         int entry_width = 21;
 
         std::uint32_t batteryCharge = 0;
+#ifdef __SWITCH__
         psmGetBatteryChargePercentage(&batteryCharge);
         add_list_entry("Battery Percent", std::to_string(batteryCharge) + "%", "", debug_list, entry_width);
 
@@ -848,6 +854,8 @@ MainPage::MainPage()
             chargeStatus = chargerTypes[chargerType];
 
         add_list_entry("Charging Status", chargeStatus, "", debug_list, entry_width);
+#endif
+
         add_list_entry("Local Version", std::string("v") + settings_get_value("meta", "local version"), "", debug_list, entry_width);
         add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list, entry_width);
         //add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list, entry_width);

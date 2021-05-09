@@ -1,4 +1,5 @@
 #include <math.h>
+#include <utils/launching.h>
 #include <utils/settings.h>
 
 #include <fstream>
@@ -101,7 +102,9 @@ void InfoPage::draw(NVGcontext* vg, int x, int y, unsigned width, unsigned heigh
             {
                 case info_page_dl_done:
                     launch_nro(settings_get_value("meta", "nro path"), "\"" + settings_get_value("meta", "nro path") + "\"");
+#ifdef __SWITCH__
                     romfsExit();
+#endif
                     brls::Application::quit();
                     break;
                 default:

@@ -14,18 +14,22 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __SWITCH__
 #include <switch.h>
-
 #include "switch/services/psm.h"
-
-//
 #include <sys/select.h>
+#include <sys/stat.h>
+#else
+#include <extern/nacp_win.h>
+#include <extern/nro_win.h>
+#include <extern/result_win.h>
+#endif // __SWITCH__
+
 //
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
 #include <algorithm>
 #include <array>

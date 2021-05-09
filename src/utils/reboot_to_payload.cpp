@@ -2,10 +2,11 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <switch.h>
+#include <string>
 #include <utils/reboot_to_payload.h>
 
-#include <string>
+#ifdef __SWITCH__
+#include <switch.h>
 
 #define IRAM_PAYLOAD_MAX_SIZE 0x2F000
 #define IRAM_PAYLOAD_BASE 0x40010000
@@ -97,3 +98,33 @@ int reboot_to_payload()
 
     return 0;
 }
+
+#else
+
+void do_iram_dram_copy(void* buf, uintptr_t iram_addr, size_t size, int option)
+{
+}
+
+void copy_to_iram(uintptr_t iram_addr, void* buf, size_t size)
+{
+}
+
+void copy_from_iram(void* buf, uintptr_t iram_addr, size_t size)
+{
+}
+
+void clear_iram(void)
+{
+}
+
+void rtp_iram(void)
+{
+}
+
+int reboot_to_payload()
+{
+    printf("RTP\n");
+    return 0;
+}
+
+#endif // __SWITCH__

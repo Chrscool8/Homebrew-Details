@@ -1,8 +1,12 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __SWITCH__
 #include <switch.h>
 #include <sys/statvfs.h>
+
+#include "switch/services/psm.h"
+#endif // __SWITCH__
 #include <utils/settings.h>
 #include <utils/utilities.h>
 
@@ -12,8 +16,6 @@
 #include <pages/main_page.hpp>
 #include <sstream>
 #include <string>
-
-#include "switch/services/psm.h"
 
 void export_resource(std::string folder, std::string src)
 {
@@ -184,12 +186,15 @@ void string_replace(std::string& str, const std::string& from, const std::string
 std::uint32_t get_battery_percent()
 {
     std::uint32_t batteryCharge = 0;
+#ifdef __SWITCH__
     psmGetBatteryChargePercentage(&batteryCharge);
+#endif // __SWITCH__
     return batteryCharge;
 }
 
 std::string get_battery_status()
 {
+#ifdef __SWITCH__
     ChargerType chargerType;
     // Not Charging, Charging Via Power, Charging via USB
     std::string chargerTypes[3] = { std::string(""), std::string(" Charging"), std::string(" via USB") };
@@ -199,6 +204,9 @@ std::string get_battery_status()
     if ((int)chargerType >= 0 && (int)chargerType < 3)
         chargeStatus = chargerTypes[chargerType];
     return chargeStatus;
+#else
+    return 0;
+#endif // __SWITCH__
 }
 
 std::string digits_string(int value, int numDigits)
@@ -278,6 +286,7 @@ std::string to_gigabytes(uint64_t size)
 
 std::string get_free_space()
 {
+#ifdef __SWITCH__
     struct statvfs st;
     if (::statvfs("sdmc:/", &st) != 0)
     {
@@ -288,10 +297,14 @@ std::string get_free_space()
         uint64_t freeSpace = static_cast<std::uint64_t>(st.f_bsize) * st.f_bfree;
         return (to_gigabytes(freeSpace) + " GB\n");
     }
+#else
+    return "? GB\n";
+#endif // __SWITCH__
 }
 
 std::string get_keyboard_input(std::string default_str)
 {
+#ifdef __SWITCH__
     SwkbdConfig kbd;
     const unsigned int str_len = 256;
     if (R_SUCCEEDED(swkbdCreate(&kbd, 0)))
@@ -318,6 +331,9 @@ std::string get_keyboard_input(std::string default_str)
     }
 
     return "";
+#else
+    return "";
+#endif // __SWITCH__
 }
 
 std::vector<std::string> explode(std::string const& s, char delim)
