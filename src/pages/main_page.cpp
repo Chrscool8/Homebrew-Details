@@ -836,18 +836,9 @@ MainPage::MainPage()
 
         int entry_width = 21;
 
-        std::uint32_t batteryCharge = 0;
-        psmGetBatteryChargePercentage(&batteryCharge);
-        add_list_entry("Battery Percent", std::to_string(batteryCharge) + "%", "", debug_list, entry_width);
+        add_list_entry("Battery Percent", std::to_string(get_battery_percent()) + "%", "", debug_list, entry_width);
 
-        ChargerType chargerType;
-        std::string chargerTypes[3] = { std::string("None"), std::string("Charging"), std::string("USB") };
-        psmGetChargerType(&chargerType);
-        std::string chargeStatus = "Error";
-        if ((int)chargerType >= 0 && (int)chargerType < 3)
-            chargeStatus = chargerTypes[chargerType];
-
-        add_list_entry("Charging Status", chargeStatus, "", debug_list, entry_width);
+        add_list_entry("Charging Status", get_battery_status(), "", debug_list, entry_width);
         add_list_entry("Local Version", std::string("v") + settings_get_value("meta", "local version"), "", debug_list, entry_width);
         add_list_entry("Online Version", std::string("v") + get_online_version_number(), "", debug_list, entry_width);
         //add_list_entry("Number of App Store Apps", std::to_string(store_apps.size()), "", debug_list, entry_width);

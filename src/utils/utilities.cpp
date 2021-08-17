@@ -190,13 +190,13 @@ std::uint32_t get_battery_percent()
 
 std::string get_battery_status()
 {
-    ChargerType chargerType;
-    // Not Charging, Charging Via Power, Charging via USB
-    std::string chargerTypes[3] = { std::string(""), std::string(" Charging"), std::string(" via USB") };
+    PsmChargerType chargerType;
+    // Not Charging, Charging Via Power, Charging via USB, Non-Standard USB
+    std::string chargerTypes[4] = { std::string(""), std::string(" Charging"), std::string(" via USB"), std::string(" via Something") };
     psmGetChargerType(&chargerType);
     // Error by Default
     std::string chargeStatus = "";
-    if ((int)chargerType >= 0 && (int)chargerType < 3)
+    if ((int)chargerType >= 0 && (int)chargerType < 4)
         chargeStatus = chargerTypes[chargerType];
     return chargeStatus;
 }
