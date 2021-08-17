@@ -29,6 +29,7 @@ This is an app that allows you to view details about, launch, categorize, and ma
 - Use an installable forwarder nsp to access directly from the home menu
 - Pin/Favorite Apps to the top of the list
 - Blacklist folders from search
+- Replace hbmenu
 
 **What will it be?**<br>
 Hopefully, an all-around manager for all your apps. Some people have already expressed that they'd like it to be a full hbmenu replacement. With app launching, it's just about there already. Coming soon is blacklisting folders in the scan, checking for and updating app store apps, and more.
@@ -56,3 +57,4 @@ Comments, criticism, and suggestions are welcomed and encouraged. I'd love to ma
 ![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000171500-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
 ![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000172000-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
 ![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v0.85/2020073000172700-CFA3C9718A0D109BC3458D1256A090E1.jpg?raw=true)
+![](https://github.com/Chrscool8/Homebrew-Details/blob/master/screenshots/v1.05/2021081702061800-DA63280140B1530CD17755515D814CFE.jpg?raw=true)
