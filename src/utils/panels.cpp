@@ -283,18 +283,50 @@ void show_settings_panel()
         brls::List* settings_list_app = new brls::List();
         settings_list_app->addView(new brls::Header("App Settings"));
 
-        brls::SelectListItem* exitToItem = new brls::SelectListItem("Exit To", { "sdmc:/hbmenu.nro", settings_get_value("meta", "nro path") });
-        exitToItem->setValue(settings_get_value("meta", "exit to"));
-        exitToItem->getValueSelectedEvent()->subscribe([](size_t selection) {
-            if (selection == 0)
-                settings_set_value("meta", "exit to", "sdmc:/hbmenu.nro");
-            else if (selection == 1)
-                settings_set_value("meta", "exit to", settings_get_value("meta", "nro path"));
+        brls::ListItem* replace_toggle = new brls::ListItem("Replace hbmenu", "Automatically forwards any hbmenu usage to HB-D.\n(Takes a few seconds to set up after pressing toggle.)");
+        replace_toggle->setChecked(fs::exists("sdmc:/hbmenu.orig.nro"));
+        replace_toggle->updateActionHint(brls::Key::A, "Toggle");
+        replace_toggle->getClickEvent()->subscribe([replace_toggle](brls::View* view) {
+            if (fs::exists("sdmc:/hbmenu.orig.nro"))
+            {
+                remove("sdmc:/hbmenu.nro");
 
-            std::string target = settings_get_value("meta", "exit to");
-            envSetNextLoad(target.c_str(), (std::string("\"") + target + "\"").c_str());
+                {
+                    std::ifstream srcfile("sdmc:/hbmenu.orig.nro", std::ios::binary);
+                    std::ofstream dstfile("sdmc:/hbmenu.nro", std::ios::binary);
+                    dstfile << srcfile.rdbuf();
+                }
+
+                remove("sdmc:/hbmenu.orig.nro");
+
+                replace_toggle->setChecked(false);
+            }
+            else
+            {
+                {
+                    std::ifstream srcfile("sdmc:/hbmenu.nro", std::ios::binary);
+                    std::ofstream dstfile("sdmc:/hbmenu.orig.nro", std::ios::binary);
+                    dstfile << srcfile.rdbuf();
+                }
+
+                {
+                    std::ifstream srcfile("sdmc:/hbmenu.nro", std::ios::binary);
+                    std::ofstream dstfile("sdmc:/hbmenu.bak.nro", std::ios::binary);
+                    dstfile << srcfile.rdbuf();
+                }
+
+                remove("sdmc:/hbmenu.nro");
+
+                {
+                    std::ifstream srcfile("romfs:/hbmenu-forward.nro", std::ios::binary);
+                    std::ofstream dstfile("sdmc:/hbmenu.nro", std::ios::binary);
+                    dstfile << srcfile.rdbuf();
+                }
+
+                replace_toggle->setChecked(true);
+            }
         });
-        settings_list_app->addView(exitToItem);
+        settings_list_app->addView(replace_toggle);
 
         settings_list_app->addView(new brls::Header("Forwarder Settings"));
         brls::ListItem* item = new brls::ListItem("Reset Automatic Forwarding");
@@ -367,6 +399,11 @@ void show_first_time_panel()
             + symbol_bullet() + "  Pin/Favorite apps to the top of the list",
         true));
 
+    list_features1->addView(new brls::Header("Global Features"));
+    list_features1->addView(new brls::Label(brls::LabelStyle::DESCRIPTION,
+        "" + symbol_bullet() + "  Replace hbmenu with HB-D\n" + "",
+        true));
+
     appView->addTab("Features, Part 1", list_features1);
 
     brls::List* list_features2 = new brls::List();
@@ -391,7 +428,7 @@ void show_first_time_panel()
 
     contact_list->addView(new brls::Header("Chris Bradel"));
     contact_list->addView(new brls::Label(brls::LabelStyle::DESCRIPTION, "Email: chrsdev8@gmail.com\n"
-                                                                         "Discord: Chrscool8#0001\n"
+                                                                         "Discord: Chrscool8#3910\n"
                                                                          "Github: https://github.com/Chrscool8\n"
                                                                          "YouTube: https://www.youtube.com/chrscool8\n"
                                                                          "Twitch: https://www.twitch.tv/chrisbradel\n",
@@ -475,6 +512,7 @@ void show_whatsnew_panel()
     appView->setIcon(get_resource_path() + "icon.png");
     appView->sidebar->setWidth(250);
 
+    appView->addTab("v1.05", generate_changelog_panel("hbmenu Replacer", "Feature:*- New setting to go or return straight to HB-D from menus or apps"));
     appView->addTab("v1.04", generate_changelog_panel("Long Time, No See", "Feature:*- Show app icon in app panel**Tweaks:*- Don't check for updates on first run*- Avoid potential slooooow black screen opening"));
     appView->addTab("v1.03", generate_changelog_panel("Encoding Fixes", "Feature:*- Info module on main screen**Tweaks:*- Battery info notice when info not available**Crash Fixes:*- Check text encoding before writing to json*- Stricter validation of nacp info to avoid crashing or reading garbage"));
     appView->addTab("v1.01", generate_changelog_panel("New Forwarder App", "Features:**- New \"What's New\" panel on main screen that shows recent changelogs (like this!)*- New Forwarder .nsp installable to your home menu**Fixes:**- Tiny potential problem affecting early 1.0 updates fixed*- Fix situation where blacklists may not apply**New Forwarder Overview:**- Display versions of HB-D on your card*- Choose and run your choice manually*- Automatically run your choice without additional input*- Included in this update and can be found at \"sdmc:/config/homebrew_details_next/forwarder*/HomebrewDetailsForwarder_v2.nsp\""));
