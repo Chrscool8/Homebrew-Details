@@ -42,7 +42,7 @@ BUILD		:=	build.nx
 SOURCES		:=	src src/pages src/utils
 DATA		:=	data
 ICON		:=	resources/icon.jpg
-INCLUDES	:=	include include/pages include/utils include/extern
+INCLUDES	:=	include include/pages include/utils include/extern include/external
 APP_TITLE	:=	Homebrew Details
 APP_AUTHOR	:=	Chris Bradel
 APP_VERSION	:=	1.05
@@ -54,18 +54,18 @@ BOREALIS_RESOURCES	:=	romfs:/
 # borealis includes
 #------------------------------------
 
-SOURCES		+=	library/lib \
-				library/lib/extern \
-				library/lib/extern/glad \
-				library/lib/extern/nanovg \
-				library/lib/extern/libretro-common/compat \
-				library/lib/extern/libretro-common/encodings \
-				library/lib/extern/libretro-common/features \
-				library/lib/extern/nxfmtwrapper
+SOURCES		+=	include/external/borealis/library/lib \
+				include/external/borealis/library/lib/extern \
+				include/external/borealis/library/lib/extern/glad \
+				include/external/borealis/library/lib/extern/nanovg \
+				include/external/borealis/library/lib/extern/libretro-common/compat \
+				include/external/borealis/library/lib/extern/libretro-common/encodings \
+				include/external/borealis/library/lib/extern/libretro-common/features \
+				include/external/borealis/library/lib/extern/nxfmtwrapper
 
-INCLUDES	+=	library/include \
-				library/lib/extern/fmt/include \
-				library/include/borealis/extern
+INCLUDES	+=	include/external/borealis/library/include \
+				include/external/borealis/library/lib/extern/fmt/include \
+				include/external/borealis/library/include/borealis/extern
 
 #---------------------------------------------------------------------------------
 # options for code generation
