@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     psmInitialize();
 
     print_debug("Beginning setting prep.");
-    read_settings();
+    read_settings(); 
 
     if (fs::exists(get_config_path() + "debug"))
     {

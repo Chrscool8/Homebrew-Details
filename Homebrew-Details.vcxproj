@@ -275,7 +275,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>include;include/pages;include/utils;library/include;library/lib/extern/fmt/include;library/include/borealis/extern;C:/devkitPro/libnx/include;C:\devkitPro\msys2\usr\include;C:\devkitPro\devkitA64\lib\gcc\aarch64-none-elf\10.2.0\include\;$(IncludePath)</IncludePath>
+    <IncludePath>include/external/borealis/library/include;include/external/nlohmann/include;include;include/pages;include/utils;library/include;library/lib/extern/fmt/include;library/include/borealis/extern;C:/devkitPro/libnx/include;C:\devkitPro\msys2\usr\include;C:\devkitPro\devkitA64\lib\gcc\aarch64-none-elf\10.2.0\include\;$(IncludePath)</IncludePath>
     <SourcePath>src;library/lib;$(SourcePath)</SourcePath>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
     <NMakeBuildCommandLine>bash build_and_run.sh</NMakeBuildCommandLine>

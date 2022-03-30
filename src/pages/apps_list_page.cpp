@@ -17,6 +17,7 @@
 #include <pages/info_page.hpp>
 #include <pages/main_page.hpp>
 #include <pages/updating_page.hpp>
+#include <system_error>
 
 brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
 {
@@ -257,8 +258,19 @@ brls::ListItem* AppsListPage::new_new_make_app_entry(nlohmann::json app_json)
             delete_item->getClickEvent()->subscribe([full_path](brls::View* view) {
                 brls::Dialog* dialog                     = new brls::Dialog("Are you sure you want to delete the following file? This action cannot be undone.\n\n" + full_path);
                 brls::GenericEvent::Callback yesCallback = [full_path, dialog](brls::View* view) {
-                    if (remove(full_path.c_str()) != 0)
-                        brls::Application::notify("Issue removing file");
+                    if (std::filesystem::exists(full_path))
+                    {
+                        print_debug("exists");
+                    }else
+                        print_debug("not exists");
+
+                    std::error_code ec;
+                    bool actionresult = std::filesystem::remove(full_path, ec);
+                    if (!actionresult)
+                    {
+                        brls::Application::notify("Issue removing file. Error: " + ec.message());
+                        print_debug("Issue removing file. Error: " + ec.message());
+                    }
                     else
                     {
                         std::string _folder = folder_of_file(full_path);

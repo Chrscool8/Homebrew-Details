@@ -45,7 +45,7 @@ ICON		:=	resources/icon.jpg
 INCLUDES	:=	include include/pages include/utils include/extern include/external
 APP_TITLE	:=	Homebrew Details
 APP_AUTHOR	:=	Chris Bradel
-APP_VERSION	:=	1.05
+APP_VERSION	:=	1.06
 
 ROMFS				:=	resources
 BOREALIS_RESOURCES	:=	romfs:/
